@@ -1,0 +1,282 @@
+.rental-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  .header {
+    padding: 40px 20px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    
+    .header-content {
+      .title {
+        font-size: 28px;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+      }
+      
+      .subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        display: block;
+      }
+    }
+  }
+  
+  .filter-section {
+    background: white;
+    padding: 15px 0;
+    border-radius: 20px 20px 0 0;
+    margin-top: -20px;
+    position: relative;
+    z-index: 1;
+    
+    .category-filter {
+      padding: 0 15px;
+      margin-bottom: 15px;
+      
+      .category-list {
+        display: flex;
+        white-space: nowrap;
+        
+        .category-item {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 10px 15px;
+          margin-right: 15px;
+          border-radius: 12px;
+          background: #f8f9fa;
+          border: 2px solid transparent;
+          transition: all 0.3s ease;
+          min-width: 70px;
+          
+          &.active {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            
+            .category-name {
+              color: #2196f3;
+              font-weight: 600;
+            }
+          }
+          
+          .category-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: block;
+          }
+          
+          .category-name {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            display: block;
+          }
+        }
+      }
+    }
+    
+    .status-filter {
+      padding: 0 15px;
+      
+      .filter-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+        
+        &.active {
+          background: #52c41a;
+          border-color: #52c41a;
+          
+          .filter-text {
+            color: white;
+          }
+        }
+        
+        .filter-text {
+          font-size: 14px;
+          color: #666;
+        }
+      }
+    }
+  }
+  
+  .content {
+    background: white;
+    min-height: calc(100vh - 200px);
+    
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      
+      .loading-text {
+        margin-top: 15px;
+        color: #999;
+        font-size: 14px;
+      }
+    }
+    
+    .items-list {
+      padding: 15px;
+      
+      .item-card {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        
+        &:active {
+          transform: scale(0.98);
+        }
+        
+        .item-image-container {
+          position: relative;
+          height: 200px;
+          
+          .item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          
+          .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+        
+        .item-info {
+          padding: 16px;
+          
+          .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            
+            .item-name {
+              font-size: 18px;
+              font-weight: 600;
+              color: #333;
+              flex: 1;
+              margin-right: 10px;
+            }
+            
+            .item-category {
+              font-size: 12px;
+              color: #999;
+              background: #f5f5f5;
+              padding: 4px 8px;
+              border-radius: 8px;
+              white-space: nowrap;
+            }
+          }
+          
+          .item-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          
+          .item-pricing {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            
+            .rental-rate {
+              font-size: 20px;
+              font-weight: bold;
+              color: #ff6b35;
+            }
+            
+            .deposit {
+              font-size: 14px;
+              color: #999;
+            }
+          }
+          
+          .item-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            .view-detail {
+              font-size: 14px;
+              color: #666;
+              padding: 8px 0;
+            }
+            
+            .rent-now {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 8px 20px;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+    
+    .footer-tip {
+      text-align: center;
+      padding: 30px 20px;
+      
+      .tip-text {
+        color: #ccc;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (min-width: 768px) {
+  .rental-container {
+    .content {
+      .items-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        
+        .item-card {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .rental-container {
+    .content {
+      .items-list {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  }
+} 

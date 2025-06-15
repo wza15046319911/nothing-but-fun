@@ -1,0 +1,253 @@
+// Variables (matching other pages for consistency)
+@primary-color: #4a90e2;
+@secondary-color: #f6f6f6;
+@text-color: #333;
+@text-secondary: #666;
+@border-color: #eee;
+@accent-color: #ff9500;
+@price-color: #ff6b6b;
+@success-color: #4cd964;
+@spacing-sm: 8px;
+@spacing-md: 16px;
+@spacing-lg: 24px;
+@border-radius: 8px;
+
+// Main container
+.publish-container {
+  min-height: 100vh;
+  background-color: @secondary-color;
+  padding-bottom: 80px; // Space for the submit button
+}
+
+// Form section
+.form-section {
+  background-color: #fff;
+  margin-bottom: @spacing-md;
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: 500;
+  padding: @spacing-md;
+  border-bottom: 1px solid @border-color;
+}
+
+.form-item {
+  padding: @spacing-md;
+  border-bottom: 1px solid @border-color;
+  position: relative;
+}
+
+.form-item-row {
+  display: flex;
+  align-items: center;
+}
+
+.form-label {
+  width: 80px;
+  font-size: 14px;
+  color: @text-color;
+}
+
+.form-input {
+  flex: 1;
+  border: none;
+  font-size: 14px;
+  color: @text-color;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 120px;
+  margin-top: @spacing-md;
+  border: none;
+  font-size: 14px;
+  line-height: 1.5;
+  color: @text-color;
+}
+
+.form-placeholder {
+  color: @text-secondary;
+}
+
+.form-right {
+  color: @text-secondary;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.right-arrow {
+  margin-left: @spacing-sm;
+}
+
+// Image upload section
+.upload-section {
+  padding: @spacing-md;
+}
+
+.upload-title {
+  font-size: 14px;
+  color: @text-color;
+  margin-bottom: @spacing-md;
+}
+
+.upload-desc {
+  font-size: 12px;
+  color: @text-secondary;
+  margin-bottom: @spacing-md;
+}
+
+.upload-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -@spacing-sm;
+}
+
+.upload-item {
+  width: 25%;
+  padding: 0 @spacing-sm;
+  margin-bottom: @spacing-md;
+}
+
+.upload-inner {
+  height: 80px;
+  border: 1px dashed @border-color;
+  border-radius: @border-radius;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: @text-secondary;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: @border-radius;
+}
+
+.delete-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+// Price settings
+.price-input {
+  width: 120px;
+  text-align: right;
+  color: @price-color;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+// Condition selector
+.condition-selector {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: @spacing-md;
+}
+
+.condition-item {
+  padding: @spacing-sm @spacing-md;
+  border: 1px solid @border-color;
+  border-radius: 16px;
+  margin-right: @spacing-md;
+  margin-bottom: @spacing-sm;
+  font-size: 12px;
+  color: @text-color;
+  
+  &.active {
+    background-color: @primary-color;
+    color: #fff;
+    border-color: @primary-color;
+  }
+}
+
+// Submit button
+.submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: @spacing-md;
+  display: flex;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.submit-button {
+  flex: 1;
+  height: 44px;
+  background-color: @primary-color;
+  color: #fff;
+  border-radius: 22px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  
+  &.disabled {
+    background-color: @text-secondary;
+    opacity: 0.6;
+  }
+}
+
+// Category picker
+.category-picker {
+  width: 100%;
+  margin-top: @spacing-md;
+}
+
+.picker-item {
+  padding: @spacing-sm 0;
+  font-size: 14px;
+}
+
+// Tips section
+.tips-section {
+  padding: @spacing-md;
+}
+
+.tips-title {
+  font-size: 14px;
+  color: @text-secondary;
+  margin-bottom: @spacing-sm;
+}
+
+.tips-list {
+  font-size: 12px;
+  color: @text-secondary;
+}
+
+.tips-item {
+  margin-bottom: @spacing-sm;
+  display: flex;
+  align-items: flex-start;
+}
+
+.tips-dot {
+  margin-right: @spacing-sm;
+  flex-shrink: 0;
+}
+
+.tips-text {
+  flex: 1;
+  line-height: 1.5;
+} 

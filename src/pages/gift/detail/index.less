@@ -1,0 +1,308 @@
+// 变量定义
+@primary-color: #4a90e2;
+@secondary-color: #f6f6f6;
+@text-color: #333;
+@text-secondary: #666;
+@text-light: #999;
+@border-color: #eee;
+@success-color: #4cd964;
+@warning-color: #ff9500;
+@danger-color: #ff3b30;
+@spacing-sm: 8px;
+@spacing-md: 16px;
+@spacing-lg: 24px;
+@border-radius: 8px;
+@card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.detail-container {
+  background-color: @secondary-color;
+  min-height: 100vh;
+  position: relative;
+
+  // 内容区域
+  .content {
+    height: calc(100vh - 80px);
+    padding-bottom: 80px;
+  }
+
+  // 加载状态
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    
+    .loading-text {
+      margin-top: @spacing-md;
+      color: @text-secondary;
+      font-size: 14px;
+    }
+  }
+
+  // 错误状态
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: @spacing-lg;
+    
+    .error-text {
+      font-size: 18px;
+      color: @text-secondary;
+      margin-bottom: @spacing-md;
+    }
+    
+    .back-link {
+      color: @primary-color;
+      font-size: 16px;
+      padding: @spacing-sm @spacing-md;
+      border: 1px solid @primary-color;
+      border-radius: @border-radius;
+      
+      &:active {
+        background-color: @primary-color;
+        color: white;
+      }
+    }
+  }
+
+  // 商品图片区域
+  .image-section {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: white;
+    
+    .main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    // 库存标签
+    .stock-badge {
+      position: absolute;
+      top: @spacing-md;
+      right: @spacing-md;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      
+      &.sufficient {
+        background-color: @success-color;
+      }
+      
+      &.low {
+        background-color: @warning-color;
+      }
+      
+      &.out {
+        background-color: @danger-color;
+      }
+    }
+  }
+
+  // 商品信息区域
+  .info-section {
+    background: white;
+    margin-top: @spacing-sm;
+    padding: @spacing-lg;
+    
+    .basic-info {
+      margin-bottom: @spacing-lg;
+      
+      .item-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: @text-color;
+        line-height: 1.4;
+        margin-bottom: @spacing-md;
+        display: block;
+      }
+      
+      .item-price {
+        font-size: 24px;
+        font-weight: bold;
+        color: @danger-color;
+        display: block;
+      }
+    }
+    
+    .item-description {
+      .description-text {
+        font-size: 15px;
+        color: @text-secondary;
+        line-height: 1.6;
+        display: block;
+      }
+    }
+  }
+
+  // 详细信息区域
+  .details-section {
+    background: white;
+    margin-top: @spacing-sm;
+    padding: @spacing-lg;
+    
+    .section-title {
+      margin-bottom: @spacing-md;
+      
+      .title-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: @text-color;
+      }
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: @spacing-md 0;
+      border-bottom: 1px solid @border-color;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .detail-label {
+        font-size: 15px;
+        color: @text-secondary;
+      }
+      
+      .detail-value {
+        font-size: 15px;
+        color: @text-color;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // 商品特色区域
+  .features-section {
+    background: white;
+    margin-top: @spacing-sm;
+    padding: @spacing-lg;
+    
+    .section-title {
+      margin-bottom: @spacing-md;
+      
+      .title-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: @text-color;
+      }
+    }
+    
+    .features-list {
+      .feature-item {
+        display: flex;
+        align-items: center;
+        padding: @spacing-md 0;
+        
+        .feature-icon {
+          font-size: 18px;
+          margin-right: @spacing-md;
+        }
+        
+        .feature-text {
+          font-size: 15px;
+          color: @text-secondary;
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  // 购买须知区域
+  .notice-section {
+    background: white;
+    margin-top: @spacing-sm;
+    padding: @spacing-lg;
+    
+    .section-title {
+      margin-bottom: @spacing-md;
+      
+      .title-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: @text-color;
+      }
+    }
+    
+    .notice-content {
+      .notice-text {
+        font-size: 14px;
+        color: @text-secondary;
+        line-height: 1.6;
+        margin-bottom: @spacing-sm;
+        display: block;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  // 底部操作栏
+  .bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: @spacing-md;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: @spacing-md;
+    
+    .action-button {
+      flex: 1;
+      height: 44px;
+      border-radius: @border-radius;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      
+      .action-text {
+        font-size: 16px;
+      }
+      
+      &.share-button {
+        background: @secondary-color;
+        color: @text-color;
+        border: 1px solid @border-color;
+        
+        &:active {
+          background: darken(@secondary-color, 5%);
+        }
+      }
+      
+      &.contact-button {
+        background: @primary-color;
+        color: white;
+        
+        &:active {
+          background: darken(@primary-color, 10%);
+        }
+      }
+    }
+  }
+}
+
+// 安全区域适配
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .detail-container {
+    .bottom-actions {
+      padding-bottom: calc(@spacing-md + env(safe-area-inset-bottom));
+    }
+  }
+} 

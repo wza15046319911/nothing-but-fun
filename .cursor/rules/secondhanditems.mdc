@@ -1,0 +1,157 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Secondhand Items API Documentation
+
+## Base Path
+
+```
+/api
+```
+
+---
+
+## 1. Create a New Secondhand Item
+
+- **Endpoint:** `POST /api/secondhand`
+- **Description:** Create a new secondhand item.
+- **Request Body:**
+  ```json
+  {
+    "sellerId": 123,
+    "title": "iPhone 13 Pro",
+    "description": "Almost new, no scratches, all accessories included",
+    "price": "5999.00",
+    "image": "https://example.com/images/iphone13pro.jpg",
+    "status": "available" // available | sold | reserved
+  }
+  ```
+- **Response:**
+  - `201 Created`  
+    Returns the created item object.
+  - `400 Bad Request`  
+    Invalid input.
+  - `500 Internal Server Error`
+
+---
+
+## 2. Get All Secondhand Items
+
+- **Endpoint:** `GET /api/secondhand`
+- **Description:** Retrieve a list of all secondhand items.
+- **Response:**
+  - `200 OK`  
+    Returns an array of item objects.
+  - `500 Internal Server Error`
+
+---
+
+## 3. Get Secondhand Item by ID
+
+- **Endpoint:** `GET /api/secondhand/{id}`
+- **Description:** Retrieve details of a specific secondhand item by its ID.
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Response:**
+  - `200 OK`  
+    Returns the item object.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 4. Update a Secondhand Item
+
+- **Endpoint:** `PUT /api/secondhand/{id}`
+- **Description:** Update an existing secondhand item.
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Request Body:** (any of the following fields)
+  ```json
+  {
+    "sellerId": 123,
+    "title": "Updated Title",
+    "description": "Updated description",
+    "price": "5999.00",
+    "image": "https://example.com/images/updated.jpg",
+    "status": "sold" // available | sold | reserved
+  }
+  ```
+- **Response:**
+  - `200 OK`  
+    Returns the updated item object.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 5. Delete a Secondhand Item
+
+- **Endpoint:** `DELETE /api/secondhand/{id}`
+- **Description:** Delete a secondhand item by its ID.
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Response:**
+  - `200 OK`  
+    Returns a success message.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 6. Review a Secondhand Item (Approve/Reject)
+
+- **Endpoint:** `PUT /api/secondhand/{id}/review`
+- **Description:** Review a secondhand item (approve or reject).
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Request Body:**
+  ```json
+  {
+    "reviewerId": 456,
+    "approved": true,
+    "reason": "Item information is complete and meets requirements"
+  }
+  ```
+- **Response:**
+  - `200 OK`  
+    Returns the reviewed item object.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 7. Get User's Secondhand Items
+
+- **Endpoint:** `GET /api/users/{userId}/secondhand`
+- **Description:** Get all secondhand items posted by a specific user.
+- **Path Parameter:**
+  - `userId` (integer, required): User ID
+- **Response:**
+  - `200 OK`  
+    Returns an array of item objects.
+  - `500 Internal Server Error`
+
+---
+
+## Data Model: SecondhandItem
+
+```json
+{
+  "id": 1,
+  "sellerId": 123,
+  "title": "iPhone 13 Pro",
+  "description": "Almost new, no scratches, all accessories included",
+  "price": "5999.00",
+  "image": "https://example.com/images/iphone13pro.jpg",
+  "status": "available", // available | sold | reserved
+  "createdAt": "2024-06-01T12:00:00Z",
+  "updatedAt": "2024-06-01T12:00:00Z"
+}
+```
+
+---
+
+For more detailed field descriptions or error response structures, please refer to the Swagger documentation or backend implementation.

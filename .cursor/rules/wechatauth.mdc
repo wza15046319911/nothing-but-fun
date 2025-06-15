@@ -1,0 +1,228 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# WeChat Authentication API Documentation
+
+## Base Path
+
+```
+/api
+```
+
+---
+
+## 1. WeChat Mini Program Login
+
+- **Endpoint:** `POST /api/wechat/login`
+- **Description:** Login with WeChat Mini Program code.
+- **Request Body:**
+  ```json
+  {
+    "code": "<WeChat login code>"
+  }
+  ```
+- **Response:**
+  - `200 OK`
+    ```json
+    {
+      "success": true,
+      "message": "登录成功",
+      "data": {
+        "openid": "<user openid>"
+      }
+    }
+    ```
+  - `400 Bad Request` 请求参数错误
+  - `500 Internal Server Error` 服务器错误
+
+---
+
+## 2. Create New User
+
+- **Endpoint:** `POST /api/wechat/user`
+- **Description:** Create a new user with WeChat openid.
+- **Request Body:**
+  ```json
+  {
+    "openid": "<WeChat user openid>",
+    "nickname": "optional",
+    "avatarUrl": "optional",
+    "gender": "optional",
+    "city": "optional",
+    "province": "optional",
+    "country": "optional",
+    "language": "optional"
+  }
+  ```
+- **Response:**
+  - `201 Created`
+    ```json
+    {
+      "success": true,
+      "message": "用户创建成功",
+      "data": {
+        "id": 1,
+        "openid": "<user openid>",
+        "nickname": "nickname",
+        "avatarUrl": "avatar url",
+        "gender": "gender",
+        "city": "city",
+        "province": "province",
+        "country": "country",
+        "language": "language",
+        "isActive": true,
+        "createdAt": "2024-06-01T12:00:00Z",
+        "updatedAt": "2024-06-01T12:00:00Z"
+      }
+    }
+    ```
+  - `400 Bad Request` 请求参数错误
+  - `409 Conflict` 用户已存在
+  - `500 Internal Server Error` 服务器错误
+
+---
+
+## 3. Get User Info by OpenID
+
+- **Endpoint:** `GET /api/wechat/user/{openid}`
+- **Description:** Retrieve user info by WeChat openid.
+- **Path Parameter:**
+  - `openid` (string, required): User's WeChat openid
+- **Response:**
+  - `200 OK`
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": 1,
+        "openid": "<user openid>",
+        "nickname": "nickname",
+        "avatarUrl": "avatar url",
+        "gender": "gender",
+        "city": "city",
+        "province": "province",
+        "country": "country",
+        "language": "language",
+        "isActive": true,
+        "lastLoginAt": "2024-06-01T12:00:00Z",
+        "createdAt": "2024-06-01T12:00:00Z"
+      }
+    }
+    ```
+  - `404 Not Found` 用户不存在
+  - `500 Internal Server Error` 服务器错误
+
+---
+
+## 4. Update User Profile
+
+- **Endpoint:** `PUT /api/wechat/profile`
+- **Description:** Update user profile (requires Bearer token).
+- **Headers:**
+  - `Authorization: Bearer <token>`
+- **Request Body:**
+  ```json
+  {
+    "nickname": "optional",
+    "avatarUrl": "optional",
+    "gender": "optional",
+    "city": "optional",
+    "province": "optional",
+    "country": "optional",
+    "language": "optional"
+  }
+  ```
+- **Response:**
+  - `200 OK`
+    ```json
+    {
+      "success": true,
+      "message": "用户资料更新成功",
+      "data": {
+        "id": 1,
+        "openid": "<user openid>",
+        "nickname": "nickname",
+        "avatarUrl": "avatar url",
+        "gender": "gender",
+        "city": "city",
+        "province": "province",
+        "country": "country",
+        "language": "language",
+        "isActive": true,
+        "updatedAt": "2024-06-01T12:00:00Z"
+      }
+    }
+    ```
+  - `400 Bad Request` 请求参数错误
+  - `401 Unauthorized` 未授权
+  - `500 Internal Server Error` 服务器错误
+
+---
+
+## 5. Verify JWT Token
+
+- **Endpoint:** `GET /api/wechat/verify`
+- **Description:** Verify the validity of a JWT token (requires Bearer token).
+- **Headers:**
+  - `Authorization: Bearer <token>`
+- **Response:**
+  - `200 OK`
+    ```json
+    {
+      "success": true,
+      "message": "token验证成功",
+      "data": {
+        "openid": "<user openid>",
+        "userId": 1
+      }
+    }
+    ```
+  - `401 Unauthorized` token无效或已过期
+
+---
+
+## 6. Refresh JWT Token
+
+- **Endpoint:** `POST /api/wechat/refresh`
+- **Description:** Refresh a JWT token (requires Bearer token).
+- **Headers:**
+  - `Authorization: Bearer <token>`
+- **Response:**
+  - `200 OK`
+    ```json
+    {
+      "success": true,
+      "message": "token刷新成功",
+      "data": {
+        "token": "<new token>"
+      }
+    }
+    ```
+  - `401 Unauthorized` token无效或已过期
+
+---
+
+## Data Model: User
+
+```json
+{
+  "id": 1,
+  "openid": "<user openid>",
+  "nickname": "nickname",
+  "avatarUrl": "avatar url",
+  "gender": "gender",
+  "city": "city",
+  "province": "province",
+  "country": "country",
+  "language": "language",
+  "isActive": true,
+  "lastLoginAt": "2024-06-01T12:00:00Z",
+  "createdAt": "2024-06-01T12:00:00Z"
+}
+```
+
+---
+
+For more details, refer to the Swagger documentation or backend implementation.

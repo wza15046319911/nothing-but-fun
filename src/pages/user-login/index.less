@@ -1,0 +1,486 @@
+// Variables (matching other pages for consistency)
+@primary-color: #4a90e2;
+@secondary-color: #f6f6f6;
+@text-color: #333;
+@text-secondary: #666;
+@border-color: #eee;
+@success-color: #4cd964;
+@warning-color: #ff6b6b;
+@spacing-sm: 8px;
+@spacing-md: 16px;
+@spacing-lg: 24px;
+@border-radius: 8px;
+
+// Main container
+.user-container {
+  background-color: @secondary-color;
+  min-height: 100vh;
+}
+
+// User header
+.user-header {
+  background-color: @primary-color;
+  padding: @spacing-lg;
+  padding-bottom: @spacing-lg * 2;
+  color: #fff;
+  // position: relative;
+}
+
+.login-section {
+  text-align: center;
+  padding: @spacing-lg 0;
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto @spacing-md;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.avatar-icon {
+  font-size: 40px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.login-text {
+  font-size: 16px;
+  margin-bottom: @spacing-sm;
+  font-weight: 500;
+}
+
+.login-desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.login-button {
+  background-color: #fff;
+  color: @primary-color;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: @spacing-sm @spacing-lg;
+  display: inline-block;
+  margin-top: @spacing-md;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+// 微信登录按钮样式
+.wechat-login-button {
+  background-color: #07c160 !important;
+  color: #fff !important;
+  border-radius: 20px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 12px 24px !important;
+  margin-top: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  width: auto !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  
+  &::after {
+    border: none !important;
+  }
+  
+  &.button-hover {
+    background-color: #06ad56 !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  &.button-loading, &.loading {
+    background-color: #06ad56 !important;
+    opacity: 0.8 !important;
+    pointer-events: none !important;
+  }
+  
+  &[disabled] {
+    background-color: #999 !important;
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+  }
+}
+
+// 退出登录按钮样式
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  margin-top: 12px;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:active {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(1px);
+  }
+}
+
+// User content
+.content-section {
+  margin-top: -@spacing-lg;
+  padding: 0 @spacing-md;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: @border-radius;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: @spacing-md;
+  overflow: hidden;
+}
+
+// Menu list
+.menu-list {
+  border-radius: @border-radius;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: @spacing-md;
+  border-bottom: 1px solid @border-color;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: @spacing-md;
+  color: @primary-color;
+  font-size: 18px;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 15px;
+  color: @text-color;
+}
+
+.menu-arrow {
+  color: @text-secondary;
+  font-size: 16px;
+}
+
+// Form card for login
+.form-card {
+  padding: @spacing-md;
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: @spacing-md;
+  color: @text-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch-link {
+  font-size: 14px;
+  color: @primary-color;
+  font-weight: normal;
+}
+
+.input-group {
+  margin-bottom: @spacing-md;
+}
+
+.input-label {
+  font-size: 14px;
+  color: @text-secondary;
+  margin-bottom: @spacing-sm;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid @border-color;
+  border-radius: @border-radius;
+  padding: @spacing-sm @spacing-md;
+  background-color: #fff;
+}
+
+.input-icon {
+  color: @text-secondary;
+  margin-right: @spacing-md;
+  font-size: 16px;
+}
+
+.input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: @text-color;
+  background: transparent;
+}
+
+.forgot-password {
+  text-align: right;
+  font-size: 13px;
+  color: @primary-color;
+  margin-top: -@spacing-sm;
+  margin-bottom: @spacing-md;
+}
+
+.submit-button {
+  background-color: @primary-color;
+  color: #fff;
+  border: none;
+  border-radius: @border-radius;
+  padding: @spacing-md;
+  font-size: 16px;
+  font-weight: 500;
+  width: 100%;
+  margin-top: @spacing-md;
+  text-align: center;
+}
+
+.other-login {
+  margin-top: @spacing-lg;
+  text-align: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  color: @text-secondary;
+  font-size: 13px;
+  margin: @spacing-md 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: @border-color;
+}
+
+.divider-text {
+  padding: 0 @spacing-md;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: @spacing-md;
+}
+
+.social-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 @spacing-md;
+  background-color: #f5f5f5;
+  color: @text-color;
+  font-size: 20px;
+}
+
+// 头像昵称填写表单样式
+.profile-form-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: @spacing-lg;
+}
+
+.profile-form {
+  background-color: #fff;
+  border-radius: @border-radius * 2;
+  padding: @spacing-lg * 2;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: @text-color;
+  text-align: center;
+  margin-bottom: @spacing-sm;
+}
+
+.form-desc {
+  font-size: 14px;
+  color: @text-secondary;
+  text-align: center;
+  margin-bottom: @spacing-lg * 1.5;
+}
+
+.avatar-section {
+  margin-bottom: @spacing-lg;
+}
+
+.form-label {
+  font-size: 14px;
+  color: @text-color;
+  font-weight: 500;
+  margin-bottom: @spacing-md;
+  display: block;
+}
+
+.avatar-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  
+  &::after {
+    border: none !important;
+  }
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid @border-color;
+  
+  &:hover {
+    border-color: @primary-color;
+  }
+}
+
+.nickname-section {
+  margin-bottom: @spacing-lg * 1.5;
+}
+
+.nickname-input {
+  width: 100%;
+  padding: @spacing-md;
+  border: 1px solid @border-color;
+  border-radius: @border-radius;
+  font-size: 15px;
+  color: @text-color;
+  background-color: @secondary-color;
+  
+  &:focus {
+    border-color: @primary-color;
+    outline: none;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: @spacing-md;
+}
+
+.cancel-button {
+  flex: 1;
+  padding: @spacing-md;
+  border: 1px solid @border-color;
+  border-radius: @border-radius;
+  background-color: #fff;
+  color: @text-secondary;
+  font-size: 15px;
+  text-align: center;
+  
+  &:active {
+    background-color: @secondary-color;
+  }
+}
+
+.complete-button {
+  flex: 1;
+  padding: @spacing-md;
+  border-radius: @border-radius;
+  background-color: @primary-color;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  
+  &:active {
+    background-color: darken(@primary-color, 10%);
+  }
+  
+  &.loading {
+    background-color: darken(@primary-color, 10%);
+    opacity: 0.8;
+    pointer-events: none;
+  }
+}
+
+// 调试信息样式
+.debug-section {
+  margin-top: @spacing-md;
+}
+
+.debug-buttons {
+  display: flex;
+  gap: @spacing-sm;
+  margin-bottom: @spacing-md;
+}
+
+.debug-button {
+  background-color: #ff6b6b;
+  color: #fff;
+  padding: @spacing-sm @spacing-md;
+  border-radius: @border-radius;
+  font-size: 12px;
+  text-align: center;
+  flex: 1;
+  
+  &:active {
+    background-color: #ff5252;
+  }
+}
+
+.debug-info {
+  background-color: #fff;
+  border-radius: @border-radius;
+  padding: @spacing-md;
+  border: 1px solid #e0e0e0;
+}
+
+.debug-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: @text-color;
+  margin-bottom: @spacing-sm;
+}
+
+.debug-text {
+  font-size: 12px;
+  color: @text-secondary;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  font-family: monospace;
+}
+
+ 

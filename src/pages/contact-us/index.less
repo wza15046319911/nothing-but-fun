@@ -1,0 +1,333 @@
+.contact-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 40px;
+}
+
+/* Header Section */
+.contact-header {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  padding: 40px 20px 30px;
+  text-align: center;
+  color: white;
+  
+  .header-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  .header-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.5;
+    display: block;
+  }
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 20px 0 15px;
+  padding: 0 20px;
+  display: block;
+}
+
+/* Contact Information Section */
+.contact-info-section {
+  margin: 20px 0;
+  
+  .nut-cell-group {
+    margin: 0 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nut-cell {
+    background-color: white;
+    padding: 15px 20px;
+    
+    &:not(:last-child) {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .nut-cell__title {
+      font-weight: 500;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .nut-cell__value {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+}
+
+/* Contact Form Section */
+.contact-form-section {
+  margin: 20px 0;
+  
+  .nut-form {
+    background-color: white;
+    margin: 0 20px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nut-form-item {
+    margin-bottom: 20px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    .nut-form-item__label {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .nut-input,
+    .nut-textarea {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      
+      &:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+      }
+    }
+    
+    .nut-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+  }
+}
+
+/* Form Actions */
+.form-actions {
+  margin: 20px;
+  
+  .submit-button {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+    }
+  }
+}
+
+/* Social Media Section */
+.social-section {
+  margin: 30px 0 20px;
+  
+  .social-links {
+    display: flex;
+    justify-content: space-around;
+    padding: 0 40px;
+    margin-top: 20px;
+  }
+  
+  .social-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+  
+  .social-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    &::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    &.wechat-icon {
+      background-color: #07c160;
+      
+      &::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M8.5 12c-.8 0-1.5-.7-1.5-1.5S7.7 9 8.5 9s1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5S14.7 9 15.5 9s1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm-7-9C4.5 3 1 6.1 1 10c0 2.4 1.2 4.5 3.2 5.9-.2.8-.8 2.6-1 3.1-.1.3.1.6.4.6.2 0 2.5-.9 3.5-1.3.6.1 1.2.2 1.9.2 4.5 0 8.5-3.1 8.5-7S12.5 3 8.5 3zm7 12c-.3 0-.6 0-.9-.1-1 .4-3.3 1.3-3.5 1.3-.3 0-.5-.3-.4-.6.2-.5.8-2.3 1-3.1-2-1.4-3.2-3.5-3.2-5.9 0-3.9 3.5-7 8.5-7s8.5 3.1 8.5 7-3.5 7-8.5 7z'/%3E%3C/svg%3E");
+      }
+    }
+    
+    &.weibo-icon {
+      background-color: #e6162d;
+      
+      &::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z'/%3E%3C/svg%3E");
+      }
+    }
+    
+    &.facebook-icon {
+      background-color: #1877f2;
+      
+      &::before {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z'/%3E%3C/svg%3E");
+      }
+    }
+  }
+  
+  .social-text {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+/* Features Section */
+.features-section {
+  margin: 30px 0 20px;
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0 20px;
+    margin-top: 20px;
+  }
+  
+  .feature-item {
+    background: white;
+    border-radius: 12px;
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .feature-desc {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      display: block;
+    }
+  }
+}
+
+/* Divider Styling */
+.nut-divider {
+  margin: 30px 0;
+  
+  &::before,
+  &::after {
+    border-color: #e0e0e0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 375px) {
+  .contact-header {
+    padding: 30px 15px 25px;
+    
+    .header-title {
+      font-size: 24px;
+    }
+    
+    .header-subtitle {
+      font-size: 13px;
+    }
+  }
+  
+  .section-title {
+    font-size: 16px;
+    padding: 0 15px;
+  }
+  
+  .contact-info-section .nut-cell-group,
+  .contact-form-section .nut-form {
+    margin: 0 15px;
+  }
+  
+  .form-actions {
+    margin: 20px 15px;
+  }
+  
+  .social-links {
+    padding: 0 20px;
+  }
+}
+
+/* Animation for form submission */
+@keyframes submitSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.submit-button.success {
+  animation: submitSuccess 0.3s ease;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .contact-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Toast Styles */
+.nut-toast {
+  z-index: 9999;
+} 

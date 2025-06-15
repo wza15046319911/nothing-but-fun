@@ -1,0 +1,164 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Peripheral Items API Documentation
+
+## Base Path
+
+```
+/api
+```
+
+---
+
+## 1. Create a New Peripheral Item
+
+- **Endpoint:** `POST /api/peripherals`
+- **Description:** Create a new peripheral item (Admin only).
+- **Headers:**
+  - `x-is-admin: true` (Required for admin operations)
+- **Request Body:**
+  ```json
+  {
+    "name": "NBF T-Shirt",
+    "description": "Official commemorative T-shirt, 100% cotton",
+    "price": "99.00",
+    "stock": 100,
+    "image": "https://example.com/images/nbf-tshirt.jpg"
+  }
+  ```
+- **Response:**
+  - `201 Created`  
+    Returns the created peripheral item object.
+  - `400 Bad Request`  
+    Invalid input data.
+  - `403 Forbidden`  
+    Admin access required.
+  - `500 Internal Server Error`
+
+---
+
+## 2. Get All Peripheral Items
+
+- **Endpoint:** `GET /api/peripherals`
+- **Description:** Retrieve a list of all peripheral items.
+- **Response:**
+  - `200 OK`  
+    Returns an array of peripheral item objects.
+  - `500 Internal Server Error`
+
+---
+
+## 3. Get Peripheral Item by ID
+
+- **Endpoint:** `GET /api/peripherals/{id}`
+- **Description:** Retrieve details of a specific peripheral item by its ID.
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Response:**
+  - `200 OK`  
+    Returns the peripheral item object.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 4. Update a Peripheral Item
+
+- **Endpoint:** `PUT /api/peripherals/{id}`
+- **Description:** Update an existing peripheral item (Admin only).
+- **Headers:**
+  - `x-is-admin: true` (Required for admin operations)
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Request Body:** (any of the following fields)
+  ```json
+  {
+    "name": "Updated Name",
+    "description": "Updated description",
+    "price": "129.00",
+    "stock": 50,
+    "image": "https://example.com/images/updated.jpg"
+  }
+  ```
+- **Response:**
+  - `200 OK`  
+    Returns the updated peripheral item object.
+  - `400 Bad Request`  
+    Invalid input data.
+  - `403 Forbidden`  
+    Admin access required.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 5. Delete a Peripheral Item
+
+- **Endpoint:** `DELETE /api/peripherals/{id}`
+- **Description:** Delete a peripheral item by its ID (Admin only).
+- **Headers:**
+  - `x-is-admin: true` (Required for admin operations)
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Response:**
+  - `200 OK`  
+    Returns a success message.
+  - `403 Forbidden`  
+    Admin access required.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## 6. Update Peripheral Item Stock
+
+- **Endpoint:** `PUT /api/peripherals/{id}/stock`
+- **Description:** Update the stock quantity of a peripheral item (Admin only).
+- **Headers:**
+  - `x-is-admin: true` (Required for admin operations)
+- **Path Parameter:**
+  - `id` (integer, required): Item ID
+- **Request Body:**
+  ```json
+  {
+    "stock": 50
+  }
+  ```
+- **Response:**
+  - `200 OK`  
+    Returns the updated peripheral item object.
+  - `400 Bad Request`  
+    Invalid stock value.
+  - `403 Forbidden`  
+    Admin access required.
+  - `404 Not Found`
+  - `500 Internal Server Error`
+
+---
+
+## Data Model: PeripheralItem
+
+```json
+{
+  "id": 1,
+  "name": "NBF T-Shirt",
+  "description": "Official commemorative T-shirt, 100% cotton",
+  "price": "99.00",
+  "stock": 100,
+  "image": "https://example.com/images/nbf-tshirt.jpg",
+  "createdAt": "2024-06-01T12:00:00Z"
+}
+```
+
+---
+
+## Admin Authentication
+
+All admin operations require the `x-is-admin: true` header. In a production environment, this should be replaced with proper JWT token-based authentication with role verification.
+
+---
+
+For more detailed field descriptions or error response structures, please refer to the Swagger documentation or backend implementation.

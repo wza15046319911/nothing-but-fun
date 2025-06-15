@@ -1,0 +1,126 @@
+// Variables
+@primary-color: #4a90e2;
+@secondary-color: #f6f6f6;
+@text-color: #333;
+@text-secondary: #666;
+@border-color: #eee;
+@spacing-sm: 8px;
+@spacing-md: 16px;
+@spacing-lg: 24px;
+@border-radius: 8px;
+
+// Main container
+.index-container {
+  background-color: @secondary-color;
+  min-height: 100vh;
+  padding-bottom: @spacing-lg;
+}
+
+// Common section styling
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: @text-color;
+  padding: @spacing-md @spacing-md @spacing-sm;
+}
+
+// Entry section
+.entry-section {
+  background-color: #fff;
+  padding: @spacing-md 0;
+  margin-bottom: @spacing-md;
+}
+
+.entry-grid {
+  margin-bottom: @spacing-sm;
+}
+
+.grid-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: @spacing-sm 0;
+}
+
+.custom-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: @spacing-sm;
+  background-color: fade(@primary-color, 10%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @primary-color;
+  position: relative;
+
+  // Icon placeholders (in a real app, use proper icon font or image)
+  &.calendar-check::before { content: "📅"; }
+  &.flag::before { content: "🚩"; }
+  &.shopping-bag::before { content: "🛍️"; }
+  &.car::before { content: "🚗"; }
+  &.hand-sparkles::before { content: "💆"; }
+  &.gift::before { content: "🎁"; }
+  &.key::before { content: "🔑"; }
+  &.truck::before { content: "🚚"; }
+  &.map-marked::before { content: "🗺️"; }
+  &.phone-alt::before { content: "📞"; }
+}
+
+.entry-text {
+  font-size: 12px;
+  color: @text-color;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+// Video section
+.video-section {
+  background-color: #fff;
+  margin-bottom: @spacing-md;
+  padding-bottom: @spacing-md;
+}
+
+.featured-video {
+  width: 100%;
+  height: 200px;
+  padding: 0 @spacing-md;
+}
+
+// Recommended section
+.recommended-section {
+  background-color: #fff;
+}
+
+.recommended-items {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 @spacing-md @spacing-md;
+}
+
+.recommended-item {
+  width: calc(50% - @spacing-sm);
+  margin-right: @spacing-md;
+  margin-bottom: @spacing-md;
+  border-radius: @border-radius;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  &:nth-child(2n) {
+    margin-right: 0;
+  }
+}
+
+.recommended-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: @border-radius;
+}
