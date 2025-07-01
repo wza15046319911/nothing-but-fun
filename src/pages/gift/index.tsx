@@ -109,7 +109,7 @@ const Gift: React.FC = () => {
                 <View 
                   key={item.id} 
                   className='item-card'
-                  onClick={() => handleItemClick(item)}
+                  // onClick={() => handleItemClick(item)}
                 >
                   {/* 商品图片 */}
                   <View className='item-image-container'>
@@ -133,9 +133,9 @@ const Gift: React.FC = () => {
                     {/* 价格和库存 */}
                     <View className='item-footer'>
                       <Text className='item-price'>{formatPrice(item.price)}</Text>
-                      <View className='item-actions'>
+                      {/* <View className='item-actions'>
                         <Text className='view-detail'>查看详情</Text>
-                      </View>
+                      </View> */}
                     </View>
                   </View>
                 </View>

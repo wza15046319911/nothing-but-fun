@@ -8,6 +8,7 @@ export interface SecondhandItem {
   description: string
   price: string
   image: string
+  images?: string[]
   status: 'available' | 'sold' | 'reserved'
   createdAt: string
   updatedAt: string
@@ -20,6 +21,7 @@ export interface CreateSecondhandItemRequest {
   description: string
   price: string
   image: string
+  images?: string[]
   status?: 'available' | 'sold' | 'reserved'
 }
 

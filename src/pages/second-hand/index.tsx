@@ -6,26 +6,6 @@ import { secondhandApi, SecondhandItem } from '../../services/secondhand'
 import { useAuth } from '../../context/auth'
 import './index.less'
 
-// Categories for filtering (can be extended based on business needs)
-const categories = [
-  { id: 'all', name: '全部', icon: '🏠' },
-  { id: 'digital', name: '数码产品', icon: '📱' },
-  { id: 'furniture', name: '家居家具', icon: '🛋️' },
-  { id: 'clothes', name: '服饰装备', icon: '👕' },
-  { id: 'books', name: '图书音像', icon: '📚' },
-  { id: 'sports', name: '运动户外', icon: '🏀' },
-  { id: 'beauty', name: '美妆日化', icon: '💄' },
-  { id: 'toys', name: '玩具乐器', icon: '🎸' }
-]
-
-// Filter options
-const filters = [
-  { id: 'default', name: '默认排序' },
-  { id: 'newest', name: '最新发布' },
-  { id: 'price_asc', name: '价格升序' },
-  { id: 'price_desc', name: '价格降序' }
-]
-
 // Status display mapping
 const statusMap = {
   'available': { text: '可购买', color: '#52c41a' },
@@ -42,8 +22,6 @@ const SecondHand: React.FC = () => {
   const [items, setItems] = useState<SecondhandItem[]>([])
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedFilter, setSelectedFilter] = useState('default')
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
@@ -77,46 +55,7 @@ const SecondHand: React.FC = () => {
     await loadItems(false)
   }
 
-  // Filter items by category (based on title/description keywords)
-  const getFilteredItems = () => {
-    let filtered = items
 
-    // Filter by category (simple keyword matching)
-    if (selectedCategory !== 'all') {
-      const categoryKeywords = {
-        'digital': ['手机', '电脑', '平板', '耳机', '相机', 'iPhone', 'iPad', 'MacBook', '数码'],
-        'furniture': ['桌子', '椅子', '沙发', '床', '柜子', '家具', '宜家'],
-        'clothes': ['衣服', '鞋子', '包包', '帽子', '裤子', '裙子', '外套'],
-        'books': ['书', '小说', '教材', '漫画', '杂志'],
-        'sports': ['运动', '健身', '球', '户外', '登山'],
-        'beauty': ['化妆品', '护肤', '香水', '面膜'],
-        'toys': ['玩具', '乐器', '游戏', '模型']
-      }
-
-      const keywords = categoryKeywords[selectedCategory] || []
-      filtered = items.filter(item => 
-        keywords.some(keyword => 
-          item.title.includes(keyword) || item.description.includes(keyword)
-        )
-      )
-    }
-
-    // Sort by selected filter
-    const sorted = [...filtered].sort((a, b) => {
-      switch (selectedFilter) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        case 'price_asc':
-          return parseFloat(a.price) - parseFloat(b.price)
-        case 'price_desc':
-          return parseFloat(b.price) - parseFloat(a.price)
-        default:
-          return 0
-      }
-    })
-
-    return sorted
-  }
 
   // Handle search click
   const handleSearchClick = () => {
@@ -185,112 +124,91 @@ const SecondHand: React.FC = () => {
     loadItems()
   }, [])
 
-  const filteredItems = getFilteredItems()
-
   return (
     <View className='second-hand-container'>
-      {/* Search bar */}
-      <View className='search-section'>
-        <View className='search-bar' onClick={handleSearchClick}>
-          <Text className='search-icon'>🔍</Text>
-          <Text className='search-placeholder'>搜索二手闲置物品</Text>
+      {/* 页面头部 */}
+      <View className='header'>
+        <View className='header-content'>
+          <Text className='title'>二手闲置</Text>
+          <Text className='subtitle'>发现好物，交换价值</Text>
         </View>
       </View>
       
-      {/* Categories */}
-      <ScrollView className='categories-section' scrollX>
-        <View className='category-list'>
-          {categories.map(category => (
-            <View
-              key={category.id}
-              className={`category-item ${category.id === selectedCategory ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category.id)}
-            >
-              <View className='category-icon'>{category.icon}</View>
-              <Text className='category-name'>{category.name}</Text>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-      
-      {/* Filters */}
-      <View className='filter-section'>
-        {filters.map(filter => (
-          <View
-            key={filter.id}
-            className={`filter-item ${filter.id === selectedFilter ? 'active' : ''}`}
-            onClick={() => setSelectedFilter(filter.id)}
-          >
-            {filter.name}
-            {filter.id === selectedFilter && (
-              <Text className='filter-icon'>✓</Text>
-            )}
-          </View>
-        ))}
-      </View>
-      
-      {/* Content Area with Pull to Refresh */}
-      <PullToRefresh
+      {/* 商品列表 */}
+      <PullToRefresh 
         onRefresh={handleRefresh}
         pullingText="下拉刷新"
         canReleaseText="释放刷新"
         refreshingText="刷新中..."
         completeText="刷新完成"
       >
-        {loading ? (
-          <View className='loading-container'>
-            <Loading type="spinner" />
-            <Text className='loading-text'>加载中...</Text>
-          </View>
-        ) : filteredItems.length > 0 ? (
-          <View className='product-grid'>
-            {filteredItems.map(item => (
-              <View 
-                key={item.id} 
-                className='product-card'
-                onClick={() => handleProductClick(item)}
-              >
-                <View className='product-inner'>
-                  <View className='product-image'>
+        <ScrollView className='content' scrollY>
+          {loading ? (
+            <View className='loading-container'>
+              <Loading type="spinner" />
+              <Text className='loading-text'>加载中...</Text>
+            </View>
+          ) : items.length === 0 ? (
+            <Empty 
+              description="暂无商品"
+              imageSize={120}
+            />
+          ) : (
+            <View className='items-grid'>
+              {items.map(item => (
+                <View 
+                  key={item.id} 
+                  className='item-card'
+                  onClick={() => handleProductClick(item)}
+                >
+                  {/* 商品图片 */}
+                  <View className='item-image-container'>
                     <Image 
-                      className='product-img'
-                      src={item.image}
+                      className='item-image'
+                      src={item.images && item.images.length > 0 ? item.images[0] : item.image}
                       mode='aspectFill'
-                      onError={() => {
-                        // Handle image load error
-                        console.log('Image load failed for item:', item.id)
-                      }}
+                      lazyLoad
                     />
+                    {/* 多图片指示器 */}
+                    {item.images && item.images.length > 1 && (
+                      <View className='image-count-badge'>
+                        📷 {item.images.length}
+                      </View>
+                    )}
+                    {/* 状态标签 */}
                     <View 
-                      className='product-status'
+                      className={`stock-badge ${item.status}`}
                       style={{ backgroundColor: statusMap[item.status].color }}
                     >
                       {statusMap[item.status].text}
                     </View>
                   </View>
-                  <View className='product-content'>
-                    <View className='product-title'>{item.title}</View>
-                    <View className='product-price'>¥{item.price}</View>
-                    <View className='product-description'>{item.description}</View>
-                    <View className='product-meta'>
-                      <Text className='product-seller'>卖家ID: {item.sellerId}</Text>
-                      <Text className='product-time'>{formatTime(item.createdAt)}</Text>
+
+                  {/* 商品信息 */}
+                  <View className='item-info'>
+                    <Text className='item-name'>{item.title}</Text>
+                    <Text className='item-description'>{item.description}</Text>
+                    
+                    {/* 价格和时间 */}
+                    <View className='item-footer'>
+                      <Text className='item-price'>${item.price}</Text>
+                      <View className='item-actions'>
+                        <Text className='view-detail'>{formatTime(item.createdAt)}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <Empty 
-            description="暂无相关商品"
-            imageSize={80}
-          >
-            <View className='empty-action' onClick={handlePostNew}>
-              发布闲置
+              ))}
             </View>
-          </Empty>
-        )}
+          )}
+
+          {/* 底部提示 */}
+          {!loading && items.length > 0 && (
+            <View className='footer-tip'>
+              <Text className='tip-text'>— 已显示全部商品 —</Text>
+            </View>
+          )}
+        </ScrollView>
       </PullToRefresh>
       
       {/* Floating action button */}

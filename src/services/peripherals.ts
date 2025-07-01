@@ -26,9 +26,9 @@ export const peripheralsApi = {
       const response = await request({
         url: '/peripherals',
         method: 'GET'
-      }) as ApiResponse<PeripheralItem[]>
+      }) as PeripheralItem[]
       
-      return response.data || []
+      return response || []
     } catch (error) {
       console.error('获取周边商品失败:', error)
       // 返回模拟数据用于展示
@@ -42,9 +42,9 @@ export const peripheralsApi = {
       const response = await request({
         url: `/peripherals/${id}`,
         method: 'GET'
-      }) as ApiResponse<PeripheralItem>
+      }) as PeripheralItem
       
-      return response.data || null
+      return response || null
     } catch (error) {
       console.error('获取周边商品详情失败:', error)
       // 返回模拟数据

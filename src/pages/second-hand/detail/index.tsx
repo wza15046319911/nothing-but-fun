@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Button, Toast, ActionSheet, Dialog } from '@nutui/nutui-react-taro'
+import { View, Text, Image, ScrollView, CommonEventFunction } from '@tarojs/components'
+import { Button, Toast, ActionSheet, Dialog, Swiper } from '@nutui/nutui-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
 import { secondhandApi, SecondhandItem } from '../../../services/secondhand'
 import './index.less'
@@ -149,6 +149,15 @@ const SecondHandDetail: React.FC = () => {
     return userInfo && item && userInfo.id === item.sellerId
   }
 
+  // Get all images (prioritize images array, fallback to single image)
+  const getAllImages = () => {
+    if (!item) return []
+    if (item.images && item.images.length > 0) {
+      return item.images
+    }
+    return item.image ? [item.image] : []
+  }
+
   useEffect(() => {
     loadItemDetail()
   }, [id])
@@ -190,12 +199,38 @@ const SecondHandDetail: React.FC = () => {
     <ScrollView className='detail-container' scrollY>
       {/* Product Image */}
       <View className='image-section'>
-        <Image
-          className='product-image'
-          src={item.image}
-          mode='aspectFill'
-          onError={() => console.log('Image load failed')}
-        />
+        {(() => {
+          const images = getAllImages()
+          
+          return images.length > 1 ? (
+            <Swiper
+              defaultValue={0}
+              indicator
+              autoplay={false}
+              style={{ height: '300px' }}
+            >
+              {images.map((imageUrl, index) => (
+                <Swiper.Item key={index}>
+                  <Image
+                    className='product-image'
+                    src={imageUrl}
+                    mode='aspectFill'
+                    style={{ width: '100%', height: '100%' }}
+                    onError={() => console.log('Image load failed')}
+                  />
+                </Swiper.Item>
+              ))}
+            </Swiper>
+          ) : (
+            <Image
+              className='product-image'
+              src={images[0] || item.image}
+              mode='aspectFill'
+              onError={() => console.log('Image load failed')}
+            />
+          )
+        })()}
+        
         <View 
           className='status-badge'
           style={{ backgroundColor: statusMap[item.status].color }}

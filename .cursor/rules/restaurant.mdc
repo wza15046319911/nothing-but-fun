@@ -1,0 +1,667 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Restaurant & Review API Documentation
+
+## Overview
+This API provides comprehensive CRUD operations for restaurant management and review system with a built-in moderation system, including advanced filtering, searching, and statistical analysis capabilities.
+
+## Base URLs
+- Restaurants: `/api/restaurants`
+- Reviews: `/api/restaurant-reviews`
+
+## Authentication
+Note: Authentication middleware should be implemented for production use. Some endpoints (like moderation) require admin privileges.
+
+## Response Format
+All API responses follow this standard format:
+```json
+{
+  "success": boolean,
+  "message": string,
+  "data": object | array | null,
+  "pagination": object (only for paginated endpoints)
+}
+```
+
+---
+
+# Restaurant Endpoints
+
+## 1. Get All Restaurants
+**GET** `/api/restaurants`
+
+Retrieve all restaurants with optional filtering and pagination.
+
+### Query Parameters
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `page` | number | Page number (default: 1) | `?page=2` |
+| `limit` | number | Items per page (default: 10) | `?limit=20` |
+| `sortBy` | string | Sort field: `name`, `overallRating`, `totalReviews`, `createdAt` | `?sortBy=overallRating` |
+| `sortOrder` | string | Sort order: `asc`, `desc` (default: desc) | `?sortOrder=desc` |
+| `name` | string | Filter by restaurant name | `?name=Dragon` |
+| `suburb` | string | Filter by suburb | `?suburb=Brisbane` |
+| `minRating` | number | Minimum rating filter | `?minRating=4.0` |
+
+### Example Request
+```bash
+GET /api/restaurants?page=1&limit=5&sortBy=overallRating&sortOrder=desc&suburb=Brisbane&minRating=4.0
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Restaurants retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "name": "Dragon Palace Asian Fusion",
+      "description": "Modern Asian fusion restaurant offering a unique blend of traditional and contemporary flavors.",
+      "image": "https://example.com/images/dragon_palace.jpg",
+      "streetAddress": "123 Brunswick Street",
+      "suburb": "Fortitude Valley",
+      "postcode": "4006",
+      "state": "QLD",
+      "overallRating": "4.25",
+      "totalReviews": 15,
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-20T14:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 5,
+    "total": 25,
+    "totalPages": 5,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+## 2. Get Restaurant by ID
+**GET** `/api/restaurants/:id`
+
+### Example Request
+```bash
+GET /api/restaurants/1
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Restaurant retrieved successfully",
+  "data": {
+    "id": 1,
+    "name": "Dragon Palace Asian Fusion",
+    "description": "Modern Asian fusion restaurant...",
+    "image": "https://example.com/images/dragon_palace.jpg",
+    "streetAddress": "123 Brunswick Street",
+    "suburb": "Fortitude Valley",
+    "postcode": "4006",
+    "state": "QLD",
+    "overallRating": "4.25",
+    "totalReviews": 15,
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-20T14:30:00.000Z"
+  }
+}
+```
+
+## 3. Create Restaurant
+**POST** `/api/restaurants`
+
+### Request Body
+```json
+{
+  "name": "New Italian Bistro",
+  "description": "Authentic Italian cuisine in the heart of Brisbane",
+  "image": "https://example.com/images/italian_bistro.jpg",
+  "streetAddress": "456 Queen Street",
+  "suburb": "Brisbane City",
+  "postcode": "4000",
+  "state": "QLD"
+}
+```
+
+### Example Response (201)
+```json
+{
+  "success": true,
+  "message": "Restaurant created successfully",
+  "data": {
+    "id": 3,
+    "name": "New Italian Bistro",
+    "description": "Authentic Italian cuisine in the heart of Brisbane",
+    "image": "https://example.com/images/italian_bistro.jpg",
+    "streetAddress": "456 Queen Street",
+    "suburb": "Brisbane City",
+    "postcode": "4000",
+    "state": "QLD",
+    "overallRating": "0.00",
+    "totalReviews": 0,
+    "createdAt": "2024-01-25T10:00:00.000Z",
+    "updatedAt": "2024-01-25T10:00:00.000Z"
+  }
+}
+```
+
+## 4. Update Restaurant
+**PUT** `/api/restaurants/:id`
+
+### Request Body (Partial Update)
+```json
+{
+  "description": "Updated description with new menu items",
+  "image": "https://example.com/images/new_image.jpg"
+}
+```
+
+## 5. Delete Restaurant
+**DELETE** `/api/restaurants/:id`
+
+### Example Response (200)
+```json
+{
+  "success": true,
+  "message": "Restaurant deleted successfully",
+  "data": null
+}
+```
+
+### Error Response (409) - Has Reviews
+```json
+{
+  "success": false,
+  "message": "Cannot delete restaurant with existing reviews",
+  "data": null
+}
+```
+
+## 6. Get Restaurants by Suburb
+**GET** `/api/restaurants/suburb/:suburb`
+
+### Example Request
+```bash
+GET /api/restaurants/suburb/Brisbane
+```
+
+## 7. Search Restaurants
+**GET** `/api/restaurants/search/:keyword`
+
+### Example Request
+```bash
+GET /api/restaurants/search/asian
+```
+
+## 8. Get Top Rated Restaurants
+**GET** `/api/restaurants/top-rated`
+
+### Query Parameters
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `limit` | number | Number of restaurants (1-50) | 10 |
+
+### Example Request
+```bash
+GET /api/restaurants/top-rated?limit=5
+```
+
+---
+
+# Restaurant Review Endpoints
+
+## 1. Get All Reviews
+**GET** `/api/restaurant-reviews`
+
+### Query Parameters
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `page` | number | Page number | `?page=2` |
+| `limit` | number | Items per page | `?limit=20` |
+| `sortBy` | string | Sort field: `rating`, `createdAt` | `?sortBy=rating` |
+| `sortOrder` | string | Sort order: `asc`, `desc` | `?sortOrder=desc` |
+| `restaurantId` | number | Filter by restaurant | `?restaurantId=1` |
+| `userId` | number | Filter by user | `?userId=101` |
+| `minRating` | number | Minimum rating (1-5) | `?minRating=4` |
+| `maxRating` | number | Maximum rating (1-5) | `?maxRating=5` |
+| `status` | string | Filter by review status: `pending`, `approved`, `rejected` | `?status=approved` |
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Reviews retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "restaurantId": 1,
+      "userId": 101,
+      "username": "foodie_sarah",
+      "content": "Amazing experience! The dumplings were absolutely divine...",
+      "rating": 5,
+      "status": "approved",
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "restaurantName": "Dragon Palace Asian Fusion",
+      "restaurantImage": "https://example.com/images/dragon_palace.jpg"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+## 2. Get Review by ID
+**GET** `/api/restaurant-reviews/:id`
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/1
+```
+
+## 3. Get Reviews by Restaurant
+**GET** `/api/restaurant-reviews/restaurant/:restaurantId`
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/restaurant/1?page=1&limit=10&sortBy=createdAt&sortOrder=desc
+```
+
+## 4. Get Reviews by User
+**GET** `/api/restaurant-reviews/user/:userId`
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/user/101?page=1&limit=10
+```
+
+## 5. Get Pending Reviews (Admin Only)
+**GET** `/api/restaurant-reviews/pending`
+
+Get all reviews pending moderation.
+
+### Query Parameters
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `page` | number | Page number | `?page=1` |
+| `limit` | number | Items per page | `?limit=20` |
+| `sortBy` | string | Sort field: `rating`, `createdAt` | `?sortBy=createdAt` |
+| `sortOrder` | string | Sort order: `asc`, `desc` | `?sortOrder=desc` |
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/pending?page=1&limit=10&sortBy=createdAt&sortOrder=desc
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Pending reviews retrieved successfully",
+  "data": [
+    {
+      "id": 25,
+      "restaurantId": 2,
+      "userId": 105,
+      "username": "new_reviewer",
+      "content": "This restaurant needs improvement in service quality...",
+      "rating": 2,
+      "status": "pending",
+      "createdAt": "2024-01-25T15:30:00.000Z",
+      "updatedAt": "2024-01-25T15:30:00.000Z",
+      "restaurantName": "Nonna's Kitchen",
+      "restaurantImage": "https://example.com/images/nonnas.jpg"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 5,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+## 6. Get Approved Reviews by Restaurant (Public)
+**GET** `/api/restaurant-reviews/restaurant/:restaurantId/approved`
+
+Get only approved reviews for a restaurant (public view).
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/restaurant/1/approved?page=1&limit=10
+```
+
+## 7. Create Review
+**POST** `/api/restaurant-reviews`
+
+### Request Body
+```json
+{
+  "restaurantId": 1,
+  "userId": 102,
+  "username": "food_lover",
+  "content": "Great food and excellent service! The pasta was perfectly cooked and the atmosphere was wonderful. Highly recommend this place for a romantic dinner.",
+  "rating": 5
+}
+```
+
+### Example Response (201)
+```json
+{
+  "success": true,
+  "message": "Review created successfully and is pending moderation",
+  "data": {
+    "id": 15,
+    "restaurantId": 1,
+    "userId": 102,
+    "username": "food_lover",
+    "content": "Great food and excellent service!...",
+    "rating": 5,
+    "status": "pending",
+    "createdAt": "2024-01-25T10:00:00.000Z",
+    "updatedAt": "2024-01-25T10:00:00.000Z"
+  }
+}
+```
+
+**Note:** All new reviews start with `status: "pending"` and require moderation before becoming visible to the public.
+
+### Error Response (400) - Already Reviewed
+```json
+{
+  "success": false,
+  "message": "User has already reviewed this restaurant",
+  "data": null
+}
+```
+
+## 8. Update Review
+**PUT** `/api/restaurant-reviews/:id`
+
+### Request Body (Only content and rating can be updated)
+```json
+{
+  "content": "Updated review content with more details about the experience",
+  "rating": 4
+}
+```
+
+**Note:** Updating a review resets its status to "pending" and requires re-moderation.
+
+## 9. Delete Review
+**DELETE** `/api/restaurant-reviews/:id`
+
+### Example Response (200)
+```json
+{
+  "success": true,
+  "message": "Review deleted successfully",
+  "data": null
+}
+```
+
+## 10. Moderate Review (Admin Only)
+**POST** `/api/restaurant-reviews/:id/moderate`
+
+Approve or reject a pending review.
+
+### Request Body
+```json
+{
+  "action": "approve"
+}
+```
+
+For rejection:
+```json
+{
+  "action": "reject"
+}
+```
+
+### Example Response (200)
+```json
+{
+  "success": true,
+  "message": "Review approved successfully",
+  "data": {
+    "id": 25,
+    "restaurantId": 2,
+    "userId": 105,
+    "username": "new_reviewer",
+    "content": "This restaurant needs improvement in service quality...",
+    "rating": 2,
+    "status": "approved",
+    "createdAt": "2024-01-25T15:30:00.000Z",
+    "updatedAt": "2024-01-25T16:00:00.000Z"
+  }
+}
+```
+
+### Error Response (409) - Already Moderated
+```json
+{
+  "success": false,
+  "message": "Review has already been moderated",
+  "data": null
+}
+```
+
+## 11. Get Moderation Statistics (Admin Only)
+**GET** `/api/restaurant-reviews/moderation/stats`
+
+Get overall moderation statistics.
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/moderation/stats
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Moderation statistics retrieved successfully",
+  "data": {
+    "pending": 15,
+    "approved": 120,
+    "rejected": 8,
+    "total": 143
+  }
+}
+```
+
+## 12. Get Restaurant Review Statistics
+**GET** `/api/restaurant-reviews/restaurant/:restaurantId/stats`
+
+### Example Request
+```bash
+GET /api/restaurant-reviews/restaurant/1/stats
+```
+
+### Example Response
+```json
+{
+  "success": true,
+  "message": "Restaurant review statistics retrieved successfully",
+  "data": {
+    "totalReviews": 25,
+    "averageRating": 4.32,
+    "ratingDistribution": {
+      "5": 12,
+      "4": 8,
+      "3": 3,
+      "2": 1,
+      "1": 1
+    }
+  }
+}
+```
+
+**Note:** Statistics only include approved reviews.
+
+---
+
+## Data Validation
+
+### Restaurant Creation Requirements
+- `name`: Non-empty string (required)
+- `streetAddress`: Non-empty string (required)
+- `suburb`: Non-empty string (required)
+- `postcode`: Non-empty string (required)
+- `description`: Optional string
+- `image`: Optional URL string
+- `state`: Optional string (defaults to "QLD")
+
+### Review Creation Requirements
+- `restaurantId`: Valid restaurant ID (required)
+- `userId`: Valid user ID (required)
+- `username`: Non-empty string (required)
+- `content`: Non-empty string, max 1000 characters (required)
+- `rating`: Integer between 1-5 (required)
+
+### Business Rules
+- Users can only review each restaurant once
+- Restaurants with reviews cannot be deleted
+- All new reviews start with "pending" status and require moderation
+- Only approved reviews are visible to the public and count toward restaurant ratings
+- Updating a review resets its status to "pending" and requires re-moderation
+- Only review content and rating can be updated (not restaurant or user association)
+- Review statistics are automatically updated when reviews are approved/rejected
+
+## Error Handling
+
+### Common Error Codes
+- **400 Bad Request**: Invalid input data, validation errors
+- **404 Not Found**: Restaurant or review not found
+- **409 Conflict**: Business rule violation (e.g., duplicate review, delete restaurant with reviews)
+- **500 Internal Server Error**: Server-side error
+
+## Usage Examples
+
+### Complex Restaurant Query
+```bash
+GET /api/restaurants?name=asian&suburb=Brisbane&minRating=4.0&sortBy=overallRating&sortOrder=desc&page=1&limit=5
+```
+
+### Get Restaurant with Reviews
+```bash
+# First get restaurant details
+GET /api/restaurants/1
+
+# Then get its reviews
+GET /api/restaurant-reviews/restaurant/1?page=1&limit=10&sortBy=createdAt&sortOrder=desc
+
+# Get review statistics
+GET /api/restaurant-reviews/restaurant/1/stats
+```
+
+### Create Restaurant and Review
+```bash
+# Create restaurant
+curl -X POST /api/restaurants \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Amazing Thai Restaurant",
+    "description": "Authentic Thai cuisine",
+    "streetAddress": "789 George Street",
+    "suburb": "Brisbane City",
+    "postcode": "4000",
+    "state": "QLD"
+  }'
+
+# Create review for the restaurant
+curl -X POST /api/restaurant-reviews \
+  -H "Content-Type: application/json" \
+  -d '{
+    "restaurantId": 3,
+    "userId": 105,
+    "username": "thai_food_fan",
+    "content": "Absolutely delicious! Best pad thai in Brisbane.",
+    "rating": 5
+  }'
+```
+
+### Update Review
+```bash
+curl -X PUT /api/restaurant-reviews/15 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Updated: Still the best pad thai, but service was a bit slow this time.",
+    "rating": 4
+  }'
+```
+### Moderation Workflow (Admin)
+```bash
+# Get pending reviews
+GET /api/restaurant-reviews/pending?page=1&limit=10
+
+# Approve a review
+curl -X POST /api/restaurant-reviews/25/moderate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "approve"
+  }'
+
+# Reject a review
+curl -X POST /api/restaurant-reviews/26/moderate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "reject"
+  }'
+
+# Check moderation statistics
+GET /api/restaurant-reviews/moderation/stats
+```
+
+### Public vs Admin Views
+```bash
+# Public view - only approved reviews
+GET /api/restaurant-reviews/restaurant/1/approved
+
+# Admin view - all reviews with status filter
+GET /api/restaurant-reviews?restaurantId=1&status=pending
+GET /api/restaurant-reviews?restaurantId=1&status=approved
+GET /api/restaurant-reviews?restaurantId=1&status=rejected
+```
+
+---
+
+## Moderation System
+
+### Review Status Flow
+1. **Creation**: New reviews start with `status: "pending"`
+2. **Moderation**: Admin approves (`"approved"`) or rejects (`"rejected"`)
+3. **Update**: Editing a review resets status to `"pending"`
+4. **Visibility**: Only approved reviews are visible to public
+
+### Admin Endpoints
+- `GET /restaurant-reviews/pending` - Get reviews awaiting moderation
+- `POST /restaurant-reviews/:id/moderate` - Approve/reject reviews
+- `GET /restaurant-reviews/moderation/stats` - Moderation statistics
+- `GET /restaurant-reviews?status=pending` - Filter by status
+
+### Public Endpoints
+- `GET /restaurant-reviews/restaurant/:id/approved` - Only approved reviews
+- `GET /restaurant-reviews/restaurant/:id/stats` - Statistics from approved reviews only
+
+### Business Impact
+- Restaurant ratings only reflect approved reviews
+- Public users only see approved content
+- Moderation statistics help track admin workload
+- Review updates require re-moderation for quality control 

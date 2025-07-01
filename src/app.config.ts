@@ -1,10 +1,15 @@
 export default defineAppConfig({
   pages: [
+    'pages/loading/index',
     'pages/index/index',
+    'pages/course/write-review/index',
+    'pages/second-hand/index',
+    'pages/rental-house/index',
+    'pages/restaurant/index',
+    'pages/course/index',
     'pages/second-hand/publish/index',
     'pages/past-activities/index',
     'pages/recent-activities/index',
-    'pages/second-hand/index',
     'pages/second-hand/detail/index',
     'pages/carpool/index',
     'pages/user-login/index',
@@ -12,6 +17,10 @@ export default defineAppConfig({
     'pages/gift/detail/index',
     'pages/rental/index',
     'pages/rental/detail/index',
+    'pages/rental-house/detail/index',
+    'pages/restaurant/reviews/index',
+    'pages/restaurant/write-review/index',
+    'pages/course/reviews/index',
     'pages/car-rental/index',
     'pages/custom-tour/index',
     'pages/contact-us/index'

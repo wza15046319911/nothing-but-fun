@@ -17,11 +17,72 @@ const UserLogin: React.FC = () => {
   const [nickname, setNickname] = useState('')
   const [wechatCode, setWechatCode] = useState('')
   const [showProfileForm, setShowProfileForm] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [hasUploadedAvatar, setHasUploadedAvatar] = useState(false)
+  const [fileName, setFileName] = useState('')
 
   // 处理头像选择
-  const onChooseAvatar = (e) => {
+  const onChooseAvatar = async (e) => {
     const { avatarUrl } = e.detail
-    setAvatarUrl(avatarUrl)
+    
+    // 设置上传状态
+    setIsUploadingAvatar(true)
+    
+    // 显示加载状态
+    Taro.showLoading({
+      title: '上传头像中...'
+    })
+
+    try {
+      // 上传头像到服务器
+      const uploadResult = await new Promise<string>((resolve, reject) => {
+        Taro.uploadFile({
+          url: 'http://192.168.18.34:3000/api/file',
+          filePath: avatarUrl,
+          name: 'image',
+          formData: {
+            'user': 'test'
+          },
+          success: (res) => {
+            console.log('头像上传结果:', res)
+            try {
+              const data = JSON.parse(res.data)
+              // cloudinary 返回的文件名
+              // 需要拼接上 cloudinary 的域名
+              // setFileName()
+              resolve(`https://res.cloudinary.com/ds9attzj6/image/upload/v1751287215/${data.data.filename_disk}`)
+            } catch (error) {
+              reject(error)
+            }
+          },
+          fail: (error) => {
+            reject(error)
+          }
+        })
+      })
+
+      // 上传成功，更新头像URL
+      setAvatarUrl(uploadResult)
+      setHasUploadedAvatar(true)
+      
+      Taro.hideLoading()
+      Taro.showToast({
+        title: '头像上传成功',
+        icon: 'success',
+        duration: 1500
+      })
+      
+    } catch (error) {
+      console.error('头像上传失败:', error)
+      Taro.hideLoading()
+      Taro.showToast({
+        title: '头像上传失败，请重试',
+        icon: 'none',
+        duration: 2000
+      })
+    } finally {
+      setIsUploadingAvatar(false)
+    }
   }
 
   // 处理昵称输入
@@ -76,6 +137,15 @@ const UserLogin: React.FC = () => {
       return
     }
 
+    if (!hasUploadedAvatar || avatarUrl === defaultAvatarUrl) {
+      Taro.showToast({
+        title: '请先上传头像',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     try {
       const success = await createUser(wechatCode, {
         nickname: nickname,
@@ -89,6 +159,7 @@ const UserLogin: React.FC = () => {
         setWechatCode('')
         setAvatarUrl(defaultAvatarUrl)
         setNickname('')
+        setHasUploadedAvatar(false)
         
         Taro.showToast({
           title: '注册成功',
@@ -107,6 +178,8 @@ const UserLogin: React.FC = () => {
     setWechatCode('')
     setAvatarUrl(defaultAvatarUrl)
     setNickname('')
+    setHasUploadedAvatar(false)
+    setIsUploadingAvatar(false)
   }
 
   // 处理菜单项点击
@@ -134,12 +207,11 @@ const UserLogin: React.FC = () => {
           icon: 'none'
         })
         break
-      case 'myItems':
-        // 跳转到我的二手商品页面
-        Taro.navigateTo({
-          url: '/pages/second-hand/my-items/index'
-        })
-        break
+      // case 'myItems':
+      //   Taro.navigateTo({
+      //     url: '/pages/second-hand/my-items/index'
+      //   })
+      //   break
       case 'feedback':
         Taro.showToast({
           title: '意见反馈功能开发中',
@@ -202,9 +274,10 @@ const UserLogin: React.FC = () => {
             <View className='avatar-section'>
               <Text className='form-label'>选择头像</Text>
               <Button 
-                className='avatar-button' 
+                className='avatar-button'
                 openType='chooseAvatar' 
                 onChooseAvatar={onChooseAvatar}
+                disabled={isUploadingAvatar}
               >
                 <Image
                   className='avatar-preview'
@@ -212,6 +285,10 @@ const UserLogin: React.FC = () => {
                   mode='aspectFill'
                 />
               </Button>
+              <Text className='avatar-tip'>
+                {isUploadingAvatar ? '正在上传头像...' : 
+                 hasUploadedAvatar ? '头像上传成功' : '点击上传头像'}
+              </Text>
             </View>
             
             {/* 昵称输入 */}
@@ -236,10 +313,10 @@ const UserLogin: React.FC = () => {
                 取消
               </View>
               <View 
-                className={`complete-button ${isLoading ? 'loading' : ''}`}
-                onClick={isLoading ? undefined : handleCompleteProfile}
+                className={`complete-button ${isLoading || !hasUploadedAvatar ? 'loading' : ''}`}
+                onClick={(isLoading || !hasUploadedAvatar) ? undefined : handleCompleteProfile}
               >
-                {isLoading ? '登录中...' : '完成登录'}
+                {isLoading ? '登录中...' : !hasUploadedAvatar ? '请先上传头像' : '完成登录'}
               </View>
             </View>
           </View>

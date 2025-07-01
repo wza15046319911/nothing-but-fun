@@ -32,7 +32,7 @@ const ContactUs: React.FC = () => {
       data: text,
       success: () => {
         Taro.showToast({
-          title: `${type}已复制到剪贴板`,
+          title: `${type}已复制`,
           icon: 'success',
           duration: 1500
         })
@@ -45,9 +45,6 @@ const ContactUs: React.FC = () => {
       {/* 页面头部 */}
       <View className='contact-header'>
         <Text className='header-title'>联系我们</Text>
-        <Text className='header-subtitle'>
-          我们很乐意听到您的声音。请给我们留言，我们会尽快回复您。
-        </Text>
       </View>
 
       {/* 联系信息 */}
@@ -55,16 +52,10 @@ const ContactUs: React.FC = () => {
         <Text className='section-title'>联系方式</Text>
         <CellGroup>
           <Cell
-            title='电话'
-            onClick={() => handlePhoneCall('+61400123456')}
-          >
-            <Text>+61 400 123 456</Text>
-          </Cell>
-          <Cell
             title='邮箱'
-            onClick={() => handleCopy('hello@nothingbutfun.com', '邮箱地址')}
+            onClick={() => handleCopy('zianwang9911@gmail.com', '邮箱地址')}
           >
-            <Text>hello@nothingbutfun.com</Text>
+            <Text>开发者邮箱：zianwang9911@gmail.com</Text>
           </Cell>
           <Cell
             title='地址'
@@ -84,17 +75,9 @@ const ContactUs: React.FC = () => {
       <View className='social-section'>
         <Text className='section-title'>关注我们</Text>
         <View className='social-links'>
-          <View className='social-item' onClick={() => handleCopy('@nothingbutfun', '微信号')}>
+          <View className='social-item' onClick={() => handleCopy('nil_object_found', '微信号')}>
             <View className='social-icon wechat-icon' />
             <Text className='social-text'>微信</Text>
-          </View>
-          <View className='social-item' onClick={() => handleCopy('@nothingbutfun', '微博')}>
-            <View className='social-icon weibo-icon' />
-            <Text className='social-text'>微博</Text>
-          </View>
-          <View className='social-item' onClick={() => handleCopy('Nothing But Fun', 'Facebook')}>
-            <View className='social-icon facebook-icon' />
-            <Text className='social-text'>Facebook</Text>
           </View>
         </View>
       </View>

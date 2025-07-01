@@ -122,7 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error("获取微信登录code失败");
       }
 
-      console.log("获取到微信code:", loginRes.code);
 
       // 调用登录API获取openid
       const loginResponse = await authApi.wechatLogin({ code: loginRes.code });
@@ -285,9 +284,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 组件挂载时检查登录状态
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
+  // useEffect(() => {
+  //   checkLoginStatus();
+  // }, []);
 
   const contextValue: AuthContextType = {
     state,

@@ -21,6 +21,23 @@
   width: 100%;
   height: 300px;
   background-color: #fff;
+  
+  // 为Swiper组件设置样式
+  .nut-swiper {
+    height: 100%;
+    
+    .nut-swiper-pagination {
+      bottom: @spacing-md;
+      
+      .nut-swiper-pagination-bullet {
+        background-color: rgba(255, 255, 255, 0.5);
+        
+        &.nut-swiper-pagination-bullet-active {
+          background-color: #fff;
+        }
+      }
+    }
+  }
 }
 
 .product-image {
@@ -28,6 +45,8 @@
   height: 100%;
   object-fit: cover;
 }
+
+
 
 .status-badge {
   position: absolute;
@@ -38,6 +57,7 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  z-index: 10;
 }
 
 // Info section

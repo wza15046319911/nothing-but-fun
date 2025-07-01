@@ -75,8 +75,7 @@ const GiftDetail: React.FC = () => {
   // 分享商品
   const handleShare = () => {
     Taro.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
+      withShareTicket: true
     })
   }
 

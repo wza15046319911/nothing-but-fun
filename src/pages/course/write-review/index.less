@@ -1,0 +1,231 @@
+.write-review-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  .header {
+    padding: 40px 20px 20px;
+    text-align: center;
+    
+    .header-content {
+      .course-code {
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 4px;
+      }
+      
+      .course-name {
+        display: block;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      
+      .subtitle {
+        display: block;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+  
+  .form-container {
+    flex: 1;
+    background: #f5f5f5;
+    border-radius: 20px 20px 0 0;
+    min-height: calc(100vh - 160px);
+    
+    .form-content {
+      padding: 20px;
+      
+      .form-section {
+        background: #fff;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        
+        .section-title {
+          display: block;
+          font-size: 16px;
+          font-weight: 600;
+          color: #333;
+          // margin-bottom: 16px;
+        }
+        
+        .rating-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          
+          .rating-description {
+            margin-top: 12px;
+            font-size: 16px;
+            font-weight: 500;
+          }
+        }
+        
+        .content-section {
+          .content-input-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            .content-input {
+              min-height: 120px;
+              padding: 12px;
+              border: 1px solid #e8e8e8;
+              border-radius: 8px;
+              font-size: 14px;
+              line-height: 1.6;
+              background: #fafafa;
+              
+              &:focus {
+                border-color: #667eea;
+                background: #fff;
+              }
+            }
+          }
+          
+          
+          .char-count {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            
+            .count-text {
+              font-size: 12px;
+              font-weight: 500;
+            }
+            
+            .min-length-tip {
+              font-size: 12px;
+              color: #ff4d4f;
+            }
+          }
+        }
+      }
+      
+      .notice-section {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        
+        .notice-title {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #667eea;
+          margin-bottom: 8px;
+        }
+        
+        .notice-content {
+          font-size: 13px;
+          color: #666;
+          line-height: 1.6;
+        }
+      }
+      
+      .submit-btn {
+        width: 100%;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        
+        &:disabled {
+          background: #d9d9d9;
+          color: #999;
+        }
+      }
+    }
+  }
+  
+  .success-dialog-content {
+    text-align: center;
+    padding: 10px 0;
+    
+    .success-message {
+      display: block;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    
+    .review-info {
+      display: block;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .write-review-container {
+    .header {
+      padding: 30px 15px 15px;
+      
+      .header-content {
+        .course-code {
+          font-size: 20px;
+        }
+        
+        .course-name {
+          font-size: 14px;
+        }
+      }
+    }
+    
+    .form-container {
+      .form-content {
+        padding: 15px;
+        
+        .form-section {
+          padding: 15px;
+          
+          .section-title {
+            font-size: 15px;
+          }
+          
+          .content-section {
+            .content-input {
+              min-height: 100px;
+              padding: 10px;
+              font-size: 13px;
+            }
+          }
+        }
+        
+        .notice-section {
+          padding: 12px;
+          
+          .notice-title {
+            font-size: 13px;
+          }
+          
+          .notice-content {
+            font-size: 12px;
+          }
+        }
+        
+        .submit-btn {
+          height: 44px;
+          font-size: 15px;
+        }
+      }
+    }
+  }
+} 

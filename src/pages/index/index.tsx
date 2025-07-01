@@ -1,28 +1,56 @@
 import React from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Grid, GridItem } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import './index.less'
 
-// Entry points data
-const firstRowEntries = [
-  { id: 1, title: '以往活动', iconName: 'calendar-check', path: '/pages/past-activities/index' },
-  { id: 2, title: '最近活动', iconName: 'flag', path: '/pages/recent-activities/index' },
-  { id: 3, title: '二手闲置', iconName: 'shopping-bag', path: '/pages/second-hand/index' },
-  { id: 4, title: '布好玩周边', iconName: 'gift', path: '/pages/gift/index' },
-  // { id: 4, title: '拼拼车', iconName: 'car', path: '/pages/carpool/index' },
-  // { id: 5, title: '上门按摩', iconName: 'hand-sparkles' }
+// 重点功能 - 大卡片展示
+const featuredEntries = [
+  { 
+    id: 1, 
+    title: '美食推荐', 
+    subtitle: '发现周边美味餐厅',
+    iconName: 'utensils', 
+    path: '/pages/restaurant/index',
+    color: '#ff6b6b'
+  },
+  { 
+    id: 2, 
+    title: '二手买卖', 
+    subtitle: '闲置物品交易平台',
+    iconName: 'shopping-bag', 
+    path: '/pages/second-hand/index',
+    color: '#4ecdc4'
+  },
+  { 
+    id: 3, 
+    title: '课程评价', 
+    subtitle: 'UQ课程评分与评价',
+    iconName: 'graduation-cap', 
+    path: '/pages/course/index',
+    color: '#45b7d1'
+  },
+  { 
+    id: 4, 
+    title: '往期活动', 
+    subtitle: '精彩活动回顾',
+    iconName: 'calendar-check', 
+    path: '/pages/past-activities/index',
+    color: '#96ceb4'
+  }
 ]
 
-const secondRowEntries = [
-  // { id: 6, title: '布好玩周边', iconName: 'gift' },
-  { id: 5, title: '租赁', iconName: 'key', path: '/pages/rental/index' },
-  { id: 6, title: '我们的车', iconName: 'truck', path: '/pages/car-rental/index' },
-  { id: 7, title: '定制游', iconName: 'map-marked', path: '/pages/custom-tour/index' },
-  { id: 8, title: '联系我', iconName: 'phone-alt', path: '/pages/contact-us/index' }
+// 其他功能 - 小图标展示，可滑动
+const otherEntries = [
+  { id: 5, title: '最近活动', iconName: 'flag', path: '/pages/recent-activities/index' },
+  { id: 6, title: '布好玩周边', iconName: 'gift', path: '/pages/gift/index' },
+  // { id: 7, title: '租赁服务', iconName: 'key', path: '/pages/rental/index' },
+  { id: 8, title: '租房信息', iconName: 'home', path: '/pages/rental-house/index' },
+  { id: 9, title: '我们的车', iconName: 'truck', path: '/pages/car-rental/index' },
+  { id: 10, title: '定制游', iconName: 'map-marked', path: '/pages/custom-tour/index' },
+  { id: 11, title: '联系我们', iconName: 'phone-alt', path: '/pages/contact-us/index' }
 ]
 
-// Sample recommended images (in a real app, these would be loaded from API)
+// 推荐内容图片
 const recommendedImages = [
   'https://images.unsplash.com/photo-1745874864678-f464940bb513',
   'https://images.unsplash.com/photo-1749731630653-d9b3f00573ed',
@@ -30,17 +58,15 @@ const recommendedImages = [
   'https://images.unsplash.com/photo-1552519507-da3b142c6e3d'
 ]
 
-// Function to get random images
 const getRandomImages = (images, count) => {
   const shuffled = [...images].sort(() => 0.5 - Math.random())
   return shuffled.slice(0, count)
 }
 
 const Index: React.FC = () => {
-  // Get two random images for "Guess You Like" section
   const randomImages = getRandomImages(recommendedImages, 4)
 
-  // Handle entry click
+  // 处理功能点击
   const handleEntryClick = (entry) => {
     if (entry.path) {
       Taro.navigateTo({
@@ -55,46 +81,64 @@ const Index: React.FC = () => {
     }
   }
 
+
   return (
     <ScrollView className='index-container' scrollY>
-      {/* Entry points section */}
-      <View className='entry-section'>
-        {/* First row of entries */}
-        <Grid columns={4} className='entry-grid'>
-          {firstRowEntries.map(entry => (
-            <GridItem 
-              key={entry.id}
-              className='entry-item'
-              onClick={() => handleEntryClick(entry)}
-            >
-              <View className='grid-item-content'>
-                <View className={`custom-icon ${entry.iconName}`} />
-                <Text className='entry-text'>{entry.title}</Text>
-              </View>
-            </GridItem>
-          ))}
-        </Grid>
-        
-        {/* Second row of entries */}
-        <Grid columns={4} className='entry-grid'>
-          {secondRowEntries.map(entry => (
-            <GridItem 
-              key={entry.id}
-              className='entry-item'
-              onClick={() => handleEntryClick(entry)}
-            >
-              <View className='grid-item-content'>
-                <View className={`custom-icon ${entry.iconName}`} />
-                <Text className='entry-text'>{entry.title}</Text>
-              </View>
-            </GridItem>
-          ))}
-        </Grid>
+      {/* 页面头部 */}
+      <View className='header-section'>
+        <View className='header-content'>
+          <Text className='app-title'>Nothing But Fun</Text>
+          <Text className='app-subtitle'>布里斯班华人生活服务平台</Text>
+        </View>
       </View>
 
-      {/* Guess You Like section */}
+      {/* 重点功能区域 */}
+      <View className='featured-section'>
+        <Text className='section-title'>热门功能</Text>
+        <View className='featured-grid'>
+          {featuredEntries.map(entry => (
+            <View 
+              key={entry.id}
+              className='featured-card'
+              onClick={() => handleEntryClick(entry)}
+            >
+              <View className='card-content'>
+                <View 
+                  className={`featured-icon ${entry.iconName}`}
+                  style={{ backgroundColor: entry.color }}
+                />
+                <View className='card-text'>
+                  <Text className='card-title'>{entry.title}</Text>
+                  <Text className='card-subtitle'>{entry.subtitle}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* 其他功能区域 - 可滑动 */}
+      <View className='other-section'>
+        <Text className='section-title'>更多服务</Text>
+        <ScrollView className='other-scroll' scrollX showScrollbar={false}>
+          <View className='other-items'>
+            {otherEntries.map(entry => (
+              <View 
+                key={entry.id}
+                className='other-item'
+                onClick={() => handleEntryClick(entry)}
+              >
+                <View className={`other-icon ${entry.iconName}`} />
+                <Text className='other-text'>{entry.title}</Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* 推荐内容区域 */}
       <View className='recommended-section'>
-        <View className='section-title'>猜你喜欢</View>
+        <Text className='section-title'>猜你喜欢</Text>
         <View className='recommended-items'>
           {randomImages.map((imgSrc, index) => (
             <View key={index} className='recommended-item'>
@@ -103,6 +147,9 @@ const Index: React.FC = () => {
                 mode='aspectFill'
                 className='recommended-image'
               />
+              <View className='recommended-overlay'>
+                <Text className='recommended-title'>精彩内容 {index + 1}</Text>
+              </View>
             </View>
           ))}
         </View>

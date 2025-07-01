@@ -1,0 +1,414 @@
+.rental-house-detail-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  position: relative;
+  padding-bottom: 120rpx; // 为底部操作栏留出空间
+
+  // 加载状态
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 200rpx 0;
+
+    .loading-text {
+      margin-top: 20rpx;
+      font-size: 28rpx;
+      color: #999;
+    }
+  }
+
+  // 内容区域
+  .content {
+    flex: 1;
+  }
+
+  // 图片轮播区域
+  .image-section {
+    position: relative;
+    height: 500rpx;
+
+    .image-swiper {
+      width: 100%;
+      height: 100%;
+
+      .house-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .image-counter {
+      position: absolute;
+      bottom: 20rpx;
+      right: 20rpx;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 24rpx;
+    }
+
+    .property-type-badge {
+      position: absolute;
+      top: 20rpx;
+      left: 20rpx;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 24rpx;
+    }
+
+    .furnished-badge {
+      position: absolute;
+      top: 20rpx;
+      right: 20rpx;
+      background: #52c41a;
+      color: white;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 24rpx;
+    }
+  }
+
+  // 基本信息区域
+  .basic-info-section {
+    background: white;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+
+    .title-price {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20rpx;
+
+      .house-title {
+        flex: 1;
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+        line-height: 1.4;
+        margin-right: 20rpx;
+      }
+
+      .price-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+
+        .weekly-price {
+          font-size: 40rpx;
+          font-weight: bold;
+          color: #667eea;
+          margin-bottom: 8rpx;
+        }
+
+        .deposit-info {
+          font-size: 24rpx;
+          color: #999;
+        }
+      }
+    }
+
+    .location-info {
+      margin-bottom: 20rpx;
+
+      .location-text {
+        font-size: 30rpx;
+        color: #333;
+        margin-bottom: 8rpx;
+        display: block;
+      }
+
+      .suburb-text {
+        font-size: 26rpx;
+        color: #666;
+        display: block;
+      }
+    }
+
+    .config-info {
+      .config-text,
+      .area-text,
+      .build-year {
+        font-size: 28rpx;
+        color: #666;
+        margin-bottom: 8rpx;
+        display: block;
+      }
+
+      .config-text {
+        color: #333;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // 通用区域样式
+  .description-section,
+  .features-section,
+  .rental-info-section,
+  .utilities-section,
+  .additional-costs-section,
+  .contact-section {
+    background: white;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+
+    .section-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20rpx;
+      display: block;
+    }
+  }
+
+  // 房源描述
+  .description-section {
+    .description-text {
+      font-size: 28rpx;
+      color: #666;
+      line-height: 1.6;
+    }
+  }
+
+  // 房屋特色
+  .features-section {
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16rpx;
+
+      .feature-item {
+        background: #f0f2ff;
+        border: 1rpx solid #d6e4ff;
+        border-radius: 16rpx;
+        padding: 20rpx;
+        text-align: center;
+
+        .feature-text {
+          font-size: 26rpx;
+          color: #667eea;
+        }
+      }
+    }
+  }
+
+  // 租赁信息
+  .rental-info-section {
+    .rental-details {
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16rpx 0;
+        border-bottom: 1rpx solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .detail-label {
+          font-size: 28rpx;
+          color: #666;
+        }
+
+        .detail-value {
+          font-size: 28rpx;
+          color: #333;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // 包含费用
+  .utilities-section {
+    .utilities-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16rpx;
+
+      .utility-item {
+        background: #f6ffed;
+        border: 1rpx solid #b7eb8f;
+        border-radius: 16rpx;
+        padding: 12rpx 20rpx;
+
+        .utility-text {
+          font-size: 26rpx;
+          color: #52c41a;
+        }
+      }
+    }
+  }
+
+  // 额外费用
+  .additional-costs-section {
+    .costs-list {
+      .cost-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16rpx 0;
+        border-bottom: 1rpx solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .cost-name {
+          font-size: 28rpx;
+          color: #333;
+        }
+
+        .cost-amount {
+          font-size: 28rpx;
+          color: #ff4d4f;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // 联系信息
+  .contact-section {
+    .contact-details {
+      .contact-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16rpx 0;
+        border-bottom: 1rpx solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .contact-label {
+          font-size: 28rpx;
+          color: #666;
+        }
+
+        .contact-value {
+          font-size: 28rpx;
+          color: #333;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // 底部占位
+  .bottom-placeholder {
+    height: 40rpx;
+  }
+
+  // 底部操作栏
+  .bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20rpx 30rpx;
+    border-top: 1rpx solid #eee;
+    display: flex;
+    gap: 20rpx;
+    z-index: 100;
+
+    .share-button,
+    .contact-button {
+      flex: 1;
+      height: 80rpx;
+      border-radius: 40rpx;
+      font-size: 30rpx;
+    }
+
+    .share-button {
+      border-color: #667eea;
+      color: #667eea;
+
+      &:active {
+        background: #f0f2ff;
+      }
+    }
+
+    .contact-button {
+      background: #667eea;
+      border-color: #667eea;
+
+      &:active {
+        background: #5a6fd8;
+      }
+    }
+  }
+}
+
+// 响应式适配
+@media screen and (max-width: 750rpx) {
+  .rental-house-detail-container {
+    .image-section {
+      height: 400rpx;
+    }
+
+    .basic-info-section,
+    .description-section,
+    .features-section,
+    .rental-info-section,
+    .utilities-section,
+    .additional-costs-section,
+    .contact-section {
+      padding: 24rpx;
+
+      .section-title {
+        font-size: 30rpx;
+      }
+    }
+
+    .basic-info-section {
+      .title-price {
+        .house-title {
+          font-size: 32rpx;
+        }
+
+        .price-info {
+          .weekly-price {
+            font-size: 36rpx;
+          }
+        }
+      }
+    }
+
+    .features-section {
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 12rpx;
+
+        .feature-item {
+          padding: 16rpx;
+
+          .feature-text {
+            font-size: 24rpx;
+          }
+        }
+      }
+    }
+
+    .bottom-actions {
+      padding: 16rpx 20rpx;
+      gap: 16rpx;
+
+      .share-button,
+      .contact-button {
+        height: 72rpx;
+        font-size: 28rpx;
+      }
+    }
+  }
+} 
