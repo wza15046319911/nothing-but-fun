@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import { Toast } from '@nutui/nutui-react-taro'
 import './index.less'
 
+
+
 const ContactUs: React.FC = () => {
+  const [showToast, setShowToast] = useState(false)
 
   const handlePhoneCall = (phoneNumber: string) => {
     Taro.makePhoneCall({
@@ -15,92 +19,150 @@ const ContactUs: React.FC = () => {
     Taro.setClipboardData({
       data: text,
       success: () => {
-        Taro.showToast({
-          title: `${type}已复制`,
-          icon: 'success',
-          duration: 1500
-        })
       }
     })
   }
 
+  const handleOpenMap = () => {
+    Taro.openLocation({
+      latitude: -27.4698,
+      longitude: 153.0251,
+      name: 'Nothing But Fun',
+      address: '布里斯班市中心，昆士兰州，澳大利亚',
+      scale: 18
+    })
+  }
+
+
   return (
     <ScrollView className='contact-page' scrollY>
-      {/* Hero */}
-      <View className='hero'>
-        <Text className='hero-title'>联系我们</Text>
-        <Text className='hero-subtitle'>期待与你的每一次交流</Text>
-        <View className='hero-pills'>
-          <View className='pill'>服务时间 周一-周五 9:00-18:00</View>
-          <View className='pill'>平均响应 <Text style={{ fontWeight: '700' }}>24h</Text></View>
+      {/* Hero Section */}
+      <View className='hero-section'>
+        <View className='hero-content'>
+          <Text className='hero-title'>联系我们</Text>
+          <Text className='hero-subtitle'>Nothing But Fun - 让生活更精彩</Text>
+          <Text className='hero-description'>期待与您的每一次交流，共同创造美好体验</Text>
+        </View>
+        <View className='hero-decoration'>
+          <View className='decoration-circle circle-1'></View>
+          <View className='decoration-circle circle-2'></View>
+          <View className='decoration-circle circle-3'></View>
         </View>
       </View>
 
-      {/* Quick actions */}
-      <View className='card actions-card'>
-        <Text className='card-title'>快捷联系</Text>
-        <View className='action-grid'>
-          <View className='action-item' onClick={() => handlePhoneCall('000-000-000')}>
-            <Text className='action-icon'>📞</Text>
-            <View className='action-texts'>
-              <Text className='action-title'>电话</Text>
-              <Text className='action-subtitle'>一键拨打</Text>
+      {/* Quick Contact Cards */}
+      <View className='quick-contact-section'>
+        <View className='section-header'>
+          <Text className='section-title'>快速联系</Text>
+          <Text className='section-subtitle'>选择您喜欢的联系方式</Text>
+        </View>
+        <View className='contact-cards'>
+          <View className='contact-card phone-card' onClick={() => handlePhoneCall('+61-XXX-XXX-XXX')}>
+            <View className='card-icon'>
+              <Text className='icon-emoji'>📞</Text>
+            </View>
+            <View className='card-content'>
+              <Text className='card-title'>电话咨询</Text>
+              <Text className='card-subtitle'>+61-XXX-XXX-XXX</Text>
+              <Text className='card-hint'>点击拨打</Text>
             </View>
           </View>
-          <View className='action-item' onClick={() => handleCopy('zianwang9911@gmail.com', '邮箱地址')}>
-            <Text className='action-icon'>✉️</Text>
-            <View className='action-texts'>
-              <Text className='action-title'>邮箱</Text>
-              <Text className='action-subtitle'>复制邮箱地址</Text>
+          
+          <View className='contact-card email-card' onClick={() => handleCopy('zianwang9911@gmail.com', '邮箱地址')}>
+            <View className='card-icon'>
+              <Text className='icon-emoji'>✉️</Text>
+            </View>
+            <View className='card-content'>
+              <Text className='card-title'>邮箱联系</Text>
+              <Text className='card-subtitle'>zianwang9911@gmail.com</Text>
+              <Text className='card-hint'>点击复制</Text>
             </View>
           </View>
-          <View className='action-item' onClick={() => handleCopy('布里斯班市中心，昆士兰州，澳大利亚', '地址')}>
-            <Text className='action-icon'>📍</Text>
-            <View className='action-texts'>
-              <Text className='action-title'>地址</Text>
-              <Text className='action-subtitle'>复制公司地址</Text>
+          
+          <View className='contact-card location-card' onClick={handleOpenMap}>
+            <View className='card-icon'>
+              <Text className='icon-emoji'>📍</Text>
+            </View>
+            <View className='card-content'>
+              <Text className='card-title'>地址位置</Text>
+              <Text className='card-subtitle'>布里斯班市中心</Text>
+              <Text className='card-hint'>查看地图</Text>
+            </View>
+          </View>
+          
+          <View className='contact-card wechat-card' onClick={() => handleCopy('nil_object_found', '微信号')}>
+            <View className='card-icon'>
+              <Text className='icon-emoji'>💬</Text>
+            </View>
+            <View className='card-content'>
+              <Text className='card-title'>微信联系</Text>
+              <Text className='card-subtitle'>nil_object_found</Text>
+              <Text className='card-hint'>复制微信号</Text>
             </View>
           </View>
         </View>
       </View>
 
-      {/* Social */}
-      <View className='card social-card'>
-        <Text className='card-title'>关注我们</Text>
-        <View className='social-grid'>
-          <View className='social-item' onClick={() => handleCopy('nil_object_found', '微信号')}>
-            <View className='social-icon wechat' />
-            <Text className='social-label'>微信</Text>
-          </View>
+      {/* Service Features */}
+      <View className='features-section'>
+        <View className='section-header'>
+          <Text className='section-title'>我们的优势</Text>
+          <Text className='section-subtitle'>专业的团队，贴心的服务</Text>
         </View>
-      </View>
-
-      {/* Features */}
-      <View className='card features-card'>
-        <Text className='card-title'>我们的服务</Text>
+        
         <View className='features-grid'>
-          <View className='feature-item'>
-            <Text className='feature-emoji'>🎯</Text>
+          <View className='feature-card'>
+            <View className='feature-icon'>🎯</View>
             <Text className='feature-title'>专业服务</Text>
-            <Text className='feature-desc'>活动策划与落地执行</Text>
+            <Text className='feature-desc'>经验丰富的团队提供专业的活动策划与执行服务</Text>
           </View>
-          <View className='feature-item'>
-            <Text className='feature-emoji'>🌟</Text>
-            <Text className='feature-title'>品质保证</Text>
-            <Text className='feature-desc'>体验至上，口碑优先</Text>
-          </View>
-          <View className='feature-item'>
-            <Text className='feature-emoji'>💬</Text>
+          
+          <View className='feature-card'>
+            <View className='feature-icon'>⚡</View>
             <Text className='feature-title'>快速响应</Text>
-            <Text className='feature-desc'>工作日内 24 小时内回复</Text>
+            <Text className='feature-desc'>24小时内回复您的咨询，及时解决您的问题</Text>
           </View>
-          <View className='feature-item'>
-            <Text className='feature-emoji'>🎉</Text>
+          
+          <View className='feature-card'>
+            <View className='feature-icon'>🌟</View>
+            <Text className='feature-title'>品质保证</Text>
+            <Text className='feature-desc'>以客户满意为目标，提供高品质的服务体验</Text>
+          </View>
+          
+          <View className='feature-card'>
+            <View className='feature-icon'>🎉</View>
             <Text className='feature-title'>丰富活动</Text>
-            <Text className='feature-desc'>多场景覆盖，持续更新</Text>
+            <Text className='feature-desc'>涵盖各类活动场景，持续推出新颖有趣的项目</Text>
           </View>
         </View>
       </View>
+
+      {/* Business Hours */}
+      <View className='hours-section'>
+        <View className='section-header'>
+          <Text className='section-title'>营业时间</Text>
+        </View>
+        
+        <View className='hours-card'>
+          <View className='hours-item'>
+            <Text className='day'>周一 - 周五</Text>
+            <Text className='time'>9:00 - 18:00</Text>
+          </View>
+          <View className='hours-item'>
+            <Text className='day'>周六 - 周日</Text>
+            <Text className='time'>10:00 - 17:00</Text>
+          </View>
+          <View className='hours-note'>
+            <Text className='note-text'>节假日营业时间可能有所调整，请提前咨询</Text>
+          </View>
+        </View>
+      </View>
+
+      <Toast
+        visible={showToast}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+      />
     </ScrollView>
   )
 }
