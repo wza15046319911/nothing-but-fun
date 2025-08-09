@@ -12,7 +12,7 @@ export interface SecondhandItem {
   imageUrls?: string[]
   status: 'available' | 'sold' | 'reserved'
   reviewStatus?: 'pending' | 'approved' | 'rejected'
-  rejectionReason?: string
+  reviewReason?: string
   createdAt: string
   updatedAt: string
 }
@@ -168,7 +168,7 @@ export const secondhandApi = {
 
   // 创建带多图片的二手商品 - 使用 /secondhand/with-images 接口
   createItemWithImages: async (
-    data: CreateSecondhandItemWithImagesRequest
+    _data: CreateSecondhandItemWithImagesRequest
   ): Promise<CreateItemWithImagesResponse> => {
     // 注意：这个方法需要在调用时配合 Taro.uploadFile 使用
     // 因为需要上传文件，不能直接用 request 函数
@@ -206,6 +206,35 @@ export const secondhandApi = {
     return request({
       url: `/secondhand/user/${userId}`,
       method: 'GET'
+    })
+  },
+
+  // 基于用户的更新二手商品
+  // 后端路由: PUT /secondhand/user/:userId
+  // 约定: 在请求体中传递 itemId 以及需要更新的字段
+  updateUserItem: (
+    userId: string,
+    itemId: number,
+    data: UpdateSecondhandItemRequest & { images?: string[] }
+  ): Promise<SecondhandItem> => {
+    return request({
+      url: `/secondhand/user/${userId}`,
+      method: 'PUT',
+      data: { itemId, ...data }
+    })
+  },
+
+  // 基于用户的删除二手商品
+  // 后端路由: DELETE /secondhand/user/:userId
+  // 约定: 在请求体中传递 itemId
+  deleteUserItem: (
+    userId: string,
+    itemId: number
+  ): Promise<{ message: string }> => {
+    return request({
+      url: `/secondhand/user/${userId}`,
+      method: 'DELETE',
+      data: { itemId }
     })
   },
 

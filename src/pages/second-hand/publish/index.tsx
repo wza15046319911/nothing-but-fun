@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { Uploader, type FileItem } from '@nutui/nutui-react-taro'
 import './index.less'
 import { secondhandApi } from 'src/services/secondhand'
+import { API_BASE_URL } from 'src/services/api'
 import { useAuth } from 'src/context/auth'
 
 const SecondHandPublish: React.FC = () => {
@@ -16,6 +17,8 @@ const SecondHandPublish: React.FC = () => {
   const [descTouched, setDescTouched] = useState(false)
   const [priceTouched, setPriceTouched] = useState(false)
   const { state } = useAuth()
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editingItemId, setEditingItemId] = useState<number | null>(null)
   
   const maxImages = 10
   
@@ -71,6 +74,35 @@ const SecondHandPublish: React.FC = () => {
     const decPart = d.slice(0, 2)
     setPrice(decPart.length ? `${intPart}.${decPart}` : intPart)
   }
+
+  // 初始化：判断是否为编辑模式并预加载数据
+  useEffect(() => {
+    const params = Taro.getCurrentInstance()?.router?.params || {}
+    const mode = params.mode
+    const idStr = params.id
+    if (mode === 'edit' && idStr) {
+      const id = parseInt(idStr)
+      if (!Number.isNaN(id)) {
+        setIsEditMode(true)
+        setEditingItemId(id)
+        ;(async () => {
+          try {
+            const item = await secondhandApi.getItemById(id)
+            setTitle(item.title || '')
+            setDescription(item.description || '')
+            setPrice(item.price ? String(item.price) : '')
+            const existingImages = (item.imageUrls || [])
+              .filter(Boolean)
+              .map((url) => ({ url } as FileItem))
+            setFileList(existingImages)
+          } catch (e) {
+            console.error('加载商品详情失败:', e)
+            Taro.showToast({ title: '加载失败', icon: 'none' })
+          }
+        })()
+      }
+    }
+  }, [])
   
   // Handle form submission
   const handleSubmit = async() => {
@@ -104,60 +136,80 @@ const SecondHandPublish: React.FC = () => {
 
     // Show loading state
     Taro.showLoading({
-      title: '发布中...'
+      title: isEditMode ? '保存中...' : '发布中...'
     })
 
     try {
-      const API_BASE_URL = process.env.NODE_ENV === 'development' 
-        ? 'http://192.168.3.1:3000/api' 
-        : 'https://nothing-but-fun-backend-production.up.railway.app/api'
+      if (isEditMode && editingItemId) {
+        // 仅上传新增的本地图片（有 path 的）
+        const newLocalFiles = fileList.filter(f => (f as any).path)
+        let fileIds: string[] | undefined = undefined
+        if (newLocalFiles.length > 0) {
+          fileIds = await Promise.all(newLocalFiles.map(async (file) => {
+            const res = await Taro.uploadFile({
+              url: `${API_BASE_URL}/file`,
+              filePath: (file as any).path || file.url || '',
+              name: 'image',
+            })
+            const data = JSON.parse(res.data)
+            return data.data.id
+          }))
+        }
 
-      console.log('开始发布商品...')
-      console.log('商品信息:', {
-        sellerId: parseInt(state.userInfo.id),
-        title: title.trim(),
-        description: description.trim(),
-        price: price.trim(),
-        status: 'available',
-        imageCount: fileList.length
-      })
+        const payload: any = {
+          title: title.trim(),
+          description: description.trim(),
+          price: price.trim(),
+        }
+        if (fileIds && fileIds.length > 0) {
+          payload.images = fileIds
+        }
 
-      const fileIds: string[] = await Promise.all(fileList.map(async (file) => {
-        const res = await Taro.uploadFile({
-          url: `${API_BASE_URL}/file`,
-          filePath: file.path || file.url || '',
-          name: 'image',
-        })
-        const data = JSON.parse(res.data);
-        return data.data.id;
-      }))
-      
-      const res = await secondhandApi.createItem({
-        sellerId: parseInt(state.userInfo.id),
-        title: title.trim(),
-        description: description.trim(),
-        price: price.trim(),
-        status: 'available',
-        images: fileIds
-      })
-      if (res.id) {
+        await secondhandApi.updateUserItem(
+          state.userInfo.openid,
+          editingItemId,
+          payload
+        )
+
         Taro.hideLoading()
-        Taro.showToast({
-          title: '发布成功！',
-          icon: 'success',
-          duration: 2000
-        })
-        setTitle('')
-        setDescription('')
-        setPrice('')
-        setFileList([])
+        Taro.showToast({ title: '修改成功！', icon: 'success', duration: 2000 })
         Taro.navigateBack()
+      } else {
+        // 新建
+        console.log('开始发布商品...')
+        const fileIds: string[] = await Promise.all(fileList.map(async (file) => {
+          const res = await Taro.uploadFile({
+            url: `${API_BASE_URL}/file`,
+            filePath: (file as any).path || file.url || '',
+            name: 'image',
+          })
+          const data = JSON.parse(res.data)
+          return data.data.id
+        }))
+
+        const res = await secondhandApi.createItem({
+          sellerId: parseInt(state.userInfo.id),
+          title: title.trim(),
+          description: description.trim(),
+          price: price.trim(),
+          status: 'available',
+          images: fileIds
+        })
+        if (res.id) {
+          Taro.hideLoading()
+          Taro.showToast({ title: '发布成功！', icon: 'success', duration: 2000 })
+          setTitle('')
+          setDescription('')
+          setPrice('')
+          setFileList([])
+          Taro.navigateBack()
+        }
       }
     } catch (error) {
       console.error('发布失败:', error)
       Taro.hideLoading()
       Taro.showToast({
-        title: error.message || '发布失败，请重试',
+        title: (error as any).message || '操作失败，请重试',
         icon: 'none',
         duration: 2000
       })
@@ -290,7 +342,7 @@ const SecondHandPublish: React.FC = () => {
           className={`submit-button ${!isFormValid ? 'disabled' : ''}`}
           onClick={handleSubmit}
         >
-          立即发布
+          {isEditMode ? '保存修改' : '立即发布'}
         </View>
       </View>
     </ScrollView>

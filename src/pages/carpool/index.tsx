@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import React, { useState, useEffect, useMemo } from 'react'
+import { View, Text, ScrollView, Input } from '@tarojs/components'
 import { PullToRefresh, Loading, Empty, Button, Tag } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { carpoolApi, CarpoolPost, CarpoolQueryParams, formatPrice, formatDateTime, getStatusText, getStatusClassName } from '../../services/carpool'
@@ -10,7 +10,12 @@ const Carpool: React.FC = () => {
   // State management
   const [carpools, setCarpools] = useState<CarpoolPost[]>([])
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  // const [refreshing, setRefreshing] = useState(false)
+
+  // Local UI state for filters & sort
+  const [originQuery, setOriginQuery] = useState('')
+  const [destinationQuery, setDestinationQuery] = useState('')
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'tomorrow'>('all')
 
   // State for pagination
   const [pagination, setPagination] = useState({
@@ -47,13 +52,13 @@ const Carpool: React.FC = () => {
       })
     } finally {
       setLoading(false)
-      setRefreshing(false)
+      // setRefreshing(false)
     }
   }
 
   // Handle refresh
   const handleRefresh = async () => {
-    setRefreshing(true)
+    // setRefreshing(true)
     await loadCarpools(false)
   }
 
@@ -67,13 +72,60 @@ const Carpool: React.FC = () => {
     loadCarpools(true, newParams)
   }
 
+  // Derived list after local filter & sort
+  const displayCarpools = useMemo(() => {
+    let list = [...carpools]
+
+    // Text filters
+    if (originQuery.trim()) {
+      const q = originQuery.trim().toLowerCase()
+      list = list.filter(x => x.origin.toLowerCase().includes(q))
+    }
+    if (destinationQuery.trim()) {
+      const q = destinationQuery.trim().toLowerCase()
+      list = list.filter(x => x.destination.toLowerCase().includes(q))
+    }
+
+    // Date filter (all / today / tomorrow)
+    if (dateFilter !== 'all') {
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      list = list.filter(item => {
+        const dep = new Date(item.departureTime)
+        const depDay = new Date(dep.getFullYear(), dep.getMonth(), dep.getDate())
+        if (dateFilter === 'today') return depDay.getTime() === today.getTime()
+        if (dateFilter === 'tomorrow') return depDay.getTime() === tomorrow.getTime()
+        return true
+      })
+    }
+
+    return list
+  }, [carpools, originQuery, destinationQuery, dateFilter])
+
   // Handle carpool card click
   const handleCarpoolClick = (_carpool: CarpoolPost) => {
-    Taro.showToast({
-      title: '详情功能开发中',
-      icon: 'none',
-      duration: 2000
+    Taro.showToast({ title: '详情功能开发中', icon: 'none', duration: 1500 })
+  }
+
+  // Quick helpers
+  const swapOriginDestination = () => {
+    setOriginQuery(prev => {
+      const newOrigin = destinationQuery
+      setDestinationQuery(prev)
+      return newOrigin
     })
+  }
+
+  const copyCarpoolInfo = async (carpool: CarpoolPost) => {
+    const { date, time } = formatDateTime(carpool.departureTime)
+    const text = `拼车：${carpool.origin} → ${carpool.destination}\n出发：${date} ${time}\n价格：${formatPrice(carpool.price)}\n座位：${carpool.availableSeats}个${carpool.description ? `\n备注：${carpool.description}` : ''}`
+    try {
+      await Taro.setClipboardData({ data: text })
+      Taro.showToast({ title: '已复制', icon: 'success', duration: 1200 })
+    } catch {
+      Taro.showToast({ title: '复制失败', icon: 'none' })
+    }
   }
 
   // Handle post new carpool
@@ -95,14 +147,30 @@ const Carpool: React.FC = () => {
           {/* Header */}
           <View className='header-section'>
             <Text className='page-title'>拼车信息</Text>
-            <Button 
-              type="primary" 
-              size="small" 
-              className='post-button'
-              onClick={handlePostCarpool}
-            >
+            <Button type="primary" size="small" className='post-button' onClick={handlePostCarpool}>
               发布拼车
             </Button>
+          </View>
+
+          {/* Filter Bar */}
+          <View className='filter-section'>
+            <View className='route-filters'>
+              <View className='input-wrapper'>
+                <Text className='input-label'>出发</Text>
+                <Input className='route-input' value={originQuery} placeholder='例如：Toowong' onInput={e => setOriginQuery((e.detail as any).value)} />
+              </View>
+              <Button size='small' className='swap-button' onClick={swapOriginDestination}>⇄</Button>
+              <View className='input-wrapper'>
+                <Text className='input-label'>到达</Text>
+                <Input className='route-input' value={destinationQuery} placeholder='例如：UQ' onInput={e => setDestinationQuery((e.detail as any).value)} />
+              </View>
+            </View>
+
+            <View className='chips-row'>
+              <View className={`chip ${dateFilter === 'all' ? 'active' : ''}`} onClick={() => setDateFilter('all')}>全部</View>
+              <View className={`chip ${dateFilter === 'today' ? 'active' : ''}`} onClick={() => setDateFilter('today')}>今天</View>
+              <View className={`chip ${dateFilter === 'tomorrow' ? 'active' : ''}`} onClick={() => setDateFilter('tomorrow')}>明天</View>
+            </View>
           </View>
 
           {/* Loading */}
@@ -114,10 +182,10 @@ const Carpool: React.FC = () => {
           )}
 
           {/* Carpool List */}
-          {!loading && (
+           {!loading && (
             <View className='carpool-list'>
-              {carpools.length > 0 ? (
-                carpools.map(carpool => {
+              {displayCarpools.length > 0 ? (
+                displayCarpools.map(carpool => {
                   const { date, time } = formatDateTime(carpool.departureTime)
                   return (
                     <View 
@@ -176,8 +244,12 @@ const Carpool: React.FC = () => {
                           size="small"
                           disabled={carpool.status !== 'open'}
                           className='action-button'
+                          onClick={(e) => { e.stopPropagation(); copyCarpoolInfo(carpool) }}
                         >
-                          {carpool.status === 'open' ? '联系车主' : '不可预订'}
+                          {carpool.status === 'open' ? '复制信息联系' : '复制信息'}
+                        </Button>
+                        <Button size='small' className='action-button secondary' onClick={(e) => { e.stopPropagation(); copyCarpoolInfo(carpool) }}>
+                          复制
                         </Button>
                       </View>
                     </View>
@@ -201,7 +273,7 @@ const Carpool: React.FC = () => {
           )}
 
           {/* Pagination */}
-          {!loading && carpools.length > 0 && pagination.totalPages > 1 && (
+          {!loading && originQuery.trim() === '' && destinationQuery.trim() === '' && dateFilter === 'all' && displayCarpools.length > 0 && pagination.totalPages > 1 && (
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}

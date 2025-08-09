@@ -69,6 +69,30 @@
   }
 }
 
+.tabs {
+  display: flex;
+  background: white;
+  margin: -@spacing-lg @spacing-md @spacing-md;
+  border-radius: @border-radius;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: @border-radius;
+    color: @text-secondary;
+    font-size: 14px;
+  }
+
+  .tab.active {
+    color: white;
+    background: linear-gradient(135deg, @primary-color 0%, #5ba3f5 100%);
+    box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+  }
+}
+
 // Content area
 .content {
   // flex: 1;

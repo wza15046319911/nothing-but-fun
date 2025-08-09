@@ -5,6 +5,8 @@ import Taro from '@tarojs/taro'
 import { useAuth } from '../../context/auth'
 import { secondhandApi, SecondhandItem } from '../../services/secondhand'
 import './index.less'
+import { restaurantReviewApi, type RestaurantReview } from '../../services/restaurant'
+import { carpoolApi, type CarpoolPost, formatDateTime, formatPrice } from '../../services/carpool'
 
 // 状态映射
 const statusMap = {
@@ -27,9 +29,12 @@ const UserPosts: React.FC = () => {
   // 状态管理
   const [items, setItems] = useState<SecondhandItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  // const [refreshing, setRefreshing] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedItem, setSelectedItem] = useState<SecondhandItem | null>(null)
+  const [activeTab, setActiveTab] = useState<'secondhand' | 'reviews' | 'carpool'>('secondhand')
+  const [userReviews, setUserReviews] = useState<RestaurantReview[]>([])
+  const [userCarpools, setUserCarpools] = useState<CarpoolPost[]>([])
 
   // 加载用户发布的商品
   const loadUserItems = async (showLoading = true) => {
@@ -55,13 +60,13 @@ const UserPosts: React.FC = () => {
       })
     } finally {
       setLoading(false)
-      setRefreshing(false)
+      // setRefreshing(false)
     }
   }
 
   // 下拉刷新
   const handleRefresh = async () => {
-    setRefreshing(true)
+    // setRefreshing(true)
     await loadUserItems(false)
   }
 
@@ -88,18 +93,31 @@ const UserPosts: React.FC = () => {
 
   // 商品点击事件
   const handleItemClick = (item: SecondhandItem) => {
-    Taro.navigateTo({
-      url: `/pages/second-hand/detail/index?id=${item.id}`
-    })
+    if (item.reviewStatus === 'approved') {
+      Taro.navigateTo({
+        url: `/pages/second-hand/detail/index?id=${item.id}`
+      })
+      return
+    }
+    if (item.reviewStatus === 'rejected') {
+      Taro.showModal({
+        title: '审核未通过',
+        content: item.reviewReason || '该商品未通过审核',
+        showCancel: false,
+        confirmText: '知道了'
+      })
+      return
+    }
+    Taro.showToast({ title: '审核中，暂不可查看', icon: 'none' })
   }
 
-  // 编辑商品
-  const handleEditItem = (item: SecondhandItem, e: any) => {
-    e.stopPropagation()
-    Taro.navigateTo({
-      url: `/pages/second-hand/publish/index?id=${item.id}&mode=edit`
-    })
-  }
+  // 编辑商品（暂未使用）
+  // const handleEditItem = (item: SecondhandItem, e: any) => {
+  //   e.stopPropagation()
+  //   Taro.navigateTo({
+  //     url: `/pages/second-hand/publish/index?id=${item.id}&mode=edit`
+  //   })
+  // }
 
   // 删除商品确认
   const handleDeleteConfirm = (item: SecondhandItem, e: any) => {
@@ -113,7 +131,10 @@ const UserPosts: React.FC = () => {
     if (!selectedItem) return
 
     try {
-      await secondhandApi.deleteItem(selectedItem.id)
+      if (!userInfo?.openid) {
+        throw new Error('未获取到用户身份')
+      }
+      await secondhandApi.deleteUserItem(userInfo.openid, selectedItem.id)
       Taro.showToast({
         title: '删除成功',
         icon: 'success'
@@ -144,7 +165,7 @@ const UserPosts: React.FC = () => {
     e.stopPropagation()
     Taro.showModal({
       title: '审核被拒绝',
-      content: item.rejectionReason || '暂无拒绝原因说明',
+      content: item.reviewReason || '暂无拒绝原因说明',
       showCancel: false,
       confirmText: '知道了'
     })
@@ -153,7 +174,153 @@ const UserPosts: React.FC = () => {
   // 组件挂载时加载数据
   useEffect(() => {
     loadUserItems()
+    ;(async () => {
+      if (userInfo?.openid) {
+        const [reviews, carpools] = await Promise.all([
+          restaurantReviewApi.getReviewsByOpenId(userInfo.openid),
+          carpoolApi.getCarpoolsByOpenId(userInfo.openid)
+        ])
+        setUserReviews(reviews || [])
+        setUserCarpools(carpools || [])
+      }
+    })()
   }, [userInfo])
+
+  // const renderContent = () => {}
+
+  const renderSecondhandContent = () => {
+    if (loading) {
+      return (
+        <View className='loading-container'>
+          <Loading type="spinner" />
+          <Text className='loading-text'>加载中...</Text>
+        </View>
+      )
+    }
+    if (items.length === 0) {
+      return (
+        <View className='empty-container'>
+          <Empty description="您还没有发布任何商品" imageSize={120} />
+          <Button className='empty-publish-button' type='primary' onClick={handlePublishNew}>
+            🚀 立即发布
+          </Button>
+        </View>
+      )
+    }
+    return (
+      <View className='items-list'>
+        {items.map(item => (
+          <View key={item.id} className='item-card' onClick={() => handleItemClick(item)}>
+            <View className='item-image-container'>
+              <Image 
+                className='item-image'
+                src={item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls[0] : (item.image && /^(https?:)?\/\//.test(item.image) ? item.image : '')}
+                mode='aspectFill'
+                lazyLoad
+              />
+              <View
+                className={`status-badge ${item.status}`}
+                style={{ backgroundColor: statusMap[item.status].color }}
+              >
+                {statusMap[item.status].text}
+              </View>
+              {item.reviewStatus && (
+                <View className={`review-status-badge ${item.reviewStatus}`} style={{ backgroundColor: reviewStatusMap[item.reviewStatus].color }}>
+                  {reviewStatusMap[item.reviewStatus].icon} {reviewStatusMap[item.reviewStatus].text}
+                </View>
+              )}
+              {item.imageUrls && item.imageUrls.length > 1 && (
+                <View className='image-count-badge'>📷 {item.imageUrls.length}</View>
+              )}
+            </View>
+            <View className='item-info'>
+              <Text className='item-name'>{item.title}</Text>
+              <Text className='item-description'>{item.description}</Text>
+              {item.reviewStatus && (
+                <View className='review-status-info'>
+                  <Text className='review-status-text'>
+                    审核状态: {reviewStatusMap[item.reviewStatus].icon} {reviewStatusMap[item.reviewStatus].text}
+                  </Text>
+                  {item.reviewStatus === 'rejected' && item.reviewReason && (
+                    <Text className='rejection-reason'>拒绝原因: {item.reviewReason}</Text>
+                  )}
+                </View>
+              )}
+              <View className='item-footer'>
+                <Text className='item-price'>${item.price}</Text>
+                <Text className='item-time'>{formatTime(item.createdAt)}</Text>
+              </View>
+              <View className='item-actions'>
+                {item.reviewStatus === 'rejected' && (
+                  <Button className='action-button reason-button' size='small' onClick={(e) => handleViewRejectionReason(item, e)}>
+                    📋 查看原因
+                  </Button>
+                )}
+                <Button className='action-button delete-button' size='small' onClick={(e) => handleDeleteConfirm(item, e)}>
+                  🗑️ 删除
+                </Button>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    )
+  }
+
+  const renderReviewsContent = () => {
+    if (!userReviews || userReviews.length === 0) {
+      return (
+        <View className='empty-container'>
+          <Empty description="暂无餐厅评价" imageSize={120} />
+        </View>
+      )
+    }
+    return (
+      <View className='items-list'>
+        {userReviews.map(r => (
+          <View key={r.id} className='item-card'>
+            <View className='item-info'>
+              <Text className='item-name'>{r.restaurantName || `餐厅 #${r.restaurantId}`}</Text>
+              <Text className='item-description'>{r.content}</Text>
+              <View className='item-footer'>
+                <Text className='item-price'>评分 {r.rating}/5</Text>
+                <Text className='item-time'>{formatTime(r.createdAt)}</Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    )
+  }
+
+  const renderCarpoolContent = () => {
+    if (!userCarpools || userCarpools.length === 0) {
+      return (
+        <View className='empty-container'>
+          <Empty description="暂无拼车信息" imageSize={120} />
+        </View>
+      )
+    }
+    return (
+      <View className='items-list'>
+        {userCarpools.map(c => {
+          const { date, time } = formatDateTime(c.departureTime)
+          return (
+            <View key={c.id} className='item-card'>
+              <View className='item-info'>
+                <Text className='item-name'>{c.origin} → {c.destination}</Text>
+                <Text className='item-description'>{c.description || '无描述'}</Text>
+                <View className='item-footer'>
+                  <Text className='item-price'>{formatPrice(c.price)}</Text>
+                  <Text className='item-time'>{date} {time}</Text>
+                </View>
+              </View>
+            </View>
+          )
+        })}
+      </View>
+    )
+  }
 
   return (
     <View className='user-posts-container'>
@@ -161,20 +328,45 @@ const UserPosts: React.FC = () => {
       <View className='header'>
         <View className='header-content'>
           <Text className='title'>我的发布</Text>
-          <Text className='subtitle'>管理您发布的二手商品</Text>
+          <Text className='subtitle'>管理您发布的二手商品、餐厅评价和拼车信息</Text>
         </View>
       </View>
 
       {/* 发布按钮 */}
-      <View className='publish-section'>
-        <Button
-          className='publish-button'
-          type='primary'
-          onClick={handlePublishNew}
+      {/* Tab 切换 */}
+      <View className='tabs'>
+        <View 
+          className={`tab ${activeTab === 'secondhand' ? 'active' : ''}`}
+          onClick={() => setActiveTab('secondhand')}
         >
-          📝 发布新商品
-        </Button>
+          二手发布
+        </View>
+        <View 
+          className={`tab ${activeTab === 'reviews' ? 'active' : ''}`}
+          onClick={() => setActiveTab('reviews')}
+        >
+          餐厅评价
+        </View>
+        <View 
+          className={`tab ${activeTab === 'carpool' ? 'active' : ''}`}
+          onClick={() => setActiveTab('carpool')}
+        >
+          拼车信息
+        </View>
       </View>
+
+      {/* 发布按钮：仅二手展示 */}
+      {activeTab === 'secondhand' && (
+        <View className='publish-section'>
+          <Button
+            className='publish-button'
+            type='primary'
+            onClick={handlePublishNew}
+          >
+            📝 发布新商品
+          </Button>
+        </View>
+      )}
 
       {/* 商品列表 */}
       <PullToRefresh 
@@ -185,121 +377,7 @@ const UserPosts: React.FC = () => {
         completeText="刷新完成"
       >
         <ScrollView className='content' scrollY>
-          {loading ? (
-            <View className='loading-container'>
-              <Loading type="spinner" />
-              <Text className='loading-text'>加载中...</Text>
-            </View>
-          ) : items.length === 0 ? (
-            <View className='empty-container'>
-              <Empty 
-                description="您还没有发布任何商品"
-                imageSize={120}
-              />
-              <Button
-                className='empty-publish-button'
-                type='primary'
-                onClick={handlePublishNew}
-              >
-                🚀 立即发布
-              </Button>
-            </View>
-          ) : (
-            <View className='items-list'>
-              {items.map(item => (
-                <View 
-                  key={item.id} 
-                  className='item-card'
-                  onClick={() => handleItemClick(item)}
-                >
-                  {/* 商品图片 */}
-                  <View className='item-image-container'>
-                    <Image 
-                      className='item-image'
-                      src={item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls[0] : (item.image && /^(https?:)?\/\//.test(item.image) ? item.image : '')}
-                      mode='aspectFill'
-                      lazyLoad
-                    />
-                    {/* 商品状态标签 */}
-                    <View
-                      className={`status-badge ${item.status}`}
-                      style={{ backgroundColor: statusMap[item.status].color }}
-                    >
-                      {statusMap[item.status].text}
-                    </View>
-                    {/* 审核状态标签 */}
-                    {item.reviewStatus && (
-                      <View
-                        className={`review-status-badge ${item.reviewStatus}`}
-                        style={{ backgroundColor: reviewStatusMap[item.reviewStatus].color }}
-                      >
-                        {reviewStatusMap[item.reviewStatus].icon} {reviewStatusMap[item.reviewStatus].text}
-                      </View>
-                    )}
-                    {/* 多图片指示器 */}
-                    {item.imageUrls && item.imageUrls.length > 1 && (
-                      <View className='image-count-badge'>
-                        📷 {item.imageUrls.length}
-                      </View>
-                    )}
-                  </View>
-
-                  {/* 商品信息 */}
-                  <View className='item-info'>
-                    <Text className='item-name'>{item.title}</Text>
-                    <Text className='item-description'>{item.description}</Text>
-
-                    {/* 审核状态信息 */}
-                    {item.reviewStatus && (
-                      <View className='review-status-info'>
-                        <Text className='review-status-text'>
-                          审核状态: {reviewStatusMap[item.reviewStatus].icon} {reviewStatusMap[item.reviewStatus].text}
-                        </Text>
-                        {item.reviewStatus === 'rejected' && item.rejectionReason && (
-                          <Text className='rejection-reason'>
-                            拒绝原因: {item.rejectionReason}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-
-                    {/* 价格和时间 */}
-                    <View className='item-footer'>
-                      <Text className='item-price'>${item.price}</Text>
-                      <Text className='item-time'>{formatTime(item.createdAt)}</Text>
-                    </View>
-
-                    {/* 操作按钮 */}
-                    <View className='item-actions'>
-                      {item.reviewStatus === 'rejected' && (
-                        <Button
-                          className='action-button reason-button'
-                          size='small'
-                          onClick={(e) => handleViewRejectionReason(item, e)}
-                        >
-                          📋 查看原因
-                        </Button>
-                      )}
-                      <Button
-                        className='action-button edit-button'
-                        size='small'
-                        onClick={(e) => handleEditItem(item, e)}
-                      >
-                        ✏️ 编辑
-                      </Button>
-                      <Button
-                        className='action-button delete-button'
-                        size='small'
-                        onClick={(e) => handleDeleteConfirm(item, e)}
-                      >
-                        🗑️ 删除
-                      </Button>
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-          )}
+          {activeTab === 'secondhand' ? renderSecondhandContent() : activeTab === 'reviews' ? renderReviewsContent() : renderCarpoolContent()}
         </ScrollView>
       </PullToRefresh>
 

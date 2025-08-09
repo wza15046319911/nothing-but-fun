@@ -116,6 +116,27 @@ export const carpoolApi = {
     }
   },
 
+  // 根据 OpenID 获取用户发布的拼车信息
+  getCarpoolsByOpenId: async (openid: string): Promise<CarpoolPost[]> => {
+    try {
+      const response = await request({
+        url: `/carpools/user/${openid}`,
+        method: 'GET'
+      })
+      if (response && typeof response === 'object' && 'data' in response) {
+        return (response as { data: CarpoolPost[] }).data || []
+      }
+      // 兼容直接返回数组的情况
+      if (Array.isArray(response)) {
+        return response as CarpoolPost[]
+      }
+      return []
+    } catch (error) {
+      console.error('根据 OpenID 获取拼车信息失败:', error)
+      return []
+    }
+  },
+
   // 根据ID获取拼车信息
   getCarpoolById: async (id: number): Promise<CarpoolPost | null> => {
     try {

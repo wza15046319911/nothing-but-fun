@@ -1,15 +1,10 @@
-import React, { useState } from 'react'
-import { View, Text } from '@tarojs/components'
+import React, { useMemo, useState } from 'react'
+import { View, Text, Input, Textarea, Switch } from '@tarojs/components'
 import {
-  Form,
-  FormItem,
-  Input,
   DatePicker,
   Button,
-  TextArea,
   Picker,
-  Toast,
-  Switch
+  Toast
 } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { carpoolApi, CreateCarpoolPost } from '../../../services/carpool'
@@ -20,17 +15,15 @@ const CarpoolPublish: React.FC = () => {
   const { state: authState } = useAuth()
   const { isLoggedIn, userInfo } = authState
 
-  // Form state
-  const [formData, setFormData] = useState({
-    origin: 'Toowang',
-    destination: 'UQ',
-    departureTime: new Date().toISOString(),
-    availableSeats: 1,
-    price: '20',
-    description: 'wu',
-    carDetails: '',
-    insured: false
-  })
+  // Form state (independent states)
+  const [origin, setOrigin] = useState('Toowang')
+  const [destination, setDestination] = useState('UQ')
+  const [departureTime, setDepartureTime] = useState(new Date().toISOString())
+  const [availableSeats, setAvailableSeats] = useState(1)
+  const [price, setPrice] = useState('20')
+  const [description, setDescription] = useState('wu')
+  const [carDetails, setCarDetails] = useState('')
+  const [insured, setInsured] = useState(false)
 
   // UI state
   const [loading, setLoading] = useState(false)
@@ -43,53 +36,49 @@ const CarpoolPublish: React.FC = () => {
   // Validation state
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Preset quick routes
+  const quickRoutes = [
+    { origin: 'Toowong', destination: 'UQ' },
+    { origin: 'City', destination: 'UQ' },
+    { origin: 'Sunnybank', destination: 'City' },
+    { origin: 'Indooroopilly', destination: 'UQ' },
+  ]
+
   // Seats options
-  const seatsOptions = Array.from({ length: 8 }, (_, i) => ({
+  const seatsOptions = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
     text: `${i + 1}个座位`,
     value: (i + 1).toString()
-  }))
+  })), [])
+
+  // no-op
 
   // Form validation
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.origin || !formData.origin.trim()) {
+    if (!origin || !origin.trim()) {
       newErrors.origin = '请输入出发地'
     }
 
-    if (!formData.destination || !formData.destination.trim()) {
+    if (!destination || !destination.trim()) {
       newErrors.destination = '请输入目的地'
     }
 
-    if (!formData.departureTime) {
+    if (!departureTime) {
       newErrors.departureTime = '请选择出发时间'
     } 
-    // else {
-    //   try {
-    //     const departureDate = new Date(formData.departureTime)
-    //     const now = new Date()
 
-    //     if (isNaN(departureDate.getTime())) {
-    //       newErrors.departureTime = '出发时间格式不正确'
-    //     } else if (departureDate <= now) {
-    //       newErrors.departureTime = '出发时间不能早于当前时间'
-    //     }
-    //   } catch (error) {
-    //     newErrors.departureTime = '出发时间格式不正确'
-    //   }
-    // }
-
-    if (!formData.availableSeats || formData.availableSeats < 1 || formData.availableSeats > 8) {
+    if (!availableSeats || availableSeats < 1 || availableSeats > 8) {
       newErrors.availableSeats = '座位数必须在1-8之间'
     }
 
-    if (!formData.price || !formData.price.trim()) {
+    if (!price || !price.trim()) {
       newErrors.price = '请输入价格'
     } else {
-      const price = parseFloat(formData.price)
-      if (isNaN(price) || price < 0) {
+      const priceNum = parseFloat(price)
+      if (isNaN(priceNum) || priceNum < 0) {
         newErrors.price = '价格必须为非负数'
-      } else if (price > 10000) {
+      } else if (priceNum > 10000) {
         newErrors.price = '价格不能超过10000澳元'
       }
     }
@@ -98,45 +87,26 @@ const CarpoolPublish: React.FC = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  // Handle form field changes
-  const handleFieldChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-
-    // Clear error when user starts typing
+  // Clear error when user starts typing
+  const clearError = (field: string) => {
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }))
+      setErrors(prev => ({ ...prev, [field]: '' }))
     }
   }
 
-  // Specific handlers for each field to avoid any potential issues
-  const handleOriginChange = (value: string) => {
-    handleFieldChange('origin', value)
+
+
+  // Quick helpers
+  const swapRoute = () => {
+    const o = origin
+    const d = destination
+    setOrigin(d)
+    setDestination(o)
   }
 
-  const handleDestinationChange = (value: string) => {
-    handleFieldChange('destination', value)
-  }
-
-  const handlePriceChange = (value: string) => {
-    handleFieldChange('price', value)
-  }
-
-  const handleDescriptionChange = (value: string) => {
-    handleFieldChange('description', value)
-  }
-
-  const handleCarDetailsChange = (value: string) => {
-    handleFieldChange('carDetails', value)
-  }
-
-  const handleInsuredChange = (value: boolean) => {
-    handleFieldChange('insured', value)
+  const applyQuickRoute = (route: { origin: string; destination: string }) => {
+    setOrigin(route.origin)
+    setDestination(route.destination)
   }
 
   // Handle date picker confirm
@@ -161,7 +131,8 @@ const CarpoolPublish: React.FC = () => {
         selectedDate.setHours(selectedDate.getHours() + 1)
       }
 
-      handleFieldChange('departureTime', selectedDate.toISOString())
+      setDepartureTime(selectedDate.toISOString())
+      if (errors.departureTime) setErrors(prev => ({ ...prev, departureTime: '' }))
     } catch (error) {
       console.error('Error processing date:', error)
       showToastMessage('日期选择出错，请重试')
@@ -191,10 +162,11 @@ const CarpoolPublish: React.FC = () => {
         selectedSeats = 1
       }
 
-      handleFieldChange('availableSeats', selectedSeats)
+      setAvailableSeats(selectedSeats)
+      if (errors.availableSeats) setErrors(prev => ({ ...prev, availableSeats: '' }))
     } catch (error) {
       console.error('Error processing seats selection:', error)
-      handleFieldChange('availableSeats', 1)
+      setAvailableSeats(1)
     }
 
     setShowSeatsPicker(false)
@@ -225,14 +197,14 @@ const CarpoolPublish: React.FC = () => {
       setLoading(true)
 
       const carpoolData: Omit<CreateCarpoolPost, 'userId'> = {
-        origin: formData.origin.trim(),
-        destination: formData.destination.trim(),
-        departureTime: formData.departureTime,
-        availableSeats: formData.availableSeats,
-        price: formData.price.trim(),
-        description: formData.description.trim() || undefined,
-        carDetails: formData.carDetails.trim() || undefined,
-        insured: formData.insured
+        origin: origin.trim(),
+        destination: destination.trim(),
+        departureTime,
+        availableSeats,
+        price: price.trim(),
+        description: description.trim() || undefined,
+        carDetails: carDetails.trim() || undefined,
+        insured
       }
 
       const result = await carpoolApi.createCarpool(parseInt(userInfo.id), carpoolData)
@@ -289,126 +261,148 @@ const CarpoolPublish: React.FC = () => {
       </View>
 
       <View className='form-container'>
-        <Form>
-          {/* Origin */}
-          <FormItem 
-            label="出发地" 
-            required
-            className={errors.origin ? 'form-item-error' : ''}
-          >
-            <Input
-              placeholder="请输入出发地"
-              value={formData.origin}
-              onChange={handleOriginChange}
-              clearable
-            />
-            {errors.origin && <Text className='error-text'>{errors.origin}</Text>}
-          </FormItem>
+        {/* Quick actions */}
+        <View className='quick-row'>
+          <View className='quick-chips'>
+            {quickRoutes.map((r, idx) => (
+              <View key={idx} className='qchip' onClick={() => applyQuickRoute(r)}>
+                {r.origin} → {r.destination}
+              </View>
+            ))}
+          </View>
+          <Button size='small' className='swap-route' onClick={swapRoute}>⇄ 互换</Button>
+        </View>
+        {/* Route Row */}
+        <View className='form-section'>
+          <Text className='section-title'>出行路线</Text>
+          <View className='form-row two-cols'>
+            <View className={`form-field ${errors.origin ? 'error' : ''}`}>
+              <Text className='field-label required'>出发地</Text>
+              <Input
+                className='field-input'
+                placeholder="请输入出发地"
+                value={origin}
+                onInput={(e) => {
+                  setOrigin(e.detail.value)
+                  clearError('origin')
+                }}
+              />
+              {errors.origin && <Text className='field-error'>{errors.origin}</Text>}
+            </View>
 
-          {/* Destination */}
-          <FormItem 
-            label="目的地" 
-            required
-            className={errors.destination ? 'form-item-error' : ''}
-          >
-            <Input
-              placeholder="请输入目的地"
-              value={formData.destination}
-              onChange={handleDestinationChange}
-              clearable
-            />
-            {errors.destination && <Text className='error-text'>{errors.destination}</Text>}
-          </FormItem>
+            <View className={`form-field ${errors.destination ? 'error' : ''}`}>
+              <Text className='field-label required'>目的地</Text>
+              <Input
+                className='field-input'
+                placeholder="请输入目的地"
+                value={destination}
+                onInput={(e) => {
+                  setDestination(e.detail.value)
+                  clearError('destination')
+                }}
+              />
+              {errors.destination && <Text className='field-error'>{errors.destination}</Text>}
+            </View>
+          </View>
+        </View>
 
-          {/* Departure Time */}
-          <FormItem 
-            label="出发时间" 
-            required
-            className={errors.departureTime ? 'form-item-error' : ''}
-          >
+        {/* Departure Time */}
+        <View className='form-section'>
+          <Text className='section-title'>出发时间</Text>
+          <View className={`form-field ${errors.departureTime ? 'error' : ''}`}>
+            <Text className='field-label required'>选择时间</Text>
             <View 
-              className='picker-trigger'
+              className='picker-field'
               onClick={() => setShowDatePicker(true)}
             >
-              <Text className={formData.departureTime ? 'picker-text' : 'picker-placeholder'}>
-                {formatDateForDisplay(formData.departureTime)}
+              <Text className={departureTime ? 'picker-value' : 'picker-placeholder'}>
+                {formatDateForDisplay(departureTime)}
               </Text>
-              <Text className='picker-arrow'>▼</Text>
+              <Text className='picker-icon'>▼</Text>
             </View>
-            {errors.departureTime && <Text className='error-text'>{errors.departureTime}</Text>}
-          </FormItem>
+            {errors.departureTime && <Text className='field-error'>{errors.departureTime}</Text>}
+          </View>
+        </View>
 
-          {/* Available Seats */}
-          <FormItem 
-            label="可用座位" 
-            required
-            className={errors.availableSeats ? 'form-item-error' : ''}
-          >
-            <View 
-              className='picker-trigger'
-              onClick={() => setShowSeatsPicker(true)}
-            >
-              <Text className='picker-text'>{formData.availableSeats}个座位</Text>
-              <Text className='picker-arrow'>▼</Text>
+        {/* Seats & Price Row */}
+        <View className='form-section'>
+          <Text className='section-title'>价格座位</Text>
+          <View className='form-row two-cols'>
+            <View className={`form-field ${errors.availableSeats ? 'error' : ''}`}>
+              <Text className='field-label required'>可用座位</Text>
+              <View 
+                className='picker-field'
+                onClick={() => setShowSeatsPicker(true)}
+              >
+                <Text className='picker-value'>{availableSeats}个座位</Text>
+                <Text className='picker-icon'>▼</Text>
+              </View>
+              {errors.availableSeats && <Text className='field-error'>{errors.availableSeats}</Text>}
+              <Text className='field-hint'>支持 1 - 8 个座位</Text>
             </View>
-            {errors.availableSeats && <Text className='error-text'>{errors.availableSeats}</Text>}
-          </FormItem>
 
-          {/* Price */}
-          <FormItem
-            label="价格"
-            required
-            className={errors.price ? 'form-item-error' : ''}
-          >
-            <View style={{ display: 'flex', alignItems: 'center' }}>
-              <Text style={{ color: '#666', marginRight: '8rpx' }}>$</Text>
-              <Input
-                type="number"
-                placeholder="请输入价格（澳元）"
-                value={formData.price}
-                onChange={handlePriceChange}
-                clearable
-                style={{ flex: 1 }}
-              />
+            <View className={`form-field ${errors.price ? 'error' : ''}`}>
+              <Text className='field-label required'>价格</Text>
+              <View className='price-input-wrapper'>
+                <Text className='currency-symbol'>$</Text>
+                <Input
+                  className='field-input price-input'
+                  type="number"
+                  placeholder="请输入价格"
+                  value={price}
+                  onInput={(e) => {
+                    setPrice(e.detail.value)
+                    clearError('price')
+                  }}
+                />
+                <Text className='currency-unit'>AUD</Text>
+              </View>
+              {errors.price && <Text className='field-error'>{errors.price}</Text>}
+              <Text className='field-hint'>0 表示免费</Text>
             </View>
-            {errors.price && <Text className='error-text'>{errors.price}</Text>}
-          </FormItem>
+          </View>
+        </View>
 
-          {/* Description */}
-          <FormItem label="描述" className='description-item'>
-            <TextArea
+        {/* Description */}
+        <View className='form-section'>
+          <Text className='section-title'>补充信息</Text>
+          <View className='form-field'>
+            <Text className='field-label'>拼车描述</Text>
+            <Textarea
+              className='field-textarea'
               placeholder="请输入拼车描述（可选）"
-              value={formData.description}
-              onChange={handleDescriptionChange}
-              rows={3}
-              maxLength={200}
+              value={description}
+              onInput={(e) => setDescription(e.detail.value)}
+              maxlength={200}
+              autoHeight
             />
-          </FormItem>
+            <Text className='field-hint'>剩余 {200 - description.length} 字</Text>
+          </View>
 
-          {/* Car Details */}
-          <FormItem label="车辆详情" className='description-item'>
-            <TextArea
+          <View className='form-field'>
+            <Text className='field-label'>车辆详情</Text>
+            <Textarea
+              className='field-textarea'
               placeholder="请输入车辆详情（如车型、颜色、车牌等）"
-              value={formData.carDetails}
-              onChange={handleCarDetailsChange}
-              rows={2}
-              maxLength={150}
+              value={carDetails}
+              onInput={(e) => setCarDetails(e.detail.value)}
+              maxlength={150}
+              autoHeight
             />
-          </FormItem>
+            <Text className='field-hint'>剩余 {150 - carDetails.length} 字</Text>
+          </View>
 
-          {/* Insurance */}
-          <FormItem label="车辆保险">
-            <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: '28rpx', color: '#666' }}>
-                车辆是否有保险
-              </Text>
+          <View className='form-field switch-field'>
+            <Text className='field-label'>车辆保险</Text>
+            <View className='switch-wrapper'>
+              <Text className='switch-label'>车辆是否有保险</Text>
               <Switch
-                checked={formData.insured}
-                onChange={handleInsuredChange}
+                checked={insured}
+                onChange={(e) => setInsured(e.detail.value)}
               />
             </View>
-          </FormItem>
-        </Form>
+          </View>
+        </View>
       </View>
 
       {/* Action Buttons */}

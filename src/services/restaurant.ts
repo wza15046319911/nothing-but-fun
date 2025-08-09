@@ -195,17 +195,7 @@ export interface ModerationStatsResponse {
   data: ModerationStats
 }
 
-export interface ReviewStatsResponse {
-  success: boolean
-  message: string
-  data: {
-    totalReviews: number
-    averageRating: number
-    ratingDistribution: {
-      [key: string]: number
-    }
-  }
-}
+// 重复定义移除（上方已定义 ReviewStatsResponse）
 
 // 餐厅API
 export const restaurantApi = {
@@ -543,6 +533,26 @@ export const restaurantReviewApi = {
           hasPrev: false
         }
       }
+    }
+  },
+
+  // 根据 OpenID 获取用户发布的餐厅评价
+  getReviewsByOpenId: async (openid: string): Promise<RestaurantReview[]> => {
+    try {
+      const response = await request({
+        url: `/restaurant-reviews/user/openid/${openid}`,
+        method: 'GET'
+      })
+      if (response && typeof response === 'object' && 'data' in response) {
+        return (response as { data: RestaurantReview[] }).data || []
+      }
+      if (Array.isArray(response)) {
+        return response as RestaurantReview[]
+      }
+      return []
+    } catch (error) {
+      console.error('根据 OpenID 获取用户餐厅评价失败:', error)
+      return []
     }
   },
 
