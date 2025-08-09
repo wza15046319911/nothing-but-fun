@@ -1,0 +1,180 @@
+.event-filters {
+  background: white;
+  border-radius: 16rpx;
+  margin: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 32rpx;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background: #e9ecef;
+    }
+
+    .toggle-text {
+      font-size: 32rpx;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .toggle-icon {
+      font-size: 24rpx;
+      color: #666;
+      transition: transform 0.3s ease;
+
+      &.active {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .filter-content {
+    padding: 32rpx;
+    border-top: 1rpx solid #e9ecef;
+
+    .filter-item {
+      margin-bottom: 40rpx;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .filter-label {
+        display: block;
+        font-size: 28rpx;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 16rpx;
+      }
+
+      .picker-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20rpx 24rpx;
+        background: #f8f9fa;
+        border-radius: 12rpx;
+        border: 2rpx solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #007bff;
+          background: #f0f8ff;
+        }
+
+        .picker-text {
+          font-size: 28rpx;
+          color: #333;
+        }
+
+        .picker-arrow {
+          font-size: 20rpx;
+          color: #666;
+        }
+      }
+
+      .price-range-container {
+        display: flex;
+        align-items: center;
+        gap: 20rpx;
+      }
+
+      .price-range {
+        .nut-range {
+          .nut-range-bar {
+            background: #e9ecef;
+            height: 8rpx;
+            border-radius: 4rpx;
+          }
+
+          .nut-range-bar-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          }
+
+          .nut-range-button {
+            width: 32rpx;
+            height: 32rpx;
+            background: white;
+            border: 4rpx solid #667eea;
+            box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+          }
+
+          .nut-range-button-active {
+            border-color: #764ba2;
+            box-shadow: 0 6rpx 16rpx rgba(118, 75, 162, 0.4);
+          }
+        }
+
+        .nut-range-mark {
+          font-size: 20rpx;
+          color: #999;
+          margin-top: 12rpx;
+        }
+      }
+    }
+
+    .filter-actions {
+      margin-top: 32rpx;
+      display: flex;
+      justify-content: center;
+
+      .reset-button {
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 20rpx;
+        padding: 16rpx 32rpx;
+        font-size: 26rpx;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background: #5a6268;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .event-filters {
+    margin: 16rpx;
+
+    .filter-content {
+      padding: 24rpx;
+
+      .filter-item {
+        margin-bottom: 32rpx;
+
+        .filter-label {
+          font-size: 26rpx;
+        }
+
+        .picker-trigger {
+          padding: 16rpx 20rpx;
+
+          .picker-text {
+            font-size: 26rpx;
+          }
+        }
+
+        .price-range-container {
+          gap: 16rpx;
+
+          .price-text {
+            font-size: 22rpx;
+            min-width: 70rpx;
+          }
+        }
+      }
+    }
+  }
+}

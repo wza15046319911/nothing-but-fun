@@ -7,6 +7,8 @@ export interface UserInfo {
   openid: string
   nickname?: string
   avatarUrl?: string
+  email?: string
+  phone?: string
   gender?: string
   city?: string
   province?: string
@@ -16,6 +18,7 @@ export interface UserInfo {
   lastLoginAt?: string
   createdAt?: string
   updatedAt?: string
+  contact?: string
 }
 
 // 微信登录请求类型
@@ -45,11 +48,14 @@ export interface GetUserInfoResponse {
 export interface UpdateProfileRequest {
   nickname?: string
   avatarUrl?: string
+  email?: string
+  phone?: string
   gender?: string
   city?: string
   province?: string
   country?: string
   language?: string
+  contact?: string
 }
 
 // 更新用户资料响应类型

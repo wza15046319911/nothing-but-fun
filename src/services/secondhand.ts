@@ -9,20 +9,41 @@ export interface SecondhandItem {
   price: string
   image: string
   images?: string[]
+  imageUrls?: string[]
   status: 'available' | 'sold' | 'reserved'
+  reviewStatus?: 'pending' | 'approved' | 'rejected'
+  rejectionReason?: string
   createdAt: string
   updatedAt: string
 }
 
 // 创建二手商品请求类型
 export interface CreateSecondhandItemRequest {
-  sellerId: string
+  sellerId: number
   title: string
   description: string
   price: string
-  image: string
   images?: string[]
   status?: 'available' | 'sold' | 'reserved'
+}
+
+// 创建带图片的二手商品请求类型
+export interface CreateSecondhandItemWithImagesRequest {
+  sellerId: number
+  title: string
+  description?: string
+  price: string | number
+  status?: 'available' | 'sold' | 'reserved'
+}
+
+// API响应接口
+export interface CreateItemWithImagesResponse {
+  success: boolean
+  message: string
+  data: {
+    id: number
+    uploadedFiles: number
+  }
 }
 
 // 更新二手商品请求类型
@@ -42,14 +63,90 @@ export interface ReviewSecondhandItemRequest {
   reason: string
 }
 
+// 二手商品筛选参数接口
+export interface SecondhandFilters {
+  priceFrom?: number
+  priceTo?: number
+  page?: number
+  limit?: number
+}
+
+// 分页响应接口
+export interface PaginatedSecondhandResponse {
+  data: SecondhandItem[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 // 二手商品API服务
 export const secondhandApi = {
-  // 获取所有二手商品
-  getAllItems: (): Promise<SecondhandItem[]> => {
-    return request({
-      url: '/secondhand',
-      method: 'GET'
-    })
+  // 获取所有二手商品（支持筛选和分页）
+  getAllItems: async (filters?: SecondhandFilters): Promise<PaginatedSecondhandResponse> => {
+    try {
+      // 构建查询参数
+      const queryParams = new URLSearchParams()
+
+      if (filters?.priceFrom !== undefined) {
+        queryParams.append('priceFrom', filters.priceFrom.toString())
+      }
+      if (filters?.priceTo !== undefined) {
+        queryParams.append('priceTo', filters.priceTo.toString())
+      }
+      if (filters?.page !== undefined) {
+        queryParams.append('page', filters.page.toString())
+      }
+      if (filters?.limit !== undefined) {
+        queryParams.append('limit', filters.limit.toString())
+      }
+
+      const url = queryParams.toString() ? `/secondhand?${queryParams.toString()}` : '/secondhand'
+
+      const response = await request({
+        url,
+        method: 'GET'
+      })
+      console.log("response secondhand is ::", response);
+      // 检查响应格式 - 后端返回的格式是 { data: SecondhandItem[], total, page, limit, totalPages }
+      if (response && typeof response === 'object' && 'data' in response && 'total' in response) {
+        
+        return response as PaginatedSecondhandResponse
+      }
+      // 如果是简单数组格式，包装成分页响应
+      if (Array.isArray(response)) {
+        return {
+          data: response,
+          total: response.length,
+          page: 1,
+          limit: response.length,
+          totalPages: 1
+        } as PaginatedSecondhandResponse
+      }
+
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0
+      } as PaginatedSecondhandResponse
+    } catch (error) {
+      console.error('获取二手商品列表失败:', error)
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0
+      } as PaginatedSecondhandResponse
+    }
+  },
+
+  // 获取所有二手商品（简化版本，保持向后兼容）
+  getAllItemsSimple: async (): Promise<SecondhandItem[]> => {
+    const result = await secondhandApi.getAllItems()
+    return result.data
   },
 
   // 根据ID获取二手商品
@@ -60,13 +157,22 @@ export const secondhandApi = {
     })
   },
 
-  // 创建新的二手商品
+  // 创建新的二手商品（不带图片）
   createItem: (data: CreateSecondhandItemRequest): Promise<SecondhandItem> => {
     return request({
       url: '/secondhand',
       method: 'POST',
       data
     })
+  },
+
+  // 创建带多图片的二手商品 - 使用 /secondhand/with-images 接口
+  createItemWithImages: async (
+    data: CreateSecondhandItemWithImagesRequest
+  ): Promise<CreateItemWithImagesResponse> => {
+    // 注意：这个方法需要在调用时配合 Taro.uploadFile 使用
+    // 因为需要上传文件，不能直接用 request 函数
+    throw new Error('请使用 Taro.uploadFile 直接调用 /secondhand/with-images 接口')
   },
 
   // 更新二手商品
@@ -96,9 +202,9 @@ export const secondhandApi = {
   },
 
   // 获取用户的二手商品
-  getUserItems: (userId: number): Promise<SecondhandItem[]> => {
+  getUserItems: (userId: string): Promise<SecondhandItem[]> => {
     return request({
-      url: `/users/${userId}/secondhand`,
+      url: `/secondhand/user/${userId}`,
       method: 'GET'
     })
   },

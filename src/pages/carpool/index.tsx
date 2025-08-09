@@ -1,279 +1,220 @@
-import React, { useState } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import React, { useState, useEffect } from 'react'
+import { View, Text, ScrollView } from '@tarojs/components'
+import { PullToRefresh, Loading, Empty, Button, Tag } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { carpoolApi, CarpoolPost, CarpoolQueryParams, formatPrice, formatDateTime, getStatusText, getStatusClassName } from '../../services/carpool'
+import Pagination from '../../components/Pagination'
 import './index.less'
 
-// Tab options
-const tabs = [
-  { id: 'passenger', name: '我要搭车' },
-  { id: 'driver', name: '我要载人' }
-]
-
-// Filter options
-const dateFilters = [
-  { id: 'today', name: '今天' },
-  { id: 'tomorrow', name: '明天' },
-  { id: 'this_week', name: '本周' },
-  { id: 'all', name: '全部' }
-]
-
-// Mock carpooling data
-const mockCarpools = {
-  passenger: [
-    {
-      id: 1,
-      startPoint: '朝阳CBD',
-      endPoint: '海淀西二旗',
-      departureTime: '今天 18:30',
-      departureDate: '2023-08-15',
-      user: {
-        name: '李先生',
-        avatar: 'https://picsum.photos/100/100?random=50'
-      },
-      price: 30,
-      seats: 2,
-      remainingSeats: 1,
-      distance: '15km',
-      tags: ['准时出发', '不抽烟'],
-      isFull: false
-    },
-    {
-      id: 2,
-      startPoint: '望京SOHO',
-      endPoint: '天通苑',
-      departureTime: '明天 08:30',
-      departureDate: '2023-08-16',
-      user: {
-        name: '王女士',
-        avatar: 'https://picsum.photos/100/100?random=51'
-      },
-      price: 25,
-      seats: 3,
-      remainingSeats: 0,
-      distance: '12km',
-      tags: ['舒适轿车', '可带小件'],
-      isFull: true
-    },
-    {
-      id: 3,
-      startPoint: '国贸',
-      endPoint: '回龙观',
-      departureTime: '明天 19:00',
-      departureDate: '2023-08-16',
-      user: {
-        name: '张先生',
-        avatar: 'https://picsum.photos/100/100?random=52'
-      },
-      price: 35,
-      seats: 4,
-      remainingSeats: 2,
-      distance: '20km',
-      tags: ['高速优先', '有暖气/空调'],
-      isFull: false
-    }
-  ],
-  driver: [
-    {
-      id: 4,
-      startPoint: '西直门',
-      endPoint: '燕郊',
-      departureTime: '今天 17:45',
-      departureDate: '2023-08-15',
-      user: {
-        name: '刘女士',
-        avatar: 'https://picsum.photos/100/100?random=53'
-      },
-      price: 40,
-      seats: 1,
-      remainingSeats: 1,
-      distance: '25km',
-      tags: ['准时', '走高速'],
-      isFull: false
-    },
-    {
-      id: 5,
-      startPoint: '大兴机场',
-      endPoint: '亦庄',
-      departureTime: '明天 10:30',
-      departureDate: '2023-08-16',
-      user: {
-        name: '赵先生',
-        avatar: 'https://picsum.photos/100/100?random=54'
-      },
-      price: 60,
-      seats: 1,
-      remainingSeats: 1,
-      distance: '35km',
-      tags: ['机场接送', '行李空间大'],
-      isFull: false
-    }
-  ]
-}
-
 const Carpool: React.FC = () => {
-  // State for active tab and filters
-  const [activeTab, setActiveTab] = useState('passenger')
-  const [activeDateFilter, setActiveDateFilter] = useState('all')
-  
-  // Filter carpools by date
-  const filterCarpoolsByDate = (carpools, dateFilter) => {
-    if (dateFilter === 'all') return carpools
-    
-    const today = '2023-08-15' // Hardcoded for demo
-    const tomorrow = '2023-08-16' // Hardcoded for demo
-    
-    return carpools.filter(carpool => {
-      switch(dateFilter) {
-        case 'today':
-          return carpool.departureDate === today
-        case 'tomorrow':
-          return carpool.departureDate === tomorrow
-        case 'this_week':
-          // In a real app, would check if within current week
-          return true
-        default:
-          return true
+  // State management
+  const [carpools, setCarpools] = useState<CarpoolPost[]>([])
+  const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // State for pagination
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
+
+  // State for query parameters
+  const [queryParams, setQueryParams] = useState<CarpoolQueryParams>({
+    page: 1,
+    limit: 10,
+    sortBy: 'departureTime',
+    order: 'asc'
+  })
+
+  // Load carpool data
+  const loadCarpools = async (showLoading = true, params: CarpoolQueryParams = queryParams) => {
+    try {
+      if (showLoading) {
+        setLoading(true)
       }
+
+      const response = await carpoolApi.getAllCarpools(params)
+      setCarpools(response.data)
+      setPagination(response.pagination)
+    } catch (error) {
+      console.error('加载拼车信息失败:', error)
+      Taro.showToast({
+        title: '加载失败',
+        icon: 'error',
+        duration: 2000
+      })
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await loadCarpools(false)
+  }
+
+  // Handle pagination change
+  const handlePageChange = (page: number) => {
+    const newParams = {
+      ...queryParams,
+      page
+    }
+    setQueryParams(newParams)
+    loadCarpools(true, newParams)
+  }
+
+  // Handle carpool card click
+  const handleCarpoolClick = (_carpool: CarpoolPost) => {
+    Taro.showToast({
+      title: '详情功能开发中',
+      icon: 'none',
+      duration: 2000
     })
   }
-  
-  // Get filtered carpools
-  const carpools = filterCarpoolsByDate(mockCarpools[activeTab], activeDateFilter)
-  
+
   // Handle post new carpool
   const handlePostCarpool = () => {
-    Taro.showToast({
-      title: '发布功能开发中',
-      icon: 'none',
-      duration: 2000
+    Taro.navigateTo({
+      url: '/pages/carpool/publish/index'
     })
   }
-  
-  // Handle join carpool
-  const handleJoinCarpool = (carpoolId) => {
-    Taro.showToast({
-      title: '拼车功能开发中',
-      icon: 'none',
-      duration: 2000
-    })
-  }
+
+  // Load data on component mount
+  useEffect(() => {
+    loadCarpools()
+  }, [])
 
   return (
     <View className='carpool-container'>
-      {/* Tab Navigation */}
-      <View className='tabs-section'>
-        {tabs.map(tab => (
-          <View
-            key={tab.id}
-            className={`tab-item ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.name}
+      <PullToRefresh onRefresh={handleRefresh}>
+        <ScrollView className='content' scrollY>
+          {/* Header */}
+          <View className='header-section'>
+            <Text className='page-title'>拼车信息</Text>
+            <Button 
+              type="primary" 
+              size="small" 
+              className='post-button'
+              onClick={handlePostCarpool}
+            >
+              发布拼车
+            </Button>
           </View>
-        ))}
-      </View>
-      
-      {/* Carpool Listings */}
-      <View className='cards-section'>
-        {/* Filters */}
-        <View className='filter-section'>
-          <View className='filter-left'>
-            {dateFilters.map(filter => (
-              <View
-                key={filter.id}
-                className={`filter-item ${activeDateFilter === filter.id ? 'active' : ''}`}
-                onClick={() => setActiveDateFilter(filter.id)}
-              >
-                {filter.name}
-                {activeDateFilter === filter.id && (
-                  <Text className='filter-icon'>✓</Text>
-                )}
-              </View>
-            ))}
-          </View>
-          <View className='filter-right'>
-            <View className='sort-button'>
-              时间排序 ▼
+
+          {/* Loading */}
+          {loading && (
+            <View className='loading-container'>
+              <Loading type="spinner" />
+              <Text className='loading-text'>加载中...</Text>
             </View>
-          </View>
-        </View>
-        
-        {/* Carpool Cards */}
-        {carpools.length > 0 ? (
-          carpools.map(carpool => (
-            <View key={carpool.id} className='carpool-card'>
-              {/* Card Header */}
-              <View className='card-header'>
-                <View className='route-info'>
-                  <View className='route-title'>
-                    <Text className='start-point'>{carpool.startPoint}</Text>
-                    <Text className='route-arrow'>→</Text>
-                    <Text className='end-point'>{carpool.endPoint}</Text>
-                  </View>
-                  <View className='route-time'>{carpool.departureTime}</View>
-                </View>
-                <View className='card-user'>
-                  <Image 
-                    className='user-avatar'
-                    src={carpool.user.avatar}
-                    mode='aspectFill'
-                  />
-                  <Text className='user-name'>{carpool.user.name}</Text>
-                </View>
-              </View>
-              
-              {/* Card Details */}
-              <View className='card-details'>
-                <View className='detail-item'>
-                  <Text className='detail-label'>单人价格</Text>
-                  <Text className='detail-value highlight'>¥{carpool.price}</Text>
-                </View>
-                <View className='detail-item'>
-                  <Text className='detail-label'>剩余座位</Text>
-                  <Text className='detail-value'>{carpool.remainingSeats}/{carpool.seats}</Text>
-                </View>
-                <View className='detail-item'>
-                  <Text className='detail-label'>预计路程</Text>
-                  <Text className='detail-value'>{carpool.distance}</Text>
-                </View>
-              </View>
-              
-              {/* Card Footer */}
-              <View className='card-footer'>
-                <View className='card-tags'>
-                  {carpool.tags.map((tag, index) => (
-                    <Text key={index} className='card-tag'>{tag}</Text>
-                  ))}
-                </View>
-                <View className='card-action'>
-                  <View 
-                    className={`action-button ${carpool.isFull ? 'disabled' : ''}`}
-                    onClick={() => !carpool.isFull && handleJoinCarpool(carpool.id)}
+          )}
+
+          {/* Carpool List */}
+          {!loading && (
+            <View className='carpool-list'>
+              {carpools.length > 0 ? (
+                carpools.map(carpool => {
+                  const { date, time } = formatDateTime(carpool.departureTime)
+                  return (
+                    <View 
+                      key={carpool.id} 
+                      className='carpool-card'
+                      onClick={() => handleCarpoolClick(carpool)}
+                    >
+                      <View className='card-header'>
+                        <View className='route-info'>
+                          <View className='route-points'>
+                            <Text className='start-point'>{carpool.origin}</Text>
+                            <Text className='route-arrow'>→</Text>
+                            <Text className='end-point'>{carpool.destination}</Text>
+                          </View>
+                          <View className='route-time'>
+                            <Text className='time-date'>{date}</Text>
+                            <Text className='time-hour'>{time}</Text>
+                          </View>
+                        </View>
+                        <View className='status-info'>
+                          <Tag 
+                            type={carpool.status === 'open' ? 'success' : 'warning'}
+                            className={getStatusClassName(carpool.status)}
+                          >
+                            {getStatusText(carpool.status)}
+                          </Tag>
+                        </View>
+                      </View>
+                      
+                      <View className='card-body'>
+                        <View className='card-info'>
+                          <View className='info-item'>
+                            <Text className='info-label'>价格</Text>
+                            <Text className='info-value'>{formatPrice(carpool.price)}</Text>
+                          </View>
+                          <View className='info-item'>
+                            <Text className='info-label'>座位</Text>
+                            <Text className='info-value'>{carpool.availableSeats}个</Text>
+                          </View>
+                          <View className='info-item'>
+                            <Text className='info-label'>发布时间</Text>
+                            <Text className='info-value'>{formatDateTime(carpool.createdAt).date}</Text>
+                          </View>
+                        </View>
+                        
+                        {carpool.description && (
+                          <View className='card-description'>
+                            <Text className='description-text'>{carpool.description}</Text>
+                          </View>
+                        )}
+                      </View>
+                      
+                      <View className='card-footer'>
+                        <Button 
+                          type={carpool.status === 'open' ? 'primary' : 'default'}
+                          size="small"
+                          disabled={carpool.status !== 'open'}
+                          className='action-button'
+                        >
+                          {carpool.status === 'open' ? '联系车主' : '不可预订'}
+                        </Button>
+                      </View>
+                    </View>
+                  )
+                })
+              ) : (
+                <Empty 
+                  description="暂无拼车信息"
+                  imageSize={120}
+                >
+                  <Button 
+                    type="primary" 
+                    onClick={handlePostCarpool}
+                    className='empty-action-button'
                   >
-                    {carpool.isFull ? '已满员' : activeTab === 'passenger' ? '申请搭车' : '申请搭载'}
-                  </View>
-                </View>
-              </View>
+                    发布拼车信息
+                  </Button>
+                </Empty>
+              )}
             </View>
-          ))
-        ) : (
-          <View className='empty-state'>
-            <View className='empty-icon'>🚗</View>
-            <View className='empty-text'>暂无{activeTab === 'passenger' ? '可搭乘' : '乘客需求'}信息</View>
-            <View className='empty-action' onClick={handlePostCarpool}>
-              {activeTab === 'passenger' ? '我要找车' : '我要载人'}
-            </View>
-          </View>
-        )}
-      </View>
-      
-      {/* Post Button */}
-      <View className='post-button' onClick={handlePostCarpool}>
-        <Text className='post-icon'>+</Text>
-        <Text>{activeTab === 'passenger' ? '发布找车' : '发布载人'}</Text>
-      </View>
+          )}
+
+          {/* Pagination */}
+          {!loading && carpools.length > 0 && pagination.totalPages > 1 && (
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              pageSize={pagination.limit}
+              onPageChange={handlePageChange}
+              loading={loading}
+            />
+          )}
+        </ScrollView>
+      </PullToRefresh>
     </View>
   )
 }
 
-export default Carpool 
+export default Carpool

@@ -1,6 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { PullToRefresh, Loading, Empty } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { eventsApi, Event, EventFilters, PaginatedEventsResponse } from '../../services/events'
+import EventRegistrationStatus from '../../components/EventRegistrationStatus'
+import EventFiltersComponent from '../../components/EventFilters'
+import Pagination from '../../components/Pagination'
+import { useEventTypes } from '../../hooks/useTypes'
 import './index.less'
 
 // Helper function to generate dates for the next 14 days
@@ -26,197 +32,229 @@ const generateDates = () => {
   return dates
 }
 
-// Mock data for upcoming activities
-const mockActivities = [
-  {
-    id: 1,
-    title: '布好玩户外攀岩体验',
-    description: '户外攀岩入门体验，专业教练指导，适合初学者。提供全套安全装备，快来挑战自我吧！',
-    image: 'https://picsum.photos/400/300?random=20',
-    date: '2023-08-15',
-    time: '09:00-12:00',
-    location: '城市攀岩中心',
-    category: '运动',
-    capacity: 20,
-    enrolled: 12,
-    price: '128'
-  },
-  {
-    id: 2,
-    title: '夏日城市定向越野赛',
-    description: '在城市中寻找隐藏的线索，完成各种有趣的任务。组队参加，考验默契与智慧，赢取丰厚奖品！',
-    image: 'https://picsum.photos/400/300?random=21',
-    date: '2023-08-20',
-    time: '14:00-18:00',
-    location: '市中心广场',
-    category: '竞技',
-    capacity: 50,
-    enrolled: 35,
-    price: '99'
-  },
-  {
-    id: 3,
-    title: '自然摄影工作坊',
-    description: '跟随专业摄影师学习如何捕捉自然之美。无论你使用何种装备，都能学到实用技巧。',
-    image: 'https://picsum.photos/400/300?random=22',
-    date: '2023-08-16',
-    time: '15:30-17:30',
-    location: '植物园',
-    category: '艺术',
-    capacity: 15,
-    enrolled: 15,
-    price: '168'
-  },
-  {
-    id: 4,
-    title: '城市夜跑俱乐部',
-    description: '每周固定夜跑活动，不同路线、不同风景，遇见志同道合的朋友，一起享受跑步的乐趣。',
-    image: 'https://picsum.photos/400/300?random=23',
-    date: '2023-08-17',
-    time: '19:30-21:00',
-    location: '滨江公园',
-    category: '运动',
-    capacity: 30,
-    enrolled: 22,
-    price: '免费'
-  },
-  {
-    id: 5,
-    title: '周末手工陶艺课',
-    description: '零基础陶艺创作体验，专业老师指导，制作属于自己的生活陶艺品。所有作品均可带回家。',
-    image: 'https://picsum.photos/400/300?random=24',
-    date: '2023-08-19',
-    time: '10:00-12:30',
-    location: '艺术中心',
-    category: '手工',
-    capacity: 12,
-    enrolled: 8,
-    price: '199'
-  }
-]
+
 
 const RecentActivities: React.FC = () => {
+  // Use event types hook
+  const { getEventTypeName } = useEventTypes()
+
   // Generate dates for navigation
   const dates = generateDates()
-  
-  // State for selected date
+
+  // State management
   const [selectedDate, setSelectedDate] = useState(dates[0].dateString)
-  
-  // Filter activities based on selected date
-  const filteredActivities = mockActivities.filter(activity => 
-    activity.date === selectedDate
-  )
-  
-  // Handle activity join
-  const handleJoin = (activityId) => {
-    Taro.showModal({
-      title: '活动报名',
-      content: '确认报名参加该活动吗？',
-      success: function (res) {
-        if (res.confirm) {
-          Taro.showToast({
-            title: '报名成功',
-            icon: 'success',
-            duration: 2000
-          })
-        }
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // State for pagination
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
+
+  // State for filters
+  const [currentFilters, setCurrentFilters] = useState<EventFilters>({
+    isHistorical: false,
+    page: 1,
+    limit: 10
+  })
+
+  // Fetch upcoming events from API
+  const fetchUpcomingEvents = async (showLoading = true, filters: EventFilters = currentFilters) => {
+    try {
+      if (showLoading) {
+        setLoading(true)
       }
+
+      // 使用新的分页API
+      const response = await eventsApi.getAllEvents(filters)
+      setEvents(response.data)
+      setPagination({
+        page: response.page,
+        limit: response.limit,
+        total: response.total,
+        totalPages: response.totalPages
+      })
+    } catch (error) {
+      console.error('获取即将到来的活动失败:', error)
+      Taro.showToast({
+        title: '加载失败，请稍后重试',
+        icon: 'error',
+        duration: 2000
+      })
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  // Handle filter changes
+  const handleFiltersChange = (filters: EventFilters) => {
+    const newFilters = {
+      ...filters,
+      isHistorical: false, // 确保始终获取未来活动
+      page: 1, // 重置到第一页
+      limit: 10
+    }
+    setCurrentFilters(newFilters)
+    fetchUpcomingEvents(true, newFilters)
+  }
+
+  // Handle pagination change
+  const handlePageChange = (page: number) => {
+    const newFilters = {
+      ...currentFilters,
+      page
+    }
+    setCurrentFilters(newFilters)
+    fetchUpcomingEvents(true, newFilters)
+  }
+
+  // Pull to refresh functionality
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await fetchUpcomingEvents(false)
+  }
+
+  // Load events on component mount
+  useEffect(() => {
+    fetchUpcomingEvents()
+  }, [])
+
+  // Filter events based on selected date
+  const filteredEvents = events.filter(event => {
+    const eventDate = new Date(event.startTime)
+    const eventDateString = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`
+    return eventDateString === selectedDate
+  })
+
+  // Format date and time helpers
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
     })
   }
 
+
+
   return (
-    <ScrollView className='recent-activities-container' scrollY>
-      {/* Header section */}
-      <View className='header-section'>
-        <View className='header-title'>最近活动</View>
-        <View className='header-desc'>探索丰富多彩的活动，加入我们一起玩乐！</View>
-      </View>
-
-      {/* Date navigation */}
-      <View className='date-nav'>
-        <View className='month-text'>{dates[0].month}月</View>
-        {dates.map((date, index) => (
-          <View 
-            key={index}
-            className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
-            onClick={() => setSelectedDate(date.dateString)}
-          >
-            <View className='day-number'>
-              {date.day}
-            </View>
-            <View className='day-name'>
-              {date.isToday ? '今天' : `周${date.weekday}`}
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* Activity section */}
-      <View className='activity-section'>
-        <View className='section-title'>
-          {selectedDate === dates[0].dateString ? '今日活动' : `${selectedDate.slice(5).replace('-', '月')}日活动`}
+    <PullToRefresh onRefresh={handleRefresh}>
+      <ScrollView className='recent-activities-container' scrollY>
+        {/* Header section */}
+        <View className='header-section'>
+          <View className='header-title'>最近活动</View>
+          <View className='header-desc'>探索丰富多彩的活动，加入我们一起玩乐！</View>
         </View>
-        
-        {filteredActivities.length > 0 ? (
-          filteredActivities.map(activity => (
-            <View key={activity.id} className='activity-card'>
-              <Image 
+
+        {/* Date navigation */}
+        <View className='date-nav'>
+          <View className='month-text'>{dates[0].month}月</View>
+          {dates.map((date, index) => (
+            <View
+              key={index}
+              className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
+              onClick={() => setSelectedDate(date.dateString)}
+            >
+              <View className='day-number'>
+                {date.day}
+              </View>
+              <View className='day-name'>
+                {date.isToday ? '今天' : `周${date.weekday}`}
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Event Filters */}
+        <EventFiltersComponent
+          onFiltersChange={handleFiltersChange}
+          initialFilters={currentFilters}
+        />
+
+        {/* Activity section */}
+        <View className='activity-section'>
+          <View className='section-title'>
+            {selectedDate === dates[0].dateString ? '今日活动' : `${selectedDate.slice(5).replace('-', '月')}日活动`}
+          </View>
+
+          {loading ? (
+            <View className='loading-container'>
+              <Loading type="spinner" />
+              <Text className='loading-text'>加载中...</Text>
+            </View>
+          ) : filteredEvents.length > 0 ? (
+          filteredEvents.map(event => (
+            <View key={event.id} className='activity-card'>
+              <Image
                 className='activity-image'
-                src={activity.image}
+                src={event.imageUrls?.[0] || event.image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop'}
                 mode='aspectFill'
               />
               <View className='activity-content'>
-                <View className='activity-title'>{activity.title}</View>
-                
+                <View className='activity-title'>{event.title}</View>
+
                 <View className='activity-time-location'>
                   <View className='activity-time'>
                     <Text className='icon'>🕒</Text>
-                    <Text>{activity.time}</Text>
+                    <Text>{formatTime(event.startTime)}</Text>
                   </View>
                   <View className='activity-location'>
                     <Text className='icon'>📍</Text>
-                    <Text>{activity.location}</Text>
+                    <Text>{event.location || '线上活动'}</Text>
                   </View>
                 </View>
-                
-                <View className='activity-desc'>{activity.description}</View>
-                
+
+                <View className='activity-desc'>{event.description || '暂无描述'}</View>
+
                 <View className='activity-footer'>
                   <View className='activity-tags'>
-                    <View className='activity-tag'>{activity.category}</View>
-                    <View className='activity-tag limit-tag'>
-                      {activity.enrolled}/{activity.capacity}人
-                    </View>
-                    <View className='activity-tag'>
-                      {activity.price}
-                    </View>
-                  </View>
-                  
-                  <View className='activity-action'>
-                    {activity.enrolled < activity.capacity ? (
-                      <View 
-                        className='join-button'
-                        onClick={() => handleJoin(activity.id)}
-                      >
-                        立即报名
+                    {event.capacity && (
+                      <View className='activity-tag limit-tag'>
+                        {event.capacity}人
                       </View>
-                    ) : (
-                      <View className='join-button full-button'>
-                        已满员
+                    )}
+                    {event.price && (
+                      <View className='activity-tag'>
+                        ${event.price}
                       </View>
                     )}
                   </View>
+
+                  <EventRegistrationStatus
+                    event={event}
+                    onRegistrationChange={() => fetchUpcomingEvents(false)}
+                  />
                 </View>
               </View>
             </View>
           ))
         ) : (
-          <View className='empty-state'>
-            当天暂无活动安排，请选择其他日期或稍后再来~
-          </View>
+          <Empty
+            description={selectedDate === dates[0].dateString ? '今日暂无活动安排' : `${selectedDate.slice(5).replace('-', '月')}日暂无活动安排`}
+            imageSize={120}
+          />
+        )}
+
+        {/* Pagination */}
+        {!loading && events.length > 0 && pagination.totalPages > 1 && (
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            total={pagination.total}
+            pageSize={pagination.limit}
+            onPageChange={handlePageChange}
+            loading={loading}
+          />
         )}
       </View>
     </ScrollView>
+    </PullToRefresh>
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { Uploader, type FileItem } from '@nutui/nutui-react-taro'
@@ -8,63 +8,68 @@ import { useAuth } from 'src/context/auth'
 
 const SecondHandPublish: React.FC = () => {
   // Form state
-  const [title, setTitle] = useState('Sample title')
-  const [description, setDescription] = useState('Sample description')
-  const [price, setPrice] = useState('60')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [price, setPrice] = useState('')
   const [fileList, setFileList] = useState<FileItem[]>([])
-  const [fileIds, setFileIds] = useState<string[]>([])
+  const [titleTouched, setTitleTouched] = useState(false)
+  const [descTouched, setDescTouched] = useState(false)
+  const [priceTouched, setPriceTouched] = useState(false)
   const { state } = useAuth()
   
-  const maxImages = 6 // 最多支持6张图片
+  const maxImages = 10
   
   // Calculate if form is valid
   const isFormValid = 
-    title.trim() !== '' && 
-    description.trim() !== '' && 
-    price.trim() !== '' && 
+    title.trim().length > 0 && 
+    description.trim().length > 0 && 
+    price.trim().length > 0 && 
+    !Number.isNaN(parseFloat(price)) &&
+    parseFloat(price) > 0 &&
     fileList.length > 0
 
-  // Handle file operations
+  const titleRemaining = useMemo(() => 30 - title.length, [title])
+  const descRemaining = useMemo(() => 500 - description.length, [description])
+
+  // Handle file operations - 只做本地预览，不上传
   const onDelete = (file: FileItem, files: FileItem[]) => {
-    // console.log('delete file', file)
+    console.log('删除文件:', file)
     setFileList(files)
-    // 根据删除后的文件数量来调整 fileIds
-    // 由于无法确定删除的是哪个具体文件，我们按照剩余文件数量来截取 fileIds
-    setFileIds(prev => prev.slice(0, files.length))
   }
 
+  // 由于不使用自动上传，这些回调不会被触发，但保留以防需要
   const onSuccess = (param: { responseText: any; option: any; files: FileItem[] }) => {
-    // console.log('upload success', param)
-    try {
-      const response = JSON.parse(param.responseText.data)
-      const imageUrl = `https://res.cloudinary.com/ds9attzj6/image/upload/v1751287215/${response.data.filename_disk}`
-      setFileIds(prev => [...prev, response.data.id])
-      // console.log('File ID added:', response.data.id)
-      
-      // 由于 NutUI 的 bug，files 数组可能是空的，我们需要手动构建文件对象
-      const newFile: FileItem = {
-        uid: `upload_${Date.now()}`,
-        name: `image_${fileIds.length + 1}`,
-        url: imageUrl,
-        status: 'success',
-        type: 'image',
-        message: ''
-      }
-      
-      // 手动更新文件列表
-      setFileList(prev => [...prev, newFile])
-    } catch (error) {
-      console.error('Upload response parsing error:', error)
-    }
+    console.log('图片选择成功:', param)
+    // 不需要处理上传，只更新本地文件列表
   }
 
   const onFailure = (param: { responseText: string; option: any; files: FileItem[] }) => {
-    console.log('upload failure', param)
-    Taro.showToast({
-      title: '图片上传失败',
-      icon: 'none',
-      duration: 2000
-    })
+    console.log('图片选择失败:', param)
+  }
+
+  // Handle file change - 当用户选择文件时
+  const handleFileChange = (files: FileItem[]) => {
+    console.log('文件列表更新:', files)
+    setFileList(files)
+  }
+
+  const handleTitleInput = (value: string) => {
+    setTitle(value)
+  }
+
+  const handleDescInput = (value: string) => {
+    setDescription(value)
+  }
+
+  const handlePriceInput = (value: string) => {
+    // 只允许数字和一个小数点，限制两位小数
+    let sanitized = value.replace(/[^\d.]/g, '')
+    const parts = sanitized.split('.')
+    if (parts.length > 2) sanitized = parts[0] + '.' + parts.slice(1).join('')
+    const [i = '', d = ''] = sanitized.split('.')
+    const intPart = i.replace(/^0+(?=\d)/, '')
+    const decPart = d.slice(0, 2)
+    setPrice(decPart.length ? `${intPart}.${decPart}` : intPart)
   }
   
   // Handle form submission
@@ -78,10 +83,19 @@ const SecondHandPublish: React.FC = () => {
       return
     }
 
-    // 检查所有图片是否上传成功
-    if (fileIds.length === 0) {
+    if (!state.userInfo?.id) {
       Taro.showToast({
-        title: '请先上传商品图片',
+        title: '请先登录',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
+    // 检查是否有图片
+    if (fileList.length === 0) {
+      Taro.showToast({
+        title: '请先选择商品图片',
         icon: 'none',
         duration: 2000
       })
@@ -94,39 +108,56 @@ const SecondHandPublish: React.FC = () => {
     })
 
     try {
-      // Create item with first image as main image and all images in array
-      const res1 = await secondhandApi.createItem({
-        sellerId: state.userInfo?.openid || "",
-        title: title,
-        description: description,
-        price: price,
-        image: fileIds[0], // Use first image as main image
-        images: fileIds, // Store all images
-        status: 'available'
+      const API_BASE_URL = process.env.NODE_ENV === 'development' 
+        ? 'http://192.168.3.1:3000/api' 
+        : 'https://nothing-but-fun-backend-production.up.railway.app/api'
+
+      console.log('开始发布商品...')
+      console.log('商品信息:', {
+        sellerId: parseInt(state.userInfo.id),
+        title: title.trim(),
+        description: description.trim(),
+        price: price.trim(),
+        status: 'available',
+        imageCount: fileList.length
       })
+
+      const fileIds: string[] = await Promise.all(fileList.map(async (file) => {
+        const res = await Taro.uploadFile({
+          url: `${API_BASE_URL}/file`,
+          filePath: file.path || file.url || '',
+          name: 'image',
+        })
+        const data = JSON.parse(res.data);
+        return data.data.id;
+      }))
       
-      if (res1.id) {
+      const res = await secondhandApi.createItem({
+        sellerId: parseInt(state.userInfo.id),
+        title: title.trim(),
+        description: description.trim(),
+        price: price.trim(),
+        status: 'available',
+        images: fileIds
+      })
+      if (res.id) {
         Taro.hideLoading()
         Taro.showToast({
-          title: '发布成功',
+          title: '发布成功！',
           icon: 'success',
           duration: 2000
         })
-        setTimeout(() => {
-          Taro.navigateBack()
-        }, 2000)
-      } else {
-        Taro.hideLoading()
-        Taro.showToast({
-          title: '发布失败',
-          icon: 'none',
-          duration: 2000
-        })
+        setTitle('')
+        setDescription('')
+        setPrice('')
+        setFileList([])
+        Taro.navigateBack()
       }
     } catch (error) {
+      console.error('发布失败:', error)
       Taro.hideLoading()
       Taro.showToast({
-        title: '发布失败，请重试',
+        title: error.message || '发布失败，请重试',
         icon: 'none',
         duration: 2000
       })
@@ -135,32 +166,52 @@ const SecondHandPublish: React.FC = () => {
 
   return (
     <ScrollView className='publish-container' scrollY>
+      {/* Hero */}
+      <View className='publish-hero'>
+        <Text className='hero-title'>发布二手好物</Text>
+        <Text className='hero-subtitle'>清晰描述 + 优质图片，更快成交</Text>
+        <View className='hero-stats'>
+          <View className='stat'><Text className='stat-number'>{fileList.length}</Text><Text className='stat-label'>已选图片</Text></View>
+          <View className='divider' />
+          <View className='stat'><Text className='stat-number'>{Math.max(0, maxImages - fileList.length)}</Text><Text className='stat-label'>剩余可选</Text></View>
+        </View>
+      </View>
       {/* Basic Info Section */}
       <View className='form-section'>
         <View className='form-title'>基本信息</View>
         
         {/* Title */}
-        <View className='form-item'>
+        <View className={`form-item ${titleTouched && title.trim() === '' ? 'error' : ''}`}>
           <Input 
             className='form-input'
             placeholder='标题（建议30字以内）'
             placeholderClass='form-placeholder'
             value={title}
-            onInput={e => setTitle(e.detail.value)}
+            onInput={e => handleTitleInput(e.detail.value)}
+            onBlur={() => setTitleTouched(true)}
             maxlength={30}
           />
+          <View className='field-hint'>剩余 {Math.max(0, titleRemaining)} 字</View>
+          {titleTouched && title.trim() === '' && (
+            <View className='error-text'>请填写标题</View>
+          )}
         </View>
         
         {/* Description */}
-        <View className='form-item'>
+        <View className={`form-item ${descTouched && description.trim() === '' ? 'error' : ''}`}>
           <Textarea 
             className='form-textarea'
             placeholder='描述一下你的商品，例如：入手渠道、使用感受、新旧程度等'
             placeholderClass='form-placeholder'
             value={description}
-            onInput={e => setDescription(e.detail.value)}
+            onInput={e => handleDescInput(e.detail.value)}
+            onBlur={() => setDescTouched(true)}
             maxlength={500}
           />
+          <View className='field-hint'>剩余 {Math.max(0, descRemaining)} 字</View>
+          {descTouched && description.trim() === '' && (
+            <View className='error-text'>请填写商品描述</View>
+          )}
         </View>
       </View>
       
@@ -168,21 +219,19 @@ const SecondHandPublish: React.FC = () => {
       <View className='form-section'>
         <View className='form-title'>上传图片</View>
         <View className='upload-section'>
-          <View className='upload-desc'>上传清晰的商品照片, 最多{maxImages}张 ({fileList.length}/{maxImages})</View>
+          <View className='upload-desc'>选择清晰的商品照片（{fileList.length}/{maxImages} 张，支持拖动排序）</View>
           <Uploader
-            url="https://nothing-but-fun-backend-production.up.railway.app/api/file"
             value={fileList}
-            onChange={setFileList}
+            onChange={handleFileChange}
             multiple
             maxCount={maxImages}
             onDelete={onDelete}
             onSuccess={onSuccess}
             onFailure={onFailure}
-            name="image"
-            data={{ user: 'test' }}
             accept="image/*"
             deletable
             preview
+            autoUpload={false}
           />
         </View>
       </View>
@@ -192,7 +241,7 @@ const SecondHandPublish: React.FC = () => {
         <View className='form-title'>价格</View>
         
         {/* Price */}
-        <View className='form-item'>
+        <View className={`form-item ${priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) ? 'error' : ''}`}>
           <View className='form-item-row'>
             <View className='form-label'>售价</View>
             <Input 
@@ -200,15 +249,17 @@ const SecondHandPublish: React.FC = () => {
               placeholder='0'
               placeholderClass='form-placeholder'
               value={price}
-              onInput={e => setPrice(e.detail.value)}
+              onInput={e => handlePriceInput(e.detail.value)}
+              onBlur={() => setPriceTouched(true)}
               type='digit'
             />
             <Text style={{ marginLeft: '4px' }}>AUD</Text>
           </View>
+          {priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) && (
+            <View className='error-text'>请输入有效的价格（大于 0）</View>
+          )}
         </View>
       </View>
-      
-      
       
       {/* Tips Section */}
       <View className='tips-section'>
@@ -228,7 +279,7 @@ const SecondHandPublish: React.FC = () => {
           </View>
           <View className='tips-item'>
             <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>发布后，请耐心等待审核，审核通过后，商品将显示在二手市场</Text>
+            <Text className='tips-text'>图片将在发布时上传，发布后请耐心等待审核</Text>
           </View>
         </View>
       </View>

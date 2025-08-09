@@ -5,7 +5,8 @@ export interface Restaurant {
   id: number
   name: string
   description: string
-  image: string
+  image?: string  // Legacy field, kept for backward compatibility
+  imageUrls: string[]  // 多图片支持，来自Cloudinary
   streetAddress: string
   suburb: string
   postcode: string
@@ -14,6 +15,21 @@ export interface Restaurant {
   totalReviews: number
   createdAt: string
   updatedAt: string
+  pricingDetails?: string  // 价格详情
+  priceRangeRid?: number  // 价格范围ID
+  restaurantTypeRid?: number  // 餐厅类型ID
+}
+
+// 餐厅类型接口
+export interface RestaurantType {
+  id: number
+  name: string
+}
+
+// 价格范围接口
+export interface PriceRange {
+  id: number
+  name: string
 }
 
 // 餐厅评论数据类型
@@ -32,6 +48,25 @@ export interface RestaurantReview {
   updatedAt: string
   restaurantName?: string
   restaurantImage?: string
+  // 新增维度评分
+  tasteRating?: number      // 口味评分 (1-5)
+  environmentRating?: number // 环境评分 (1-5)
+  serviceRating?: number    // 服务评分 (1-5)
+  priceRating?: number      // 价格评分 (1-5)
+}
+
+// 新评论创建接口
+export interface NewRestaurantReview {
+  restaurantId: number
+  userId: number
+  username: string
+  content: string
+  rating: number
+  status?: 'pending' | 'approved' | 'rejected'
+  tasteRating?: number
+  environmentRating?: number
+  serviceRating?: number
+  priceRating?: number
 }
 
 // 餐厅查询参数接口
@@ -43,6 +78,30 @@ export interface RestaurantQueryParams {
   name?: string
   suburb?: string
   minRating?: number
+  priceRangeRid?: string  // 价格范围筛选
+  restaurantTypeRid?: string  // 餐厅类型筛选
+}
+
+// 餐厅过滤参数接口（用于过滤组件）
+export interface RestaurantFilters {
+  page?: number
+  limit?: number
+  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt'
+  sortOrder?: 'asc' | 'desc'
+  name?: string
+  suburb?: string
+  minRating?: number
+  priceRangeRid?: string
+  restaurantTypeRid?: string
+}
+
+// 分页餐厅响应接口
+export interface PaginatedRestaurantResponse {
+  data: Restaurant[]
+  // total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 // 评论查询参数接口
@@ -56,6 +115,31 @@ export interface ReviewQueryParams {
   minRating?: number
   maxRating?: number
   status?: 'pending' | 'approved' | 'rejected'
+}
+
+// 评论统计接口
+export interface ReviewStats {
+  totalReviews: number
+  averageRating: string
+  ratingDistribution: {
+    [key: string]: number // "1": count, "2": count, etc.
+  }
+  // 维度评分统计
+  averageTasteRating?: number
+  averageEnvironmentRating?: number
+  averageServiceRating?: number
+  averagePriceRating?: number
+}
+
+// 审核统计接口
+export interface ModerationStats {
+  totalReviews: number
+  pendingReviews: number
+  approvedReviews: number
+  rejectedReviews: number
+  pendingPercentage: number
+  approvedPercentage: number
+  rejectedPercentage: number
 }
 
 // API响应接口
@@ -102,6 +186,18 @@ export interface SingleReviewResponse {
 export interface ReviewStatsResponse {
   success: boolean
   message: string
+  data: ReviewStats
+}
+
+export interface ModerationStatsResponse {
+  success: boolean
+  message: string
+  data: ModerationStats
+}
+
+export interface ReviewStatsResponse {
+  success: boolean
+  message: string
   data: {
     totalReviews: number
     averageRating: number
@@ -124,16 +220,26 @@ export const restaurantApi = {
           return acc
         }, {} as Record<string, string>)
       ).toString() : ''
-      
+
       const response = await request({
         url: `/restaurants${queryString}`,
         method: 'GET'
       }) as RestaurantResponse
-      
+      // Ensure imageUrls is always an array
+      if (response?.data) {
+        response.data = response.data.map(restaurant => ({
+          ...restaurant,
+          imageUrls: restaurant.imageUrls || []
+        }))
+      }
+
       return response || { success: false, message: '获取数据失败', data: [] }
     } catch (error) {
       console.error('获取餐厅列表失败:', error)
-      // 返回模拟数据用于展示
+      // 提供更详细的错误信息，但仍返回模拟数据用于展示
+      const errorMessage = error instanceof Error ? error.message : '网络连接失败，请检查网络设置'
+      console.warn(`API调用失败: ${errorMessage}，使用模拟数据`)
+
       return {
         success: true,
         message: '获取餐厅列表成功（模拟数据）',
@@ -145,7 +251,73 @@ export const restaurantApi = {
           totalPages: 1,
           hasNext: false,
           hasPrev: false
-        }
+        },
+      }
+    }
+  },
+
+  // 获取所有餐厅（新的分页格式）
+  getAllRestaurantsPaginated: async (params?: RestaurantFilters): Promise<PaginatedRestaurantResponse> => {
+    try {
+      const queryString = params ? '?' + new URLSearchParams(
+        Object.entries(params).reduce((acc, [key, value]) => {
+          if (value !== undefined && value !== null) {
+            acc[key] = String(value)
+          }
+          return acc
+        }, {} as Record<string, string>)
+      ).toString() : ''
+
+      const response = await request({
+        url: `/restaurants${queryString}`,
+        method: 'GET'
+      })
+
+      // 检查响应格式 - 后端返回的格式是 { data: Restaurant[], total, page, limit, totalPages }
+      if (response && typeof response === 'object' && 'data' in response) {
+        // Ensure imageUrls is always an array
+        const restaurants = response.data.map((restaurant: Restaurant) => ({
+          ...restaurant,
+          imageUrls: restaurant.imageUrls || []
+        }))
+
+        return {
+          data: restaurants,
+          page: response.page,
+          limit: response.limit,
+          totalPages: response.totalPages
+        } as PaginatedRestaurantResponse
+      }
+
+      // 如果是简单数组格式，包装成分页响应
+      if (Array.isArray(response)) {
+        const restaurants = response.map((restaurant: Restaurant) => ({
+          ...restaurant,
+          imageUrls: restaurant.imageUrls || []
+        }))
+        return {
+          data: restaurants,
+          page: 1,
+          limit: restaurants.length,
+          totalPages: 1
+        } as PaginatedRestaurantResponse
+      }
+
+      return {
+        data: [],
+        page: 1,
+        limit: 10,
+        totalPages: 0
+      } as PaginatedRestaurantResponse
+    } catch (error) {
+      console.error('获取餐厅列表失败:', error)
+      // 返回模拟数据，包装成分页响应格式
+      const mockData = getMockRestaurants()
+      return {
+        data: mockData,
+        page: 1,
+        limit: mockData.length,
+        totalPages: 1
       }
     }
   },
@@ -157,7 +329,12 @@ export const restaurantApi = {
         url: `/restaurants/${id}`,
         method: 'GET'
       }) as SingleRestaurantResponse
-      
+
+      // Ensure imageUrls is always an array
+      if (response?.data) {
+        response.data.imageUrls = response.data.imageUrls || []
+      }
+
       return response?.data || null
     } catch (error) {
       console.error('获取餐厅详情失败:', error)
@@ -175,7 +352,7 @@ export const restaurantApi = {
         method: 'POST',
         data: restaurantData
       }) as SingleRestaurantResponse
-      
+
       return response?.data || null
     } catch (error) {
       console.error('创建餐厅失败:', error)
@@ -191,7 +368,7 @@ export const restaurantApi = {
         method: 'PUT',
         data: restaurantData
       }) as SingleRestaurantResponse
-      
+
       return response?.data || null
     } catch (error) {
       console.error('更新餐厅失败:', error)
@@ -206,10 +383,35 @@ export const restaurantApi = {
         url: `/restaurants/${id}`,
         method: 'DELETE'
       })
-      
+
       return response?.success || false
     } catch (error) {
       console.error('删除餐厅失败:', error)
+      throw error
+    }
+  },
+
+  // 为餐厅评分
+  rateRestaurant: async (restaurantId: number, ratingData: {
+    userId: number
+    username: string
+    content: string
+    rating: number
+    tasteRating?: number
+    environmentRating?: number
+    serviceRating?: number
+    priceRating?: number
+  }): Promise<any> => {
+    try {
+      const response = await request({
+        url: `/restaurants/rate/${restaurantId}`,
+        method: 'POST',
+        data: ratingData
+      })
+
+      return response?.data || null
+    } catch (error) {
+      console.error('提交餐厅评分失败:', error)
       throw error
     }
   },
@@ -221,7 +423,7 @@ export const restaurantApi = {
         url: `/restaurants/suburb/${encodeURIComponent(suburb)}`,
         method: 'GET'
       }) as RestaurantResponse
-      
+
       return response?.data || []
     } catch (error) {
       console.error('根据区域获取餐厅失败:', error)
@@ -236,11 +438,56 @@ export const restaurantApi = {
         url: `/restaurants/search/${encodeURIComponent(keyword)}`,
         method: 'GET'
       }) as RestaurantResponse
-      
+
       return response?.data || []
     } catch (error) {
       console.error('搜索餐厅失败:', error)
       return []
+    }
+  },
+
+  // 获取餐厅类型
+  getRestaurantTypes: async (): Promise<RestaurantType[]> => {
+    try {
+      const response = await request({
+        url: '/restaurant-types',
+        method: 'GET'
+      }) as { success: boolean; data: RestaurantType[] }
+
+      return response?.data || []
+    } catch (error) {
+      console.error('获取餐厅类型失败:', error)
+      // 返回默认餐厅类型
+      return [
+        { id: 1, name: '中餐' },
+        { id: 2, name: '西餐' },
+        { id: 3, name: '日料' },
+        { id: 4, name: '韩料' },
+        { id: 5, name: '快餐' },
+        { id: 6, name: '咖啡厅' },
+        { id: 7, name: '酒吧' }
+      ]
+    }
+  },
+
+  // 获取价格范围
+  getPriceRanges: async (): Promise<PriceRange[]> => {
+    try {
+      const response = await request({
+        url: '/price-ranges',
+        method: 'GET'
+      }) as { success: boolean; data: PriceRange[] }
+
+      return response?.data || []
+    } catch (error) {
+      console.error('获取价格范围失败:', error)
+      // 返回默认价格范围
+      return [
+        { id: 1, name: '$' },
+        { id: 2, name: '$$' },
+        { id: 3, name: '$$$' },
+        { id: 4, name: '$$$$' }
+      ]
     }
   },
 
@@ -251,7 +498,7 @@ export const restaurantApi = {
         url: `/restaurants/top-rated?limit=${limit}`,
         method: 'GET'
       }) as RestaurantResponse
-      
+
       return response?.data || []
     } catch (error) {
       console.error('获取热门餐厅失败:', error)
@@ -273,12 +520,12 @@ export const restaurantReviewApi = {
           return acc
         }, {} as Record<string, string>)
       ).toString() : ''
-      
+
       const response = await request({
         url: `/restaurant-reviews${queryString}`,
         method: 'GET'
       }) as ReviewResponse
-      
+
       return response || { success: false, message: '获取数据失败', data: [] }
     } catch (error) {
       console.error('获取评论列表失败:', error)
@@ -306,7 +553,7 @@ export const restaurantReviewApi = {
         url: `/restaurant-reviews/${id}`,
         method: 'GET'
       }) as SingleReviewResponse
-      
+
       return response?.data || null
     } catch (error) {
       console.error('获取评论详情失败:', error)
@@ -327,12 +574,12 @@ export const restaurantReviewApi = {
           return acc
         }, {} as Record<string, string>)
       ).toString() : ''
-      
+
       const response = await request({
         url: `/restaurant-reviews/restaurant/${restaurantId}${queryString}`,
         method: 'GET'
       }) as ReviewResponse
-      
+
       return response || { success: false, message: '获取数据失败', data: [] }
     } catch (error) {
       console.error('根据餐厅获取评论失败:', error)
@@ -366,18 +613,18 @@ export const restaurantReviewApi = {
           return acc
         }, {} as Record<string, string>)
       ).toString() : ''
-      
+
       const response = await request({
         url: `/restaurant-reviews/restaurant/${restaurantId}/approved${queryString}`,
         method: 'GET'
       }) as ReviewResponse
-      
+
       return response || { success: false, message: '获取数据失败', data: [] }
     } catch (error) {
       console.error('获取餐厅已审核评论失败:', error)
       // 返回模拟数据，只返回已审核通过的评论
       const mockReviews = getMockReviews()
-      const approvedReviews = mockReviews.filter(review => 
+      const approvedReviews = mockReviews.filter(review =>
         review.restaurantId === restaurantId && review.status === 'approved'
       )
       return {
@@ -407,12 +654,12 @@ export const restaurantReviewApi = {
           return acc
         }, {} as Record<string, string>)
       ).toString() : ''
-      
+
       const response = await request({
         url: `/restaurant-reviews/user/${userId}${queryString}`,
         method: 'GET'
       }) as ReviewResponse
-      
+
       return response || { success: false, message: '获取数据失败', data: [] }
     } catch (error) {
       console.error('根据用户获取评论失败:', error)
@@ -421,20 +668,20 @@ export const restaurantReviewApi = {
   },
 
   // 创建新评论（默认状态为pending，需要审核）
-  createReview: async (reviewData: Omit<RestaurantReview, 'id' | 'status' | 'moderatedBy' | 'moderatedAt' | 'rejectionReason' | 'createdAt' | 'updatedAt'>): Promise<RestaurantReview | null> => {
+  createReview: async (reviewData: NewRestaurantReview): Promise<RestaurantReview | null> => {
     try {
       // 确保新评论状态为pending
       const reviewWithStatus = {
         ...reviewData,
         status: 'pending' as const
       }
-      
+
       const response = await request({
         url: '/restaurant-reviews',
         method: 'POST',
         data: reviewWithStatus
       }) as SingleReviewResponse
-      
+
       return response?.data || null
     } catch (error) {
       console.error('创建评论失败:', error)
@@ -450,7 +697,7 @@ export const restaurantReviewApi = {
         method: 'PUT',
         data: reviewData
       }) as SingleReviewResponse
-      
+
       return response?.data || null
     } catch (error) {
       console.error('更新评论失败:', error)
@@ -465,139 +712,13 @@ export const restaurantReviewApi = {
         url: `/restaurant-reviews/${id}`,
         method: 'DELETE'
       })
-      
+
       return response?.success || false
     } catch (error) {
       console.error('删除评论失败:', error)
       throw error
     }
   },
-
-  // 获取餐厅评论统计（只统计已审核通过的评论）
-  getRestaurantReviewStats: async (restaurantId: number): Promise<ReviewStatsResponse['data'] | null> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/restaurant/${restaurantId}/stats`,
-        method: 'GET'
-      }) as ReviewStatsResponse
-      
-      return response?.data || null
-    } catch (error) {
-      console.error('获取餐厅评论统计失败:', error)
-      // 返回模拟统计数据，只统计已审核通过的评论
-      const mockReviews = getMockReviews()
-      const approvedReviews = mockReviews.filter(review => 
-        review.restaurantId === restaurantId && review.status === 'approved'
-      )
-      
-      if (approvedReviews.length === 0) {
-        return {
-          totalReviews: 0,
-          averageRating: 0,
-          ratingDistribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 }
-        }
-      }
-      
-      const totalRating = approvedReviews.reduce((sum, review) => sum + review.rating, 0)
-      const averageRating = totalRating / approvedReviews.length
-      
-      const ratingDistribution = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 }
-      approvedReviews.forEach(review => {
-        ratingDistribution[review.rating.toString()]++
-      })
-      
-      return {
-        totalReviews: approvedReviews.length,
-        averageRating: Math.round(averageRating * 100) / 100,
-        ratingDistribution
-      }
-    }
-  },
-
-  // 审核评论（管理员功能）
-  moderateReview: async (reviewId: number, action: 'approve' | 'reject', moderatorId: number, rejectionReason?: string): Promise<RestaurantReview | null> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/${reviewId}/moderate`,
-        method: 'POST',
-        data: {
-          action,
-          moderatorId,
-          rejectionReason
-        }
-      }) as SingleReviewResponse
-      
-      return response?.data || null
-    } catch (error) {
-      console.error('审核评论失败:', error)
-      throw error
-    }
-  },
-
-  // 获取待审核评论（管理员功能）
-  getPendingReviews: async (params?: Omit<ReviewQueryParams, 'status'>): Promise<ReviewResponse> => {
-    try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-      
-      const response = await request({
-        url: `/restaurant-reviews/pending${queryString}`,
-        method: 'GET'
-      }) as ReviewResponse
-      
-      return response || { success: false, message: '获取数据失败', data: [] }
-    } catch (error) {
-      console.error('获取待审核评论失败:', error)
-      // 返回模拟数据，只返回待审核的评论
-      const mockReviews = getMockReviews()
-      const pendingReviews = mockReviews.filter(review => review.status === 'pending')
-      return {
-        success: true,
-        message: '获取待审核评论成功（模拟数据）',
-        data: pendingReviews,
-        pagination: {
-          page: 1,
-          limit: 10,
-          total: pendingReviews.length,
-          totalPages: Math.ceil(pendingReviews.length / 10),
-          hasNext: false,
-          hasPrev: false
-        }
-      }
-    }
-  },
-
-  // 获取审核统计（管理员功能）
-  getModerationStats: async (): Promise<{ pending: number; approved: number; rejected: number; total: number } | null> => {
-    try {
-      const response = await request({
-        url: '/restaurant-reviews/moderation/stats',
-        method: 'GET'
-      })
-      
-      return response?.data || null
-    } catch (error) {
-      console.error('获取审核统计失败:', error)
-      // 返回模拟统计数据
-      const mockReviews = getMockReviews()
-      const pending = mockReviews.filter(review => review.status === 'pending').length
-      const approved = mockReviews.filter(review => review.status === 'approved').length
-      const rejected = mockReviews.filter(review => review.status === 'rejected').length
-      
-      return {
-        pending,
-        approved,
-        rejected,
-        total: mockReviews.length
-      }
-    }
-  }
 }
 
 // 模拟餐厅数据（用于展示和测试）
@@ -608,6 +729,11 @@ const getMockRestaurants = (): Restaurant[] => {
       name: '龙宫亚洲融合餐厅',
       description: '现代亚洲融合餐厅，提供传统与现代风味的独特融合。招牌菜包括北京烤鸭、日式拉面和泰式咖喱。',
       image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop'
+      ],
       streetAddress: '123 Brunswick Street',
       suburb: 'Fortitude Valley',
       postcode: '4006',
@@ -615,13 +741,22 @@ const getMockRestaurants = (): Restaurant[] => {
       overallRating: '4.25',
       totalReviews: 15,
       createdAt: '2024-01-15T10:00:00.000Z',
-      updatedAt: '2024-01-20T14:30:00.000Z'
+      updatedAt: '2024-01-20T14:30:00.000Z',
+      pricingDetails: '主菜 $25-35，套餐 $45-65',
+      priceRangeRid: 3,
+      restaurantTypeRid: 1
     },
     {
       id: 2,
       name: '意式风情餐厅',
       description: '正宗意大利餐厅，提供手工制作的意大利面和传统比萨。使用进口意大利食材，营造地道的意式用餐体验。',
       image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+      imageUrls: [
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop'
+      ],
       streetAddress: '456 Queen Street',
       suburb: 'Brisbane City',
       postcode: '4000',
@@ -629,92 +764,12 @@ const getMockRestaurants = (): Restaurant[] => {
       overallRating: '4.50',
       totalReviews: 28,
       createdAt: '2024-01-10T09:30:00.000Z',
-      updatedAt: '2024-01-25T16:45:00.000Z'
+      updatedAt: '2024-01-25T16:45:00.000Z',
+      pricingDetails: '比萨 $18-28，意面 $22-32',
+      priceRangeRid: 2,
+      restaurantTypeRid: 2
     },
-    {
-      id: 3,
-      name: '海鲜码头',
-      description: '新鲜海鲜专门店，每日从黄金海岸直送最新鲜的海鲜。特色菜包括澳洲龙虾、生蚝和巴拉曼迪鱼。',
-      image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop',
-      streetAddress: '789 Eagle Street Pier',
-      suburb: 'Brisbane City',
-      postcode: '4000',
-      state: 'QLD',
-      overallRating: '4.75',
-      totalReviews: 42,
-      createdAt: '2024-01-05T11:15:00.000Z',
-      updatedAt: '2024-02-01T10:20:00.000Z'
-    },
-    {
-      id: 4,
-      name: '川味小厨',
-      description: '正宗四川菜餐厅，提供麻辣鲜香的川菜。招牌菜有麻婆豆腐、水煮鱼和宫保鸡丁，适合喜欢辣味的食客。',
-      image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600&h=400&fit=crop',
-      streetAddress: '321 Wickham Street',
-      suburb: 'Fortitude Valley',
-      postcode: '4006',
-      state: 'QLD',
-      overallRating: '4.10',
-      totalReviews: 33,
-      createdAt: '2024-01-20T13:45:00.000Z',
-      updatedAt: '2024-02-05T09:30:00.000Z'
-    },
-    {
-      id: 5,
-      name: '法式小酒馆',
-      description: '精致法式餐厅，提供经典法国菜和精选葡萄酒。浪漫的用餐环境，适合情侣约会和商务宴请。',
-      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop',
-      streetAddress: '654 Ann Street',
-      suburb: 'Fortitude Valley',
-      postcode: '4006',
-      state: 'QLD',
-      overallRating: '4.60',
-      totalReviews: 19,
-      createdAt: '2024-01-12T15:20:00.000Z',
-      updatedAt: '2024-01-30T12:10:00.000Z'
-    },
-    {
-      id: 6,
-      name: '日式料理屋',
-      description: '传统日本料理餐厅，提供新鲜寿司、刺身和各种日式热菜。由日本主厨亲自掌勺，保证正宗口味。',
-      image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=600&h=400&fit=crop',
-      streetAddress: '987 Adelaide Street',
-      suburb: 'Brisbane City',
-      postcode: '4000',
-      state: 'QLD',
-      overallRating: '4.35',
-      totalReviews: 26,
-      createdAt: '2024-01-08T10:45:00.000Z',
-      updatedAt: '2024-01-28T14:55:00.000Z'
-    },
-    {
-      id: 7,
-      name: '墨西哥风情',
-      description: '热情洋溢的墨西哥餐厅，提供正宗墨西哥菜和特色鸡尾酒。周末有现场音乐表演，营造欢乐的用餐氛围。',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop',
-      streetAddress: '147 Boundary Street',
-      suburb: 'West End',
-      postcode: '4101',
-      state: 'QLD',
-      overallRating: '4.20',
-      totalReviews: 31,
-      createdAt: '2024-01-18T12:30:00.000Z',
-      updatedAt: '2024-02-03T11:40:00.000Z'
-    },
-    {
-      id: 8,
-      name: '素食花园',
-      description: '创意素食餐厅，提供健康美味的植物性料理。使用有机食材，适合素食主义者和注重健康的食客。',
-      image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop',
-      streetAddress: '258 Given Terrace',
-      suburb: 'Paddington',
-      postcode: '4064',
-      state: 'QLD',
-      overallRating: '4.40',
-      totalReviews: 22,
-      createdAt: '2024-01-22T09:15:00.000Z',
-      updatedAt: '2024-02-07T16:25:00.000Z'
-    }
+
   ]
 }
 
@@ -734,7 +789,11 @@ const getMockReviews = (): RestaurantReview[] => {
       createdAt: '2024-01-20T10:00:00.000Z',
       updatedAt: '2024-01-20T11:00:00.000Z',
       restaurantName: '龙宫亚洲融合餐厅',
-      restaurantImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'
+      restaurantImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+      tasteRating: 5,
+      environmentRating: 4,
+      serviceRating: 5,
+      priceRating: 4
     },
     {
       id: 2,
@@ -749,7 +808,11 @@ const getMockReviews = (): RestaurantReview[] => {
       createdAt: '2024-01-22T14:30:00.000Z',
       updatedAt: '2024-01-22T15:00:00.000Z',
       restaurantName: '意式风情餐厅',
-      restaurantImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop'
+      restaurantImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+      tasteRating: 5,
+      environmentRating: 4,
+      serviceRating: 4,
+      priceRating: 3
     },
     {
       id: 3,

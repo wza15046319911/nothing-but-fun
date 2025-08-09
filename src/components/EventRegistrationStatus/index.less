@@ -1,0 +1,280 @@
+.event-registration-status {
+  .registration-info {
+    margin-bottom: 24rpx;
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16rpx;
+
+      .status-badge {
+        padding: 8rpx 16rpx;
+        border-radius: 20rpx;
+        
+        .status-text {
+          font-size: 24rpx;
+          color: white;
+          font-weight: 500;
+        }
+      }
+
+      .capacity-info {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+
+        .capacity-text {
+          font-size: 26rpx;
+          color: #666;
+          font-weight: 500;
+        }
+
+        .full-badge {
+          background: #ff4d4f;
+          color: white;
+          padding: 4rpx 12rpx;
+          border-radius: 12rpx;
+          font-size: 22rpx;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .registered-badge {
+      background: #f6ffed;
+      border: 1rpx solid #b7eb8f;
+      border-radius: 8rpx;
+      padding: 12rpx 16rpx;
+
+      .registered-text {
+        font-size: 26rpx;
+        color: #52c41a;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .action-buttons {
+    .register-button {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      border: none;
+      border-radius: 24rpx;
+      height: 80rpx;
+      font-size: 30rpx;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, #ff5252 0%, #e53e3e 100%);
+        transform: translateY(-2rpx);
+        box-shadow: 0 8rpx 20rpx rgba(255, 107, 107, 0.3);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .cancel-button {
+      background: #fff;
+      color: #ff4d4f;
+      border: 2rpx solid #ff4d4f;
+      border-radius: 24rpx;
+      height: 80rpx;
+      font-size: 30rpx;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #ff4d4f;
+        color: white;
+      }
+    }
+
+    .disabled-button {
+      background: #f5f5f5;
+      color: #bbb;
+      border: none;
+      border-radius: 24rpx;
+      height: 80rpx;
+      font-size: 30rpx;
+      width: 100%;
+      cursor: not-allowed;
+    }
+  }
+
+  .cancel-dialog-content {
+    padding: 20rpx;
+    text-align: center;
+
+    .cancel-message {
+      font-size: 28rpx;
+      color: #333;
+      margin-bottom: 16rpx;
+      display: block;
+      line-height: 1.5;
+    }
+
+    .cancel-warning {
+      font-size: 24rpx;
+      color: #999;
+      margin-bottom: 32rpx;
+      display: block;
+      line-height: 1.4;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 20rpx;
+      justify-content: center;
+
+      button {
+        flex: 1;
+        height: 72rpx;
+        border-radius: 36rpx;
+        font-size: 28rpx;
+        font-weight: 500;
+        border: none;
+        transition: all 0.3s ease;
+
+        &[type="default"] {
+          background: #f5f5f5;
+          color: #666;
+
+          &:hover {
+            background: #e8e8e8;
+          }
+        }
+
+        &[type="primary"] {
+          background: #ff4d4f;
+          color: white;
+
+          &:hover {
+            background: #ff7875;
+          }
+
+          &:disabled {
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .event-registration-status {
+    .registration-info {
+      margin-bottom: 20rpx;
+
+      .status-row {
+        margin-bottom: 12rpx;
+
+        .status-badge {
+          padding: 6rpx 12rpx;
+
+          .status-text {
+            font-size: 22rpx;
+          }
+        }
+
+        .capacity-info {
+          gap: 8rpx;
+
+          .capacity-text {
+            font-size: 24rpx;
+          }
+
+          .full-badge {
+            padding: 2rpx 8rpx;
+            font-size: 20rpx;
+          }
+        }
+      }
+
+      .registered-badge {
+        padding: 10rpx 12rpx;
+
+        .registered-text {
+          font-size: 24rpx;
+        }
+      }
+    }
+
+    .action-buttons {
+      .register-button,
+      .cancel-button,
+      .disabled-button {
+        height: 72rpx;
+        font-size: 28rpx;
+      }
+    }
+
+    .cancel-dialog-content {
+      padding: 16rpx;
+
+      .cancel-message {
+        font-size: 26rpx;
+        margin-bottom: 12rpx;
+      }
+
+      .cancel-warning {
+        font-size: 22rpx;
+        margin-bottom: 24rpx;
+      }
+
+      .dialog-actions {
+        gap: 16rpx;
+
+        button {
+          height: 64rpx;
+          font-size: 26rpx;
+        }
+      }
+    }
+  }
+}
+
+/* Animation effects */
+.event-registration-status {
+  .register-button {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+  }
+
+  .registered-badge {
+    animation: slideInDown 0.3s ease-out;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

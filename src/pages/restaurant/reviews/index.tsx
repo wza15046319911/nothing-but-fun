@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { PullToRefresh, Loading, Empty, Rate, Avatar, Button } from '@nutui/nutui-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
 import { restaurantReviewApi, RestaurantReview, ReviewQueryParams } from '../../../services/restaurant'
+import ReviewFiltersComponent from '../../../components/ReviewFilters'
 import './index.less'
 
 const RestaurantReviews: React.FC = () => {
@@ -13,58 +14,50 @@ const RestaurantReviews: React.FC = () => {
   const [reviews, setReviews] = useState<RestaurantReview[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [sortBy, setSortBy] = useState<'rating' | 'createdAt'>('createdAt')
-  const [filterRating, setFilterRating] = useState<number | null>(null)
+  // const [stats, setStats] = useState<any>(null)
+  const [currentFilters, setCurrentFilters] = useState<ReviewQueryParams>({
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  })
 
-  // 排序选项
-  const sortOptions = [
-    { value: 'createdAt', label: '最新评价' },
-    { value: 'rating', label: '评分最高' }
-  ]
 
-  // 评分筛选选项
-  const ratingFilters = [
-    { value: null, label: '全部评分' },
-    { value: 5, label: '5星好评' },
-    { value: 4, label: '4星以上' },
-    { value: 3, label: '3星以上' }
-  ]
 
   // 加载评价数据
-  const loadReviews = async (showLoading = true) => {
+  const loadReviews = async (showLoading = true, filters: ReviewQueryParams = currentFilters) => {
     if (!id) return
-    
+
     try {
       if (showLoading) {
         setLoading(true)
       }
-      
+
       const params: Omit<ReviewQueryParams, 'restaurantId'> = {
         page: 1,
         limit: 50,
-        sortBy: sortBy,
-        sortOrder: 'desc'
+        ...filters
       }
 
-      // 添加评分筛选
-      if (filterRating !== null) {
-        params.minRating = filterRating
-      }
-      
       // 只获取已审核通过的评价用于公开展示
       const response = await restaurantReviewApi.getApprovedReviewsByRestaurant(Number(id), params)
       setReviews(response.data || [])
     } catch (error) {
       console.error('加载评价失败:', error)
+      const errorMessage = error instanceof Error ? error.message : '网络连接失败'
       Taro.showToast({
-        title: '加载失败，请稍后重试',
+        title: `加载失败: ${errorMessage}`,
         icon: 'error',
-        duration: 2000
+        duration: 3000
       })
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
+  }
+
+  // Handle filter changes
+  const handleFiltersChange = (filters: ReviewQueryParams) => {
+    setCurrentFilters(filters)
+    loadReviews(true, filters)
   }
 
   // 下拉刷新
@@ -73,15 +66,7 @@ const RestaurantReviews: React.FC = () => {
     await loadReviews(false)
   }
 
-  // 排序筛选
-  const handleSortFilter = (sort: 'rating' | 'createdAt') => {
-    setSortBy(sort)
-  }
 
-  // 评分筛选
-  const handleRatingFilter = (rating: number | null) => {
-    setFilterRating(rating)
-  }
 
   // 跳转到撰写评价页面
   const handleWriteReview = () => {
@@ -154,7 +139,7 @@ const RestaurantReviews: React.FC = () => {
   // 组件挂载时加载数据
   useEffect(() => {
     loadReviews()
-  }, [id, sortBy, filterRating])
+  }, [id])
 
   return (
     <View className='restaurant-reviews-container'>
@@ -171,21 +156,21 @@ const RestaurantReviews: React.FC = () => {
         <View className='stats-section'>
           <View className='overall-rating'>
             <Text className='rating-score'>{stats.averageRating}</Text>
-            <Rate 
-              value={parseFloat(stats.averageRating)} 
-              readOnly 
+            <Rate
+              value={parseFloat(stats.averageRating)}
+              readOnly
             />
             <Text className='total-reviews'>共 {stats.totalReviews} 条评价</Text>
           </View>
-          
+
           <View className='rating-distribution'>
             {Object.entries(stats.ratingDistribution).reverse().map(([rating, count]) => (
               <View key={rating} className='distribution-item'>
                 <Text className='rating-label'>{rating}星</Text>
                 <View className='progress-bar'>
-                  <View 
+                  <View
                     className='progress-fill'
-                    style={{ 
+                    style={{
                       width: `${(count / stats.totalReviews) * 100}%`,
                       backgroundColor: getRatingColor(Number(rating))
                     }}
@@ -195,53 +180,30 @@ const RestaurantReviews: React.FC = () => {
               </View>
             ))}
           </View>
-
-          {/* 撰写评价按钮 */}
-          <View className='write-review-action'>
-            <Button
-              className='write-review-button'
-              type='primary'
-              size='small'
-              onClick={handleWriteReview}
-            >
-              ✍️ 撰写评价
-            </Button>
-          </View>
         </View>
       )}
 
+      {/* 撰写评价按钮 - 始终显示 */}
+      <View className='write-review-action'>
+        <Button
+          className='write-review-button'
+          type='primary'
+          size='small'
+          onClick={handleWriteReview}
+        >
+          ✍️ 撰写评价
+        </Button>
+      </View>
+
       {/* 筛选栏 */}
       <View className='filter-section'>
-        {/* 排序筛选 */}
-        <ScrollView className='sort-filter' scrollX>
-          <View className='filter-list'>
-            {sortOptions.map(option => (
-              <View 
-                key={option.value}
-                className={`filter-item ${sortBy === option.value ? 'active' : ''}`}
-                onClick={() => handleSortFilter(option.value as any)}
-              >
-                <Text className='filter-text'>{option.label}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-
-        {/* 评分筛选 */}
-        <ScrollView className='rating-filter' scrollX>
-          <View className='filter-list'>
-            {ratingFilters.map(option => (
-              <View 
-                key={option.value || 'all'}
-                className={`filter-item ${filterRating === option.value ? 'active' : ''}`}
-                onClick={() => handleRatingFilter(option.value)}
-              >
-                <Text className='filter-text'>{option.label}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
       </View>
+
+      {/* Review Filters */}
+      <ReviewFiltersComponent
+        onFiltersChange={handleFiltersChange}
+        initialFilters={currentFilters}
+      />
 
       {/* 评价列表 */}
       <PullToRefresh onRefresh={handleRefresh}>
@@ -252,10 +214,21 @@ const RestaurantReviews: React.FC = () => {
               <Text className='loading-text'>加载中...</Text>
             </View>
           ) : reviews.length === 0 ? (
-            <Empty 
-              description="暂无评价"
-              imageSize={120}
-            />
+            <View className='empty-reviews'>
+              <Empty
+                description="暂无评价，成为第一个评价的人吧！"
+                imageSize={120}
+              />
+              <View className='empty-action'>
+                <Button
+                  className='first-review-button'
+                  type='primary'
+                  onClick={handleWriteReview}
+                >
+                  🌟 写下第一条评价
+                </Button>
+              </View>
+            </View>
           ) : (
             <View className='reviews-list'>
               {reviews.map(review => (
@@ -292,6 +265,67 @@ const RestaurantReviews: React.FC = () => {
                   <View className='review-content'>
                     <Text className='content-text'>{review.content}</Text>
                   </View>
+
+                  {/* 维度评分 */}
+                  {(review.tasteRating || review.environmentRating || review.serviceRating || review.priceRating) && (
+                    <View className='dimensional-ratings'>
+                      <Text className='ratings-title'>详细评分</Text>
+                      <View className='ratings-grid'>
+                        {review.tasteRating && (
+                          <View className='rating-dimension'>
+                            <Text className='dimension-label'>🍽️ 口味</Text>
+                            <View className='dimension-rating'>
+                              <Rate
+                                value={review.tasteRating}
+                                readOnly
+                                size={16}
+                              />
+                              <Text className='dimension-score'>{review.tasteRating}</Text>
+                            </View>
+                          </View>
+                        )}
+                        {review.environmentRating && (
+                          <View className='rating-dimension'>
+                            <Text className='dimension-label'>🏪 环境</Text>
+                            <View className='dimension-rating'>
+                              <Rate
+                                value={review.environmentRating}
+                                readOnly
+                                size={16}
+                              />
+                              <Text className='dimension-score'>{review.environmentRating}</Text>
+                            </View>
+                          </View>
+                        )}
+                        {review.serviceRating && (
+                          <View className='rating-dimension'>
+                            <Text className='dimension-label'>👥 服务</Text>
+                            <View className='dimension-rating'>
+                              <Rate
+                                value={review.serviceRating}
+                                readOnly
+                                size={16}
+                              />
+                              <Text className='dimension-score'>{review.serviceRating}</Text>
+                            </View>
+                          </View>
+                        )}
+                        {review.priceRating && (
+                          <View className='rating-dimension'>
+                            <Text className='dimension-label'>💰 价格</Text>
+                            <View className='dimension-rating'>
+                              <Rate
+                                value={review.priceRating}
+                                readOnly
+                                size={16}
+                              />
+                              <Text className='dimension-score'>{review.priceRating}</Text>
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  )}
                 </View>
               ))}
             </View>

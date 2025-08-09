@@ -1,0 +1,318 @@
+.carpool-publish-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+
+  .header-section {
+    background: white;
+    padding: 32rpx;
+    border-bottom: 1rpx solid #e5e5e5;
+    text-align: center;
+
+    .page-title {
+      font-size: 36rpx;
+      font-weight: bold;
+      color: #333;
+    }
+  }
+
+  .form-container {
+    background: white;
+    margin: 20rpx;
+    border-radius: 16rpx;
+    padding: 32rpx;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+
+    .form-item-error {
+      .nut-form-item__body {
+        border-color: #f44336;
+      }
+    }
+
+    .error-text {
+      font-size: 24rpx;
+      color: #f44336;
+      margin-top: 8rpx;
+      display: block;
+    }
+
+    .picker-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24rpx 0;
+      border-bottom: 1rpx solid #e5e5e5;
+      cursor: pointer;
+
+      .picker-text {
+        font-size: 28rpx;
+        color: #333;
+      }
+
+      .picker-placeholder {
+        font-size: 28rpx;
+        color: #999;
+      }
+
+      .picker-arrow {
+        font-size: 24rpx;
+        color: #666;
+        transition: transform 0.3s ease;
+      }
+
+      &:hover {
+        background: #f8f9fa;
+
+        .picker-arrow {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .description-item {
+      .nut-textarea {
+        border: 1rpx solid #e5e5e5;
+        border-radius: 8rpx;
+        padding: 16rpx;
+        font-size: 28rpx;
+        line-height: 1.5;
+
+        &:focus {
+          border-color: #007aff;
+        }
+      }
+    }
+
+    // Switch component styling
+    .nut-form-item {
+      .nut-switch {
+        &.nut-switch--checked {
+          background-color: #007aff;
+        }
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 20rpx;
+    padding: 32rpx;
+    background: white;
+    border-top: 1rpx solid #e5e5e5;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    .cancel-button,
+    .submit-button {
+      flex: 1;
+      height: 88rpx;
+      border-radius: 44rpx;
+      font-size: 32rpx;
+      font-weight: 600;
+    }
+
+    .cancel-button {
+      background: #f5f5f5;
+      color: #666;
+      border: 1rpx solid #e5e5e5;
+
+      &:hover {
+        background: #e9ecef;
+      }
+    }
+
+    .submit-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+
+      &:hover:not(:disabled) {
+        opacity: 0.9;
+      }
+
+      &:disabled {
+        background: #ccc;
+        color: #999;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+/* Form item customization */
+.carpool-publish-container {
+  .nut-form-item {
+    margin-bottom: 32rpx;
+    border-bottom: none;
+
+    .nut-form-item__label {
+      font-size: 28rpx;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16rpx;
+      width: auto;
+      text-align: left;
+    }
+
+    .nut-form-item__body {
+      .nut-input {
+        border: 1rpx solid #e5e5e5;
+        border-radius: 8rpx;
+        padding: 24rpx 16rpx;
+        font-size: 28rpx;
+        background: #fff;
+
+        &:focus {
+          border-color: #007aff;
+        }
+
+        &::placeholder {
+          color: #999;
+        }
+      }
+    }
+
+    &.form-item-error {
+      .nut-form-item__body {
+        .nut-input {
+          border-color: #f44336;
+        }
+      }
+    }
+  }
+}
+
+/* Required field indicator */
+.carpool-publish-container {
+  .nut-form-item[required] {
+    .nut-form-item__label::after {
+      content: '*';
+      color: #f44336;
+      margin-left: 4rpx;
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .carpool-publish-container {
+    .header-section {
+      padding: 24rpx;
+
+      .page-title {
+        font-size: 32rpx;
+      }
+    }
+
+    .form-container {
+      margin: 16rpx;
+      padding: 24rpx;
+
+      .picker-trigger {
+        padding: 20rpx 0;
+
+        .picker-text,
+        .picker-placeholder {
+          font-size: 26rpx;
+        }
+      }
+
+      .nut-form-item {
+        margin-bottom: 28rpx;
+
+        .nut-form-item__label {
+          font-size: 26rpx;
+        }
+
+        .nut-form-item__body {
+          .nut-input {
+            padding: 20rpx 12rpx;
+            font-size: 26rpx;
+          }
+        }
+      }
+
+      .description-item {
+        .nut-textarea {
+          font-size: 26rpx;
+          padding: 12rpx;
+        }
+      }
+    }
+
+    .action-buttons {
+      padding: 24rpx;
+
+      .cancel-button,
+      .submit-button {
+        height: 80rpx;
+        font-size: 28rpx;
+      }
+    }
+  }
+}
+
+/* Animation effects */
+.carpool-publish-container {
+  .form-container {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .action-buttons {
+    animation: slideUp 0.4s ease-out;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.carpool-publish-container {
+  .submit-button {
+    &.loading {
+      .nut-button__loading {
+        margin-right: 8rpx;
+      }
+    }
+  }
+}
+
+/* Focus states */
+.carpool-publish-container {
+  .picker-trigger {
+    &:active {
+      background: #f0f0f0;
+    }
+  }
+
+  .nut-input:focus,
+  .nut-textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2rpx rgba(0, 122, 255, 0.2);
+  }
+}
+
+/* Validation feedback */
+.carpool-publish-container {
+  .form-item-error {
+    .picker-trigger {
+      border-color: #f44336;
+      background: #fff5f5;
+    }
+  }
+}
+
+/* Bottom spacing for fixed buttons */
+.carpool-publish-container {
+  padding-bottom: 200rpx;
+}

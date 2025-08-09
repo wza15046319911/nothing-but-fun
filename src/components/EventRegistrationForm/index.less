@@ -1,0 +1,217 @@
+.event-registration-dialog {
+  .registration-form {
+    padding: 20rpx;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .event-info {
+      background: #f8f9fa;
+      border-radius: 12rpx;
+      padding: 24rpx;
+      margin-bottom: 32rpx;
+      border-left: 4rpx solid #ff6b6b;
+
+      .event-title {
+        font-size: 32rpx;
+        font-weight: 600;
+        color: #333;
+        display: block;
+        margin-bottom: 16rpx;
+        line-height: 1.4;
+      }
+
+      .event-time,
+      .event-location,
+      .event-capacity {
+        font-size: 26rpx;
+        color: #666;
+        display: block;
+        margin-bottom: 8rpx;
+        line-height: 1.5;
+      }
+
+      .event-capacity {
+        color: #ff6b6b;
+        font-weight: 500;
+      }
+    }
+
+    .form-fields {
+      .form-field {
+        margin-bottom: 32rpx;
+
+        .field-label {
+          font-size: 28rpx;
+          font-weight: 500;
+          color: #333;
+          display: block;
+          margin-bottom: 12rpx;
+        }
+
+        .field-input {
+          width: 100%;
+          padding: 20rpx 24rpx;
+          border: 2rpx solid #e8e8e8;
+          border-radius: 12rpx;
+          font-size: 28rpx;
+          background: #fff;
+          transition: border-color 0.3s ease;
+
+          &:focus {
+            border-color: #ff6b6b;
+            outline: none;
+          }
+
+          &.error {
+            border-color: #ff4d4f;
+            background: #fff2f0;
+          }
+
+          &::placeholder {
+            color: #bbb;
+          }
+        }
+
+        .error-text {
+          font-size: 24rpx;
+          color: #ff4d4f;
+          display: block;
+          margin-top: 8rpx;
+          line-height: 1.4;
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 20rpx;
+      margin: 40rpx 0 24rpx;
+
+      .cancel-button,
+      .submit-button {
+        flex: 1;
+        height: 88rpx;
+        border-radius: 44rpx;
+        font-size: 30rpx;
+        font-weight: 500;
+        border: none;
+        transition: all 0.3s ease;
+      }
+
+      .cancel-button {
+        background: #f5f5f5;
+        color: #666;
+
+        &:hover {
+          background: #e8e8e8;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+        }
+      }
+
+      .submit-button {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+
+        &:hover {
+          background: linear-gradient(135deg, #ff5252 0%, #e53e3e 100%);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          background: #ccc;
+        }
+      }
+    }
+
+    .terms {
+      .terms-text {
+        font-size: 22rpx;
+        color: #999;
+        line-height: 1.5;
+        text-align: center;
+        display: block;
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .event-registration-dialog {
+    .registration-form {
+      padding: 16rpx;
+
+      .event-info {
+        padding: 20rpx;
+        margin-bottom: 24rpx;
+
+        .event-title {
+          font-size: 30rpx;
+        }
+
+        .event-time,
+        .event-location,
+        .event-capacity {
+          font-size: 24rpx;
+        }
+      }
+
+      .form-fields {
+        .form-field {
+          margin-bottom: 24rpx;
+
+          .field-label {
+            font-size: 26rpx;
+          }
+
+          .field-input {
+            padding: 16rpx 20rpx;
+            font-size: 26rpx;
+          }
+
+          .error-text {
+            font-size: 22rpx;
+          }
+        }
+      }
+
+      .form-actions {
+        gap: 16rpx;
+        margin: 32rpx 0 20rpx;
+
+        .cancel-button,
+        .submit-button {
+          height: 80rpx;
+          font-size: 28rpx;
+        }
+      }
+
+      .terms {
+        .terms-text {
+          font-size: 20rpx;
+        }
+      }
+    }
+  }
+}
+
+/* Animation for dialog */
+.event-registration-dialog {
+  .nut-dialog {
+    animation: slideInUp 0.3s ease-out;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

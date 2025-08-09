@@ -1,85 +1,97 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty, Rate } from '@nutui/nutui-react-taro'
+import { PullToRefresh, Rate, Swiper } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
-import { restaurantApi, Restaurant, RestaurantQueryParams } from '../../services/restaurant'
+import { restaurantApi, Restaurant, RestaurantFilters } from '../../services/restaurant'
+import { useRestaurantTypes } from '../../hooks/useTypes'
+import RestaurantFiltersComponent from '../../components/RestaurantFilters'
+import Pagination from '../../components/Pagination'
 import './index.less'
 
 const RestaurantList: React.FC = () => {
   // 状态管理
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedSuburb, setSelectedSuburb] = useState<string>('')
-  const [sortBy, setSortBy] = useState<'overallRating' | 'totalReviews' | 'createdAt'>('overallRating')
 
-  // 常用区域
-  const popularSuburbs = [
-    '全部', 'Brisbane City', 'Fortitude Valley', 'West End', 'Paddington'
-  ]
 
-  // 排序选项
-  const sortOptions = [
-    { value: 'overallRating', label: '评分最高' },
-    { value: 'totalReviews', label: '评论最多' },
-    { value: 'createdAt', label: '最新添加' }
-  ]
+  // State for pagination
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    // total: 0,
+    totalPages: 0
+  })
+
+  // State for filters
+  const [currentFilters, setCurrentFilters] = useState<RestaurantFilters>({
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt',
+    sortOrder: 'asc'
+  })
+
+
 
   // 加载餐厅数据
-  const loadRestaurants = async (showLoading = true) => {
+  const loadRestaurants = async (showLoading = true, filters: RestaurantFilters = currentFilters) => {
     try {
       if (showLoading) {
         setLoading(true)
       }
-      
-      const params: RestaurantQueryParams = {
-        page: 1,
-        limit: 20,
-        sortBy: sortBy,
-        sortOrder: 'desc'
-      }
 
-      // 添加筛选条件
-      if (selectedSuburb && selectedSuburb !== '全部') {
-        params.suburb = selectedSuburb
-      }
-      
-      const response = await restaurantApi.getAllRestaurants(params)
-      setRestaurants(response.data || [])
+      // 使用新的分页API
+      const response = await restaurantApi.getAllRestaurantsPaginated(filters)
+      setRestaurants(response.data)
+      setPagination({
+        page: response.page,
+        limit: response.limit,
+        // total: response.total,
+        totalPages: response.totalPages
+      })
     } catch (error) {
       console.error('加载餐厅失败:', error)
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
       Taro.showToast({
-        title: '加载失败，请稍后重试',
+        title: `加载失败: ${errorMessage}`,
         icon: 'error',
-        duration: 2000
+        duration: 3000
       })
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
+  }
+
+  // Handle filter changes
+  const handleFiltersChange = (filters: RestaurantFilters) => {
+    const newFilters = {
+      ...filters,
+      page: 1, // 重置到第一页
+      limit: 10
+    }
+    setCurrentFilters(newFilters)
+    loadRestaurants(true, newFilters)
+  }
+
+  // Handle pagination change
+  const handlePageChange = (page: number) => {
+    const newFilters = {
+      ...currentFilters,
+      page
+    }
+    setCurrentFilters(newFilters)
+    loadRestaurants(true, newFilters)
   }
 
   // 下拉刷新
   const handleRefresh = async () => {
-    setRefreshing(true)
-    await loadRestaurants(false)
+    await loadRestaurants(true)
   }
 
-  // 区域筛选
-  const handleSuburbFilter = (suburb: string) => {
-    setSelectedSuburb(suburb)
-  }
 
-  // 排序筛选
-  const handleSortFilter = (sort: 'overallRating' | 'totalReviews' | 'createdAt') => {
-    setSortBy(sort)
-  }
 
   // 餐厅点击事件
   const handleRestaurantClick = (restaurant: Restaurant) => {
-    Taro.navigateTo({
-      url: `/pages/restaurant/reviews/index?id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`
-    })
+    Taro.navigateTo({ url: `/pages/restaurant/detail/index?id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}` })
   }
 
   // 格式化评分显示
@@ -96,139 +108,213 @@ const RestaurantList: React.FC = () => {
     return '#ff4d4f'
   }
 
-  // 获取餐厅类型标签
-  const getRestaurantType = (name: string) => {
-    if (name.includes('亚洲') || name.includes('龙宫')) return '亚洲菜'
-    if (name.includes('意式') || name.includes('意大利')) return '意大利菜'
-    if (name.includes('海鲜')) return '海鲜'
-    if (name.includes('川味') || name.includes('川菜')) return '川菜'
-    if (name.includes('法式')) return '法国菜'
-    if (name.includes('日式')) return '日本菜'
-    if (name.includes('墨西哥')) return '墨西哥菜'
-    if (name.includes('素食')) return '素食'
-    return '其他'
+  // 获取餐厅所有图片 (优先使用 imageUrls 数组，备用 image)
+  const getAllImages = (restaurant: Restaurant) => {
+    // 优先使用 imageUrls 字段
+    if (restaurant.imageUrls && restaurant.imageUrls.length > 0) {
+      return restaurant.imageUrls
+    }
+    // 备用方案：使用单个 image 字段
+    return restaurant.image ? [restaurant.image] : []
   }
+
+  // 从后端加载餐厅类型
+  const { getRestaurantTypeName } = useRestaurantTypes()
 
   // 组件挂载时加载数据
   useEffect(() => {
     loadRestaurants()
-  }, [selectedSuburb, sortBy])
+  }, [])
 
   return (
     <View className='restaurant-container'>
-      {/* 页面头部 */}
-      <View className='header'>
+      {/* 增强的页面头部 */}
+      <View className='enhanced-header'>
+        <View className='header-background'>
+          <View className='floating-shapes'>
+            <View className='shape shape-1'></View>
+            <View className='shape shape-2'></View>
+            <View className='shape shape-3'></View>
+          </View>
+        </View>
         <View className='header-content'>
-          <Text className='title'>美食餐厅</Text>
-          <Text className='subtitle'>发现身边的美味</Text>
+          <View className='title-section'>
+            <Text className='main-title'>美食餐厅</Text>
+            <Text className='subtitle'>发现身边的美味</Text>
+            <View className='stats-row'>
+              <View className='stat-item'>
+                <Text className='stat-number'>{restaurants.length}</Text>
+                <Text className='stat-label'>家餐厅</Text>
+              </View>
+              <View className='stat-divider'></View>
+              <View className='stat-item'>
+                <Text className='stat-number'>4.5+</Text>
+                <Text className='stat-label'>平均评分</Text>
+              </View>
+            </View>
+          </View>
         </View>
       </View>
 
-      {/* 筛选栏 */}
-      <View className='filter-section'>
-        {/* 区域筛选 */}
-        <ScrollView className='suburb-filter' scrollX>
-          <View className='filter-list'>
-            {popularSuburbs.map(suburb => (
-              <View 
-                key={suburb}
-                className={`filter-item ${selectedSuburb === suburb || (suburb === '全部' && !selectedSuburb) ? 'active' : ''}`}
-                onClick={() => handleSuburbFilter(suburb === '全部' ? '' : suburb)}
-              >
-                <Text className='filter-text'>{suburb}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-
-        {/* 排序筛选 */}
-        <ScrollView className='sort-filter' scrollX>
-          <View className='filter-list'>
-            {sortOptions.map(option => (
-              <View 
-                key={option.value}
-                className={`filter-item ${sortBy === option.value ? 'active' : ''}`}
-                onClick={() => handleSortFilter(option.value as any)}
-              >
-                <Text className='filter-text'>{option.label}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
+      {/* 筛选器 - 浮动卡片样式 */}
+      <View className='filters-wrapper'>
+        <RestaurantFiltersComponent
+          onFiltersChange={handleFiltersChange}
+          initialFilters={currentFilters}
+        />
       </View>
 
-      {/* 餐厅列表 */}
+      {/* 餐厅列表 - 重新设计 */}
       <PullToRefresh onRefresh={handleRefresh}>
-        <ScrollView className='content' scrollY>
+        <ScrollView className='enhanced-content' scrollY>
           {loading ? (
-            <View className='loading-container'>
-              <Loading type="spinner" />
-              <Text className='loading-text'>加载中...</Text>
+            <View className='enhanced-loading-container'>
+              <View className='loading-animation'>
+                <View className='loading-dots'>
+                  <View className='dot dot-1'></View>
+                  <View className='dot dot-2'></View>
+                  <View className='dot dot-3'></View>
+                </View>
+                <Text className='loading-text'>正在为您寻找美味...</Text>
+              </View>
             </View>
           ) : restaurants.length === 0 ? (
-            <Empty 
-              description="暂无餐厅信息"
-              imageSize={120}
-            />
+            <View className='enhanced-empty-container'>
+              <View className='empty-animation'>
+                <Text className='empty-icon'>🍽️</Text>
+                <Text className='empty-title'>暂无餐厅信息</Text>
+                <Text className='empty-subtitle'>换个筛选条件试试吧</Text>
+              </View>
+            </View>
           ) : (
-            <View className='restaurants-list'>
-              {restaurants.map(restaurant => (
-                <View 
-                  key={restaurant.id} 
-                  className='restaurant-card'
+            <View className='enhanced-restaurants-list'>
+              {restaurants.map((restaurant, index) => (
+                <View
+                  key={restaurant.id}
+                  className={`enhanced-restaurant-card card-${index % 2 === 0 ? 'left' : 'right'}`}
                   onClick={() => handleRestaurantClick(restaurant)}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  {/* 餐厅图片 */}
-                  <View className='restaurant-image-container'>
-                    <Image 
-                      className='restaurant-image'
-                      src={restaurant.image}
-                      mode='aspectFill'
-                      lazyLoad
-                    />
-                    {/* 餐厅类型标签 */}
-                    <View className='type-badge'>
-                      {getRestaurantType(restaurant.name)}
-                    </View>
+                  {/* 增强的餐厅图片区域 */}
+                  <View className='enhanced-image-section'>
+                    {(() => {
+                      const images = getAllImages(restaurant)
+
+                      return (
+                        <View className='image-container'>
+                          {images.length > 1 ? (
+                            <View className='swiper-container'>
+                              <Swiper
+                                defaultValue={0}
+                                indicator
+                                autoplay={false}
+                                style={{ height: '240rpx', width: '100%' }}
+                              >
+                                {images.map((imageUrl, index) => (
+                                  <Swiper.Item key={index}>
+                                    <Image
+                                      className='enhanced-restaurant-image'
+                                      src={imageUrl}
+                                      mode='aspectFill'
+                                      lazyLoad
+                                      onError={() => console.log('Image load failed:', imageUrl)}
+                                    />
+                                  </Swiper.Item>
+                                ))}
+                              </Swiper>
+                            </View>
+                          ) : (
+                            <View className='single-image-container'>
+                              <Image
+                                className='enhanced-restaurant-image'
+                                src={images[0] || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop'}
+                                mode='aspectFill'
+                                lazyLoad
+                              />
+                            </View>
+                          )}
+
+                          {/* 浮动标签 */}
+                          <View className='floating-badges'>
+                            <View className='type-badge-enhanced'>
+                              <Text className='type-text'>
+                                {getRestaurantTypeName(restaurant.restaurantTypeRid)}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      )
+                    })()}
                   </View>
 
-                  {/* 餐厅信息 */}
-                  <View className='restaurant-info'>
-                    <View className='restaurant-header'>
-                      <Text className='restaurant-name'>{restaurant.name}</Text>
-                      <View className='rating-container'>
-                        <Rate 
-                          value={formatRating(restaurant.overallRating)} 
-                          readOnly 
-                        />
-                        <Text 
-                          className='rating-score'
-                          style={{ color: getRatingColor(restaurant.overallRating) }}
-                        >
-                          {restaurant.overallRating}
-                        </Text>
+                  {/* 增强的餐厅信息 */}
+                  <View className='enhanced-restaurant-info'>
+                    <View className='info-header'>
+                      <View className='name-section'>
+                        <Text className='enhanced-restaurant-name'>{restaurant.name}</Text>
+                        <View className='quick-stats'>
+                          <View className='stat-chip'>
+                            <Text className='chip-icon'>💬</Text>
+                            <Text className='chip-text'>{restaurant.totalReviews}</Text>
+                          </View>
+                          {restaurant.pricingDetails && (
+                            <View className='stat-chip price-chip'>
+                              <Text className='chip-icon'>💰</Text>
+                              <Text className='chip-text'>{restaurant.pricingDetails}</Text>
+                            </View>
+                          )}
+                        </View>
                       </View>
-                    </View>
-                    
-                    <View className='restaurant-location'>
-                      <Text className='location-text'>📍 {restaurant.streetAddress}</Text>
-                      <Text className='suburb-text'>{restaurant.suburb}, {restaurant.state}</Text>
                     </View>
 
-                    <Text className='restaurant-description'>{restaurant.description}</Text>
-                    
-                    {/* 底部信息 */}
-                    <View className='restaurant-footer'>
-                      <View className='review-info'>
-                        <Text className='review-count'>💬 {restaurant.totalReviews} 条评价</Text>
+                    <View className='location-section'>
+                      <View className='location-row'>
+                        <Text className='location-icon'>📍</Text>
+                        <View className='location-details'>
+                          <Text className='street-address'>{restaurant.streetAddress}</Text>
+                          <Text className='suburb-state'>{restaurant.suburb}, {restaurant.state}</Text>
+                        </View>
                       </View>
-                      <View className='action-hint'>
-                        <Text className='hint-text'>点击查看评价 →</Text>
+                    </View>
+
+                    <View className='description-section'>
+                      <Text className='enhanced-description'>{restaurant.description}</Text>
+                    </View>
+
+                    <View className='action-section'>
+                      
+                      <View className='action-button'>
+                        <Text className='action-text'>查看详情</Text>
                       </View>
                     </View>
                   </View>
                 </View>
               ))}
+            </View>
+          )}
+
+          {/* 增强的分页 */}
+          {!loading && restaurants.length > 0 && pagination.totalPages > 1 && (
+            <View className='enhanced-pagination-wrapper'>
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                total={pagination.totalPages * pagination.limit}
+                pageSize={pagination.limit}
+                onPageChange={handlePageChange}
+                loading={loading}
+              />
+            </View>
+          )}
+
+          {/* 增强的底部提示 */}
+          {!loading && restaurants.length > 0 && pagination.totalPages <= 1 && (
+            <View className='enhanced-bottom-tip'>
+              <View className='tip-content'>
+                <Text className='tip-icon'>🎉</Text>
+                <Text className='tip-text'>已显示全部餐厅</Text>
+                <Text className='tip-subtext'>发现了 {restaurants.length} 家美味餐厅</Text>
+              </View>
             </View>
           )}
         </ScrollView>

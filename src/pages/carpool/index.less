@@ -1,283 +1,282 @@
-// Variables (matching other pages for consistency)
-@primary-color: #4a90e2;
-@secondary-color: #f6f6f6;
-@text-color: #333;
-@text-secondary: #666;
-@border-color: #eee;
-@accent-color: #ff9500;
-@success-color: #4cd964;
-@warning-color: #ff6b6b;
-@spacing-sm: 8px;
-@spacing-md: 16px;
-@spacing-lg: 24px;
-@border-radius: 8px;
-
-// Main container
 .carpool-container {
-  background-color: @secondary-color;
   min-height: 100vh;
-  padding-bottom: 80px; // Space for the post button
+  background: #f5f5f5;
+
+  .content {
+    height: 100vh;
+  }
+
+  .header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32rpx;
+    background: white;
+    border-bottom: 1rpx solid #e5e5e5;
+
+    .page-title {
+      font-size: 36rpx;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .post-button {
+      border-radius: 20rpx;
+      padding: 16rpx 32rpx;
+      font-size: 26rpx;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80rpx 0;
+
+    .loading-text {
+      margin-top: 20rpx;
+      font-size: 28rpx;
+      color: #666;
+    }
+  }
+
+  .carpool-list {
+    padding: 20rpx;
+
+    .carpool-card {
+      background: white;
+      border-radius: 16rpx;
+      margin-bottom: 20rpx;
+      padding: 32rpx;
+      box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2rpx);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24rpx;
+
+        .route-info {
+          flex: 1;
+
+          .route-points {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12rpx;
+
+            .start-point,
+            .end-point {
+              font-size: 32rpx;
+              font-weight: 600;
+              color: #333;
+            }
+
+            .route-arrow {
+              margin: 0 16rpx;
+              font-size: 24rpx;
+              color: #666;
+            }
+          }
+
+          .route-time {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+
+            .time-date {
+              font-size: 26rpx;
+              color: #666;
+              background: #f0f0f0;
+              padding: 4rpx 12rpx;
+              border-radius: 8rpx;
+            }
+
+            .time-hour {
+              font-size: 28rpx;
+              font-weight: 600;
+              color: #007aff;
+            }
+          }
+        }
+
+        .status-info {
+          margin-left: 20rpx;
+        }
+      }
+
+      .card-body {
+        .card-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20rpx;
+
+          .info-item {
+            text-align: center;
+
+            .info-label {
+              font-size: 24rpx;
+              color: #999;
+              margin-bottom: 8rpx;
+              display: block;
+            }
+
+            .info-value {
+              font-size: 28rpx;
+              font-weight: 600;
+              color: #333;
+            }
+          }
+        }
+
+        .card-description {
+          background: #f8f9fa;
+          padding: 16rpx;
+          border-radius: 8rpx;
+          margin-bottom: 20rpx;
+
+          .description-text {
+            font-size: 26rpx;
+            color: #666;
+            line-height: 1.5;
+          }
+        }
+      }
+
+      .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24rpx;
+
+        .action-button {
+          border-radius: 20rpx;
+          padding: 12rpx 24rpx;
+          font-size: 26rpx;
+        }
+      }
+    }
+  }
+
+  .empty-action-button {
+    margin-top: 20rpx;
+    border-radius: 20rpx;
+  }
 }
 
-// Tab navigation
-.tabs-section {
-  background-color: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  border-bottom: 1px solid @border-color;
+/* Status styles */
+.status-open {
+  background: #e8f5e8;
+  color: #4caf50;
 }
 
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: @spacing-md;
-  position: relative;
-  font-size: 15px;
-  color: @text-secondary;
-  
-  &.active {
-    color: @primary-color;
-    font-weight: bold;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 3px;
-      background-color: @primary-color;
-      border-radius: 2px;
+.status-full {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.status-completed {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+.status-cancelled {
+  background: #ffebee;
+  color: #f44336;
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .carpool-container {
+    .header-section {
+      padding: 24rpx;
+
+      .page-title {
+        font-size: 32rpx;
+      }
+
+      .post-button {
+        padding: 12rpx 24rpx;
+        font-size: 24rpx;
+      }
+    }
+
+    .carpool-list {
+      padding: 16rpx;
+
+      .carpool-card {
+        padding: 24rpx;
+
+        .card-header {
+          .route-info {
+            .route-points {
+              .start-point,
+              .end-point {
+                font-size: 28rpx;
+              }
+            }
+
+            .route-time {
+              .time-date {
+                font-size: 24rpx;
+              }
+
+              .time-hour {
+                font-size: 26rpx;
+              }
+            }
+          }
+        }
+
+        .card-body {
+          .card-info {
+            .info-item {
+              .info-label {
+                font-size: 22rpx;
+              }
+
+              .info-value {
+                font-size: 26rpx;
+              }
+            }
+          }
+
+          .card-description {
+            .description-text {
+              font-size: 24rpx;
+            }
+          }
+        }
+
+        .card-footer {
+          .action-button {
+            font-size: 24rpx;
+            padding: 10rpx 20rpx;
+          }
+        }
+      }
     }
   }
 }
 
-// Cards section
-.cards-section {
-  padding: @spacing-md;
-}
-
-// Filter section
-.filter-section {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: @spacing-md;
-}
-
-.filter-left, .filter-right {
-  display: flex;
-  align-items: center;
-}
-
-.filter-item {
-  padding: @spacing-sm @spacing-md;
-  background-color: #fff;
-  border-radius: 16px;
-  margin-right: @spacing-sm;
-  font-size: 13px;
-  color: @text-color;
-  display: flex;
-  align-items: center;
-  
-  &.active {
-    background-color: fade(@primary-color, 10%);
-    color: @primary-color;
-    font-weight: 500;
+/* Animation effects */
+.carpool-container {
+  .carpool-card {
+    animation: slideUp 0.3s ease-out;
   }
 }
 
-.filter-icon {
-  margin-left: 4px;
-  font-size: 12px;
-}
-
-.sort-button {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  padding: @spacing-sm @spacing-md;
-  border-radius: 16px;
-  font-size: 13px;
-  color: @text-color;
-}
-
-// Carpool card
-.carpool-card {
-  background-color: #fff;
-  border-radius: @border-radius;
-  margin-bottom: @spacing-md;
-  padding: @spacing-md;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: @spacing-md;
-}
-
-.route-info {
-  flex: 1;
-}
-
-.route-title {
-  display: flex;
-  align-items: center;
-  margin-bottom: @spacing-sm;
-}
-
-.start-point, .end-point {
-  font-weight: bold;
-  font-size: 16px;
-  color: @text-color;
-}
-
-.route-arrow {
-  margin: 0 @spacing-sm;
-  color: @text-secondary;
-}
-
-.route-time {
-  font-size: 13px;
-  color: @text-secondary;
-}
-
-.card-user {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: @spacing-md;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-bottom: 4px;
-}
-
-.user-name {
-  font-size: 12px;
-  color: @text-secondary;
-}
-
-.card-details {
-  display: flex;
-  justify-content: space-between;
-  padding: @spacing-md 0;
-  border-top: 1px dashed @border-color;
-  border-bottom: 1px dashed @border-color;
-  margin-bottom: @spacing-md;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: @text-secondary;
-  margin-bottom: 4px;
-}
-
-.detail-value {
-  font-size: 15px;
-  color: @text-color;
-  font-weight: 500;
-  
-  &.highlight {
-    color: @warning-color;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-tags {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.card-tag {
-  font-size: 12px;
-  padding: 2px 8px;
-  background-color: fade(@primary-color, 10%);
-  color: @primary-color;
-  border-radius: 10px;
-  margin-right: @spacing-sm;
-  margin-bottom: 4px;
-}
-
-.card-action {
-  display: flex;
-}
-
-.action-button {
-  padding: @spacing-sm @spacing-md;
-  background-color: @primary-color;
-  color: #fff;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  
-  &.disabled {
-    background-color: @text-secondary;
-    opacity: 0.7;
-  }
-}
-
-// Empty state
-.empty-state {
-  text-align: center;
-  padding: @spacing-lg * 2;
-  color: @text-secondary;
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: @spacing-md;
-}
-
-.empty-text {
-  font-size: 14px;
-  margin-bottom: @spacing-md;
-}
-
-.empty-action {
-  display: inline-block;
-  padding: @spacing-sm @spacing-lg;
-  background-color: @primary-color;
-  color: #fff;
-  border-radius: 20px;
-  font-size: 14px;
-}
-
-// Post button
-.post-button {
-  position: fixed;
-  bottom: @spacing-lg;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: @primary-color;
-  color: #fff;
-  padding: @spacing-sm @spacing-lg;
-  border-radius: 24px;
-  font-size: 16px;
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-}
-
-.post-icon {
-  margin-right: @spacing-sm;
-  font-size: 18px;
-} 

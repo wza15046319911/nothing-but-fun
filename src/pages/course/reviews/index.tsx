@@ -171,23 +171,23 @@ const CourseReviews: React.FC = () => {
         <View className='stats-section'>
           <View className='overall-rating'>
             <Text className='rating-score'>{stats.averageRating}</Text>
-            <Rate 
-              value={parseFloat(stats.averageRating)} 
+            <Rate
+              value={parseFloat(stats.averageRating)}
               readOnly={true}
               // size={16}
               // activeColor='#faad14'
             />
             <Text className='total-reviews'>共 {stats.totalReviews} 条评价</Text>
           </View>
-          
+
           <View className='rating-distribution'>
             {Object.entries(stats.ratingDistribution).reverse().map(([rating, count]) => (
               <View key={rating} className='distribution-item'>
                 <Text className='rating-label'>{rating}星</Text>
                 <View className='progress-bar'>
-                  <View 
+                  <View
                     className='progress-fill'
-                    style={{ 
+                    style={{
                       width: `${(count / stats.totalReviews) * 100}%`,
                       backgroundColor: getRatingColor(Number(rating))
                     }}
@@ -197,18 +197,20 @@ const CourseReviews: React.FC = () => {
               </View>
             ))}
           </View>
-
-          {/* 撰写评价按钮 */}
-          <Button
-            className='write-review-btn'
-            type='primary'
-            size='small'
-            onClick={handleWriteReview}
-          >
-            ✍️ 撰写评价
-          </Button>
         </View>
       )}
+
+      {/* 撰写评价按钮 - 始终显示 */}
+      <View className='write-review-action'>
+        <Button
+          className='write-review-btn'
+          type='primary'
+          size='small'
+          onClick={handleWriteReview}
+        >
+          ✍️ 撰写评价
+        </Button>
+      </View>
 
       {/* 筛选和排序 */}
       <View className='filter-section'>

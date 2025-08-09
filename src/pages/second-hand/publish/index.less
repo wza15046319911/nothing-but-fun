@@ -15,14 +15,34 @@
 // Main container
 .publish-container {
   min-height: 100vh;
-  background-color: @secondary-color;
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
   padding-bottom: 80px; // Space for the submit button
 }
+
+// Hero section
+.publish-hero {
+  padding: 24px 16px 12px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.hero-title { font-size: 20px; font-weight: 800; }
+.hero-subtitle { font-size: 12px; opacity: 0.85; }
+.hero-stats { margin-top: 8px; display: flex; align-items: center; gap: 16px; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.stat-number { font-size: 16px; font-weight: 700; }
+.stat-label { font-size: 12px; opacity: 0.8; }
+.divider { width: 1px; height: 16px; background: rgba(0,0,0,0.1); }
 
 // Form section
 .form-section {
   background-color: #fff;
   margin-bottom: @spacing-md;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.06);
 }
 
 .form-title {
@@ -36,6 +56,8 @@
   padding: @spacing-md;
   border-bottom: 1px solid @border-color;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-item-row {
@@ -55,6 +77,10 @@
   font-size: 14px;
   color: @text-color;
 }
+
+.field-hint { margin-top: 6px; font-size: 12px; color: @text-secondary; }
+.error-text { margin-top: 6px; font-size: 12px; color: #ff4d4f; }
+.form-item.error { background: #fff6f6; }
 
 .form-textarea {
   width: 100%;
@@ -200,6 +226,7 @@
   padding: @spacing-md;
   display: flex;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  padding-bottom: calc(@spacing-md + env(safe-area-inset-bottom));
 }
 
 .submit-button {

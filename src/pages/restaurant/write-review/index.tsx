@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, Textarea } from '@tarojs/components'
 import { Button, Rate, Toast, Dialog } from '@nutui/nutui-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
-import { restaurantReviewApi, restaurantApi, Restaurant } from '../../../services/restaurant'
+import { restaurantReviewApi, restaurantApi, Restaurant, NewRestaurantReview } from '../../../services/restaurant'
 import './index.less'
 
 const WriteReview: React.FC = () => {
@@ -15,6 +15,12 @@ const WriteReview: React.FC = () => {
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+
+  // 维度评分状态
+  const [tasteRating, setTasteRating] = useState(5)
+  const [environmentRating, setEnvironmentRating] = useState(5)
+  const [serviceRating, setServiceRating] = useState(5)
+  const [priceRating, setPriceRating] = useState(5)
 
   // 模拟用户信息（实际项目中应该从用户登录状态获取）
   const currentUser = {
@@ -61,12 +67,16 @@ const WriteReview: React.FC = () => {
       setSubmitting(true)
       
       // 创建评价数据
-      const reviewData = {
+      const reviewData: NewRestaurantReview = {
         restaurantId: Number(id),
         userId: currentUser.id,
         username: currentUser.username,
         content: content.trim(),
-        rating: rating
+        rating: rating,
+        tasteRating: tasteRating,
+        environmentRating: environmentRating,
+        serviceRating: serviceRating,
+        priceRating: priceRating
       }
 
       // 提交评价
@@ -173,6 +183,72 @@ const WriteReview: React.FC = () => {
           >
             {getRatingDescription(rating)}
           </Text>
+        </View>
+      </View>
+
+      {/* 维度评分区域 */}
+      <View className='dimensional-rating-section'>
+        <View className='section-header'>
+          <Text className='section-title'>详细评分</Text>
+          <Text className='optional-mark'>（可选）</Text>
+        </View>
+
+        <View className='dimensional-ratings'>
+          {/* 口味评分 */}
+          <View className='rating-item'>
+            <View className='rating-label-container'>
+              <Text className='rating-label'>🍽️ 口味</Text>
+              <Text className='rating-score'>{tasteRating}分</Text>
+            </View>
+            <Rate
+              value={tasteRating}
+              size={24}
+              activeColor={getRatingColor(tasteRating)}
+              onChange={(value) => setTasteRating(value)}
+            />
+          </View>
+
+          {/* 环境评分 */}
+          <View className='rating-item'>
+            <View className='rating-label-container'>
+              <Text className='rating-label'>🏪 环境</Text>
+              <Text className='rating-score'>{environmentRating}分</Text>
+            </View>
+            <Rate
+              value={environmentRating}
+              size={24}
+              activeColor={getRatingColor(environmentRating)}
+              onChange={(value) => setEnvironmentRating(value)}
+            />
+          </View>
+
+          {/* 服务评分 */}
+          <View className='rating-item'>
+            <View className='rating-label-container'>
+              <Text className='rating-label'>👥 服务</Text>
+              <Text className='rating-score'>{serviceRating}分</Text>
+            </View>
+            <Rate
+              value={serviceRating}
+              size={24}
+              activeColor={getRatingColor(serviceRating)}
+              onChange={(value) => setServiceRating(value)}
+            />
+          </View>
+
+          {/* 价格评分 */}
+          <View className='rating-item'>
+            <View className='rating-label-container'>
+              <Text className='rating-label'>💰 价格</Text>
+              <Text className='rating-score'>{priceRating}分</Text>
+            </View>
+            <Rate
+              value={priceRating}
+              size={24}
+              activeColor={getRatingColor(priceRating)}
+              onChange={(value) => setPriceRating(value)}
+            />
+          </View>
         </View>
       </View>
 

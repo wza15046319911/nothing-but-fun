@@ -84,6 +84,65 @@
     }
   }
 
+  // 维度评分区域
+  .dimensional-rating-section {
+    background: white;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30rpx;
+
+      .section-title {
+        font-size: 30rpx;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .optional-mark {
+        color: #999;
+        font-size: 24rpx;
+        margin-left: 8rpx;
+      }
+    }
+
+    .dimensional-ratings {
+      .rating-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20rpx 0;
+        border-bottom: 1rpx solid #f5f5f5;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .rating-label-container {
+          display: flex;
+          align-items: center;
+          gap: 16rpx;
+
+          .rating-label {
+            font-size: 28rpx;
+            color: #333;
+            font-weight: 500;
+          }
+
+          .rating-score {
+            font-size: 24rpx;
+            color: #666;
+            background: #f5f5f5;
+            padding: 4rpx 12rpx;
+            border-radius: 12rpx;
+          }
+        }
+      }
+    }
+  }
+
   // 评价内容区域
   .content-section {
     background: white;

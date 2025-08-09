@@ -196,9 +196,9 @@ const UserLogin: React.FC = () => {
 
     switch (menuType) {
       case 'orders':
-        Taro.showToast({
-          title: '我的订单功能开发中',
-          icon: 'none'
+        // 跳转到我的发布页面
+        Taro.navigateTo({
+          url: '/pages/user-posts/index'
         })
         break
       case 'favorites':
@@ -216,6 +216,16 @@ const UserLogin: React.FC = () => {
         Taro.showToast({
           title: '意见反馈功能开发中',
           icon: 'none'
+        })
+        break
+      case 'phone':
+        Taro.navigateTo({
+          url: '/pages/update-phone/index'
+        })
+        break
+      case 'contact':
+        Taro.navigateTo({
+          url: '/pages/contact-info/index'
         })
         break
       case 'settings':
@@ -335,39 +345,16 @@ const UserLogin: React.FC = () => {
             <Text className='menu-text'>我的发布</Text>
             <Text className='menu-arrow'>›</Text>
           </View>
-          <View 
+          <View
             className='menu-item'
-            onClick={() => handleMenuClick('favorites')}
+            onClick={() => handleMenuClick('contact')}
           >
-            <Text className='menu-icon'>🏆</Text>
-            <Text className='menu-text'>我的收藏</Text>
+            <Text className='menu-icon'>📧</Text>
+            <Text className='menu-text'>联系信息</Text>
             <Text className='menu-arrow'>›</Text>
           </View>
-          {/* <View 
-            className='menu-item'
-            onClick={() => handleMenuClick('settings')}
-          >
-            <Text className='menu-icon'>⚙️</Text>
-            <Text className='menu-text'>设置</Text>
-            <Text className='menu-arrow'>›</Text>
-          </View> */}
-        </View>
 
-        {/* 错误信息显示
-        {error && (
-          <View className='card'>
-            <View style={{ padding: '16px', color: '#ff4d4f', fontSize: '14px' }}>
-              错误: {error}
-              <Button 
-                size='mini' 
-                onClick={clearError}
-                style={{ marginLeft: '10px' }}
-              >
-                清除
-              </Button>
-            </View>
-          </View>
-        )} */}
+        </View>
       </View>
     </View>
   )

@@ -1,0 +1,1104 @@
+// 增强的餐厅详情容器
+.enhanced-restaurant-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+
+  // 增强的加载状态
+  .enhanced-loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    .loading-animation {
+      text-align: center;
+      color: white;
+
+      .loading-spinner {
+        position: relative;
+        width: 120rpx;
+        height: 120rpx;
+        margin: 0 auto 40rpx;
+
+        .spinner-ring {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border: 4rpx solid transparent;
+          border-top: 4rpx solid rgba(255, 255, 255, 0.8);
+          border-radius: 50%;
+          animation: spin 1.2s linear infinite;
+
+          &:nth-child(1) {
+            animation-delay: 0s;
+          }
+
+          &:nth-child(2) {
+            animation-delay: 0.4s;
+            transform: scale(0.8);
+          }
+
+          &:nth-child(3) {
+            animation-delay: 0.8s;
+            transform: scale(0.6);
+          }
+        }
+      }
+
+      .loading-text {
+        font-size: 32rpx;
+        font-weight: 500;
+        text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+
+  // 增强的错误状态
+  .enhanced-error-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40rpx;
+
+    .error-animation {
+      text-align: center;
+      animation: fadeInUp 0.6s ease-out;
+
+      .error-icon {
+        font-size: 120rpx;
+        margin-bottom: 32rpx;
+        display: block;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .error-title {
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 16rpx;
+        display: block;
+      }
+
+      .error-subtitle {
+        font-size: 28rpx;
+        color: #666;
+        margin-bottom: 40rpx;
+        display: block;
+      }
+
+      .enhanced-back-button {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: none;
+        border-radius: 24rpx;
+        padding: 16rpx 32rpx;
+        color: white;
+        font-size: 28rpx;
+        font-weight: 600;
+        box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
+
+        &:active {
+          transform: translateY(2rpx);
+          box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
+        }
+      }
+    }
+  }
+
+  // 增强的内容区域
+  .enhanced-content {
+    min-height: 100vh;
+    background: transparent;
+  }
+
+  // 增强的头部图片区域
+  .enhanced-header-image-section {
+    position: relative;
+    height: 500rpx;
+    width: 100%;
+    overflow: hidden;
+
+    .image-hero-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+
+      .enhanced-swiper-container,
+      .enhanced-single-image-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+
+        .enhanced-image-swiper {
+          width: 100%;
+          height: 100%;
+
+          .image-item-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+
+            .enhanced-restaurant-main-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              transition: transform 0.6s ease;
+            }
+
+            .image-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(180deg,
+                  rgba(0, 0, 0, 0.3) 0%,
+                  transparent 30%,
+                  transparent 70%,
+                  rgba(0, 0, 0, 0.5) 100%);
+              pointer-events: none;
+            }
+          }
+        }
+
+        .enhanced-image-counter {
+          position: absolute;
+          top: 24rpx;
+          right: 24rpx;
+          z-index: 10;
+
+          .counter-badge {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12rpx 20rpx;
+            border-radius: 24rpx;
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+            backdrop-filter: blur(10rpx);
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+
+            .counter-icon {
+              font-size: 24rpx;
+            }
+
+            .counter-text {
+              font-size: 26rpx;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+
+      // 浮动按钮
+      .floating-back-button,
+      .floating-share-button {
+        position: absolute;
+        top: 24rpx;
+        width: 80rpx;
+        height: 80rpx;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10rpx);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 10;
+
+        &:active {
+          transform: scale(0.95);
+          background: rgba(255, 255, 255, 1);
+        }
+      }
+
+      .floating-back-button {
+        left: 24rpx;
+
+        .back-icon {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: #333;
+        }
+      }
+
+      .floating-share-button {
+        right: 120rpx;
+
+        .share-icon {
+          font-size: 28rpx;
+          color: #333;
+        }
+      }
+    }
+  }
+
+  // 增强的基本信息卡片
+  .enhanced-basic-info-card {
+    background: white;
+    margin: -40rpx 20rpx 20rpx;
+    border-radius: 24rpx;
+    padding: 32rpx;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 5;
+    animation: slideInUp 0.6s ease-out;
+
+    .info-header {
+      margin-bottom: 32rpx;
+
+      .name-section {
+        .enhanced-restaurant-name {
+          font-size: 40rpx;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 16rpx;
+          display: block;
+          line-height: 1.3;
+        }
+
+        .restaurant-badges {
+          display: flex;
+          gap: 12rpx;
+          flex-wrap: wrap;
+
+          .type-badge,
+          .price-badge {
+            padding: 8rpx 16rpx;
+            border-radius: 20rpx;
+            display: flex;
+            align-items: center;
+            gap: 6rpx;
+
+            .badge-text {
+              font-size: 22rpx;
+              font-weight: 600;
+            }
+          }
+
+          .type-badge {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #1976d2;
+          }
+
+          .price-badge {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #f57c00;
+
+            .badge-icon {
+              font-size: 20rpx;
+            }
+          }
+        }
+      }
+    }
+
+    .enhanced-rating-section {
+      margin-bottom: 32rpx;
+
+      .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        margin-bottom: 16rpx;
+
+        .rating-stars {
+          .nut-rate {
+            .nut-rate-item {
+              margin-right: 8rpx;
+              transition: transform 0.2s ease;
+
+              &:hover {
+                transform: scale(1.1);
+              }
+            }
+          }
+        }
+
+        .rating-info {
+          .rating-score {
+            font-size: 32rpx;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-right: 8rpx;
+          }
+
+          .rating-reviews {
+            font-size: 24rpx;
+            color: #666;
+          }
+        }
+      }
+    }
+
+    .enhanced-location-section {
+      margin-bottom: 32rpx;
+
+      .location-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 16rpx;
+
+        .location-icon {
+          font-size: 28rpx;
+          margin-top: 4rpx;
+        }
+
+        .location-details {
+          flex: 1;
+
+          .street-address {
+            font-size: 28rpx;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8rpx;
+            display: block;
+          }
+
+          .suburb-state {
+            font-size: 26rpx;
+            color: #666;
+          }
+        }
+
+        .location-actions {
+          .action-button {
+            width: 60rpx;
+            height: 60rpx;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4rpx 16rpx rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+
+            &:active {
+              transform: scale(0.95);
+            }
+
+            .action-icon {
+              font-size: 24rpx;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+
+    .enhanced-description-section {
+      margin-bottom: 32rpx;
+
+      .section-title {
+        font-size: 28rpx;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 16rpx;
+        display: block;
+      }
+
+      .enhanced-description-text {
+        font-size: 26rpx;
+        color: #666;
+        line-height: 1.6;
+      }
+    }
+
+    .quick-actions {
+      display: flex;
+      justify-content: space-around;
+      gap: 20rpx;
+
+      .action-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20rpx 16rpx;
+        background: #f8f9fa;
+        border-radius: 16rpx;
+        transition: all 0.3s ease;
+
+        &:active {
+          background: #e9ecef;
+          transform: translateY(2rpx);
+        }
+
+        .action-icon {
+          font-size: 32rpx;
+          margin-bottom: 8rpx;
+        }
+
+        .action-text {
+          font-size: 22rpx;
+          color: #666;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // 增强的评分卡片
+  .enhanced-rating-card {
+    background: white;
+    margin: 20rpx;
+    border-radius: 24rpx;
+    padding: 32rpx;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+    animation: slideInUp 0.6s ease-out 0.2s both;
+
+    .rating-header {
+      text-align: center;
+      margin-bottom: 40rpx;
+
+      .rating-title {
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 12rpx;
+        display: block;
+      }
+
+      .rating-subtitle {
+        font-size: 26rpx;
+        color: #666;
+      }
+    }
+
+    .enhanced-rating-form {
+      .rating-categories {
+        margin-bottom: 32rpx;
+
+        .enhanced-rating-item {
+          background: #f8f9fa;
+          border-radius: 16rpx;
+          padding: 24rpx;
+          margin-bottom: 16rpx;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #e9ecef;
+            transform: translateY(-2rpx);
+          }
+
+          .rating-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16rpx;
+
+            .rating-emoji {
+              font-size: 28rpx;
+            }
+
+            .rating-label {
+              font-size: 28rpx;
+              font-weight: 600;
+              color: #333;
+              flex: 1;
+              margin-left: 12rpx;
+            }
+
+            .rating-value {
+              font-size: 24rpx;
+              color: #ff6b6b;
+              font-weight: 600;
+              background: rgba(255, 107, 107, 0.1);
+              padding: 4rpx 12rpx;
+              border-radius: 12rpx;
+            }
+          }
+
+          .nut-rate {
+            display: flex;
+            justify-content: center;
+
+            .nut-rate-item {
+              margin: 0 8rpx;
+              transition: all 0.2s ease;
+
+              &:hover {
+                transform: scale(1.2);
+              }
+
+              &:active {
+                transform: scale(1.1);
+              }
+            }
+          }
+        }
+      }
+
+      .rating-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20rpx;
+        border-radius: 16rpx;
+        text-align: center;
+        margin-bottom: 32rpx;
+
+        .summary-text {
+          font-size: 28rpx;
+          font-weight: 600;
+        }
+      }
+
+      .enhanced-submit-rating-btn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: none;
+        border-radius: 24rpx;
+        padding: 20rpx;
+        color: white;
+        font-size: 32rpx;
+        font-weight: bold;
+        box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
+        width: 100%;
+
+        &:active {
+          transform: translateY(2rpx);
+          box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
+        }
+
+        &:disabled {
+          background: #ccc;
+          box-shadow: none;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// 动画关键帧
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40%,
+  43% {
+    transform: translateY(-8rpx);
+  }
+
+  70% {
+    transform: translateY(-4rpx);
+  }
+
+  90% {
+    transform: translateY(-2rpx);
+  }
+}
+
+// 响应式设计
+@media (max-width: 750rpx) {
+  .enhanced-restaurant-detail-container {
+    .enhanced-header-image-section {
+      height: 400rpx;
+
+      .image-hero-container {
+
+        .floating-back-button,
+        .floating-share-button {
+          width: 60rpx;
+          height: 60rpx;
+          top: 20rpx;
+        }
+
+        .floating-back-button {
+          left: 20rpx;
+
+          .back-icon {
+            font-size: 28rpx;
+          }
+        }
+
+        .floating-share-button {
+          right: 100rpx;
+
+          .share-icon {
+            font-size: 24rpx;
+          }
+        }
+
+        .enhanced-swiper-container {
+          .enhanced-image-counter {
+            top: 20rpx;
+            right: 20rpx;
+
+            .counter-badge {
+              padding: 8rpx 16rpx;
+
+              .counter-icon {
+                font-size: 20rpx;
+              }
+
+              .counter-text {
+                font-size: 22rpx;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .enhanced-basic-info-card {
+      margin: -30rpx 16rpx 16rpx;
+      padding: 24rpx;
+
+      .info-header {
+        .name-section {
+          .enhanced-restaurant-name {
+            font-size: 36rpx;
+          }
+
+          .restaurant-badges {
+            gap: 8rpx;
+
+            .type-badge,
+            .price-badge {
+              padding: 6rpx 12rpx;
+
+              .badge-text {
+                font-size: 20rpx;
+              }
+            }
+          }
+        }
+      }
+
+      .enhanced-rating-section {
+        .rating-display {
+          gap: 12rpx;
+
+          .rating-info {
+            .rating-score {
+              font-size: 28rpx;
+            }
+
+            .rating-reviews {
+              font-size: 22rpx;
+            }
+          }
+        }
+      }
+
+      .enhanced-location-section {
+        .location-row {
+          gap: 12rpx;
+
+          .location-icon {
+            font-size: 24rpx;
+          }
+
+          .location-details {
+            .street-address {
+              font-size: 26rpx;
+            }
+
+            .suburb-state {
+              font-size: 24rpx;
+            }
+          }
+
+          .location-actions {
+            .action-button {
+              width: 50rpx;
+              height: 50rpx;
+
+              .action-icon {
+                font-size: 20rpx;
+              }
+            }
+          }
+        }
+      }
+
+      .quick-actions {
+        gap: 16rpx;
+
+        .action-item {
+          padding: 16rpx 12rpx;
+
+          .action-icon {
+            font-size: 28rpx;
+          }
+
+          .action-text {
+            font-size: 20rpx;
+          }
+        }
+      }
+    }
+
+    .enhanced-rating-card {
+      margin: 16rpx;
+      padding: 24rpx;
+
+      .rating-header {
+        .rating-title {
+          font-size: 32rpx;
+        }
+
+        .rating-subtitle {
+          font-size: 24rpx;
+        }
+      }
+
+      .enhanced-rating-form {
+        .rating-categories {
+          .enhanced-rating-item {
+            padding: 20rpx;
+
+            .rating-item-header {
+              .rating-emoji {
+                font-size: 24rpx;
+              }
+
+              .rating-label {
+                font-size: 26rpx;
+              }
+
+              .rating-value {
+                font-size: 22rpx;
+              }
+            }
+          }
+        }
+
+        .rating-summary {
+          .summary-text {
+            font-size: 26rpx;
+          }
+        }
+
+        .enhanced-submit-rating-btn {
+          font-size: 28rpx;
+          padding: 16rpx;
+        }
+      }
+    }
+  }
+}
+
+// Multi-image header section
+.header-image-section {
+  position: relative;
+  height: 400rpx;
+  width: 100%;
+
+  .image-swiper-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    .image-swiper {
+      width: 100%;
+      height: 100%;
+
+      .restaurant-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    // Image counter
+    .image-counter {
+      position: absolute;
+      bottom: 20rpx;
+      right: 20rpx;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 24rpx;
+      font-weight: 500;
+      z-index: 10;
+    }
+
+    // Multi-image indicator
+    .image-count-badge {
+      position: absolute;
+      top: 20rpx;
+      right: 20rpx;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 24rpx;
+      font-weight: 500;
+      z-index: 10;
+    }
+  }
+
+  .single-image-container {
+    height: 100%;
+    width: 100%;
+
+    .restaurant-main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+// Legacy single image support (for backward compatibility)
+.header-image {
+  height: 400rpx;
+  width: 100%;
+
+  .restaurant-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.basic-info-card,
+.details-card,
+.rating-card {
+  background: white;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+
+  .card-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20rpx;
+    display: block;
+  }
+}
+
+.basic-info-card {
+  .restaurant-name {
+    font-size: 40rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20rpx;
+    display: block;
+  }
+
+  .rating-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20rpx;
+    gap: 16rpx;
+
+    .rating-text {
+      font-size: 26rpx;
+      color: #666;
+    }
+  }
+
+  .restaurant-description {
+    font-size: 28rpx;
+    color: #666;
+    line-height: 1.6;
+    margin-top: 16rpx;
+  }
+}
+
+.rating-card {
+  .rating-form {
+    .rating-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24rpx;
+      padding: 16rpx 0;
+
+      .rating-label {
+        font-size: 28rpx;
+        color: #333;
+        font-weight: 500;
+        flex-shrink: 0;
+        width: 120rpx;
+      }
+
+      .rating-value {
+        font-size: 24rpx;
+        color: #666;
+        font-weight: 500;
+        flex-shrink: 0;
+        width: 80rpx;
+        text-align: right;
+      }
+    }
+
+    .submit-rating-btn {
+      margin-top: 32rpx;
+      background: #ff6b6b;
+      border: none;
+      border-radius: 24rpx;
+      font-size: 32rpx;
+      font-weight: 600;
+
+      &:hover {
+        background: #ff5252;
+      }
+    }
+  }
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 750px) {
+  .restaurant-detail-container {
+    .header-image-section {
+      height: 300rpx;
+
+      .image-swiper-container {
+
+        .image-counter,
+        .image-count-badge {
+          font-size: 22rpx;
+          padding: 6rpx 12rpx;
+          border-radius: 16rpx;
+        }
+
+        .image-counter {
+          bottom: 16rpx;
+          right: 16rpx;
+        }
+
+        .image-count-badge {
+          top: 16rpx;
+          right: 16rpx;
+        }
+      }
+    }
+
+    .basic-info-card,
+    .details-card,
+    .rating-card {
+      margin: 16rpx;
+      padding: 24rpx;
+
+      .card-title {
+        font-size: 28rpx;
+      }
+    }
+
+    .basic-info-card {
+      .restaurant-name {
+        font-size: 36rpx;
+      }
+
+      .rating-section {
+        gap: 12rpx;
+
+        .rating-text {
+          font-size: 24rpx;
+        }
+      }
+
+      .restaurant-description {
+        font-size: 26rpx;
+      }
+    }
+
+    .rating-card {
+      .rating-form {
+        .rating-item {
+          margin-bottom: 20rpx;
+          padding: 12rpx 0;
+
+          .rating-label {
+            font-size: 26rpx;
+            width: 100rpx;
+          }
+
+          .rating-value {
+            font-size: 22rpx;
+            width: 70rpx;
+          }
+        }
+
+        .submit-rating-btn {
+          margin-top: 24rpx;
+          font-size: 28rpx;
+        }
+      }
+    }
+  }
+}
+
+/* Animation effects */
+.restaurant-detail-container {
+
+  .info-section,
+  .rating-section {
+    animation: slideUp 0.3s ease-out;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
