@@ -13,6 +13,9 @@ export interface CarpoolPost {
   carDetails?: string
   insured?: boolean
   status: 'open' | 'full' | 'completed' | 'cancelled'
+  // 审核字段（后端提供）
+  reviewStatus?: 'pending' | 'approved' | 'rejected'
+  reviewReason?: string
   createdAt: string
 }
 
@@ -198,6 +201,20 @@ export const carpoolApi = {
       throw error
     }
   },
+  // 根据 OpenID 更新拼车信息
+  updateCarpoolByOpenId: async (openid: string, id: number, data: Partial<CreateCarpoolPost>): Promise<CarpoolPost | null> => {
+    try {
+      const response = await request({
+        url: `/carpools/user/${openid}/${id}`,
+        method: 'PUT',
+        data
+      })
+      return response as CarpoolPost || null
+    } catch (error) {
+      console.error('根据 OpenID 更新拼车信息失败:', error)
+      throw error
+    }
+  },
 
   // 删除拼车信息
   deleteCarpool: async (userId: number, id: number): Promise<boolean> => {
@@ -210,6 +227,19 @@ export const carpoolApi = {
       return true
     } catch (error) {
       console.error('删除拼车信息失败:', error)
+      throw error
+    }
+  },
+  // 根据 OpenID 删除拼车信息
+  deleteCarpoolByOpenId: async (openid: string, id: number): Promise<boolean> => {
+    try {
+      await request({
+        url: `/carpools/user/${openid}/${id}`,
+        method: 'DELETE'
+      })
+      return true
+    } catch (error) {
+      console.error('根据 OpenID 删除拼车信息失败:', error)
       throw error
     }
   }

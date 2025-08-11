@@ -48,7 +48,7 @@ const Gift: React.FC = () => {
 
   // 格式化价格显示
   const formatPrice = (price: string) => {
-    return `¥${price}`
+    return `$${price}`
   }
 
   // 格式化库存显示
@@ -105,10 +105,11 @@ const Gift: React.FC = () => {
             />
           ) : (
             <View className='items-grid'>
-              {items.map(item => (
+              {items.map((item, index) => (
                 <View 
                   key={item.id} 
-                  className='item-card'
+                  className='item-card fade-in-up'
+                  style={{ animationDelay: `${index * 60}ms` }}
                   // onClick={() => handleItemClick(item)}
                 >
                   {/* 商品图片 */}
@@ -123,20 +124,16 @@ const Gift: React.FC = () => {
                     <View className={`stock-badge ${getStockStatus(item.stock)}`}>
                       {formatStock(item.stock)}
                     </View>
+                    {/* 价格浮标 */}
+                    <View className='price-tag'>
+                      {formatPrice(item.price)}
+                    </View>
                   </View>
 
                   {/* 商品信息 */}
                   <View className='item-info'>
                     <Text className='item-name'>{item.name}</Text>
                     <Text className='item-description'>{item.description}</Text>
-                    
-                    {/* 价格和库存 */}
-                    <View className='item-footer'>
-                      <Text className='item-price'>{formatPrice(item.price)}</Text>
-                      {/* <View className='item-actions'>
-                        <Text className='view-detail'>查看详情</Text>
-                      </View> */}
-                    </View>
                   </View>
                 </View>
               ))}

@@ -729,6 +729,42 @@ export const restaurantReviewApi = {
       throw error
     }
   },
+  // 根据 OpenID 更新评论
+  updateReviewByOpenId: async (
+    openid: string,
+    id: number,
+    data: Pick<RestaurantReview, 'content' | 'rating'> & {
+      tasteRating?: number
+      environmentRating?: number
+      serviceRating?: number
+      priceRating?: number
+    }
+  ): Promise<RestaurantReview | null> => {
+    try {
+      const response = await request({
+        url: `/restaurant-reviews/user/openid/${openid}/${id}`,
+        method: 'PUT',
+        data
+      }) as SingleReviewResponse
+      return response?.data || null
+    } catch (error) {
+      console.error('根据 OpenID 更新评论失败:', error)
+      throw error
+    }
+  },
+  // 根据 OpenID 删除评论
+  deleteReviewByOpenId: async (openid: string, id: number): Promise<boolean> => {
+    try {
+      const response = await request({
+        url: `/restaurant-reviews/user/openid/${openid}/${id}`,
+        method: 'DELETE'
+      })
+      return !!(response && (response.success === undefined || response.success === true))
+    } catch (error) {
+      console.error('根据 OpenID 删除评论失败:', error)
+      throw error
+    }
+  },
 }
 
 // 模拟餐厅数据（用于展示和测试）

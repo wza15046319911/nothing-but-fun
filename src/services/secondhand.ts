@@ -15,6 +15,9 @@ export interface SecondhandItem {
   reviewReason?: string
   createdAt: string
   updatedAt: string
+  sellerName: string
+  sellerContact: string
+  sellerAvatar: string
 }
 
 // 创建二手商品请求类型

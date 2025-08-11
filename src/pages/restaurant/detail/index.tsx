@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
 import { Rate, Button } from '@nutui/nutui-react-taro'
-import Taro, { useRouter } from '@tarojs/taro'
+import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import { restaurantApi, Restaurant } from '../../../services/restaurant'
 import { useAuth } from '../../../context/auth'
 import './index.less'
@@ -25,20 +25,21 @@ const RestaurantDetail: React.FC = () => {
     price: 5
   })
 
-  // Get restaurant ID from router params
-  const restaurantId = parseInt(router.params.id || '0')
+  // 当前餐厅ID（使用状态以确保参数可用时再加载）
+  const [restaurantId, setRestaurantId] = useState<number>(0)
 
   // Load restaurant details
-  const loadRestaurantDetail = async () => {
+  const loadRestaurantDetail = async (id?: number) => {
     try {
       setLoading(true)
-      console.log('Loading restaurant detail for ID:', restaurantId)
+      const targetId = typeof id === 'number' ? id : restaurantId
+      console.log('Loading restaurant detail for ID:', targetId)
 
-      if (!restaurantId || restaurantId === 0) {
+      if (!targetId || targetId === 0) {
         throw new Error('餐厅ID无效')
       }
 
-      const response = await restaurantApi.getRestaurantById(restaurantId)
+      const response = await restaurantApi.getRestaurantById(targetId)
       console.log('Restaurant detail response:', response)
 
       if (response) {
@@ -145,10 +146,35 @@ const RestaurantDetail: React.FC = () => {
     return '其他'
   }
 
-  // Load data on component mount
+  // 解析并设置餐厅ID（处理初次进入和再次展示）
+  const resolveAndSetRestaurantId = () => {
+    // 优先从 Taro 实例读取，作为 useRouter 的兜底
+    const currentParams = Taro.getCurrentInstance()?.router?.params || {}
+    const idFromRouter = router?.params?.id
+    const idStr = (currentParams.id || idFromRouter || '0') as string
+    const idNum = parseInt(idStr)
+    if (!Number.isNaN(idNum) && idNum > 0) {
+      setRestaurantId(idNum)
+    }
+  }
+
+  // 首次挂载时解析ID并加载
   useEffect(() => {
-    if (restaurantId) {
-      loadRestaurantDetail()
+    resolveAndSetRestaurantId()
+  }, [])
+
+  // 页面显示时确保加载（适配小程序返回后再次展示）
+  useDidShow(() => {
+    resolveAndSetRestaurantId()
+    if (restaurantId > 0) {
+      loadRestaurantDetail(restaurantId)
+    }
+  })
+
+  // 当 restaurantId 变更时加载
+  useEffect(() => {
+    if (restaurantId > 0) {
+      loadRestaurantDetail(restaurantId)
     }
   }, [restaurantId])
 

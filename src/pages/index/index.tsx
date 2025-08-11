@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline, useLoad } from '@tarojs/taro'
 import './index.less'
 
 // 主要功能 - 大卡片展示，突出显示
@@ -83,6 +83,25 @@ const getRandomImages = (images: string[], count: number): string[] => {
 
 const Index: React.FC = () => {
   const randomImages = getRandomImages(recommendedImages, 4)
+
+  // 分享给好友：落地到 loading 页面
+  useShareAppMessage(() => ({
+    title: 'Nothing But Fun | 布好玩',
+    path: '/pages/loading/index'
+  }))
+
+  // 朋友圈分享：附带标记参数，进入首页后跳转 loading
+  useShareTimeline(() => ({
+    title: 'Nothing But Fun | 布好玩',
+    query: 'fromShare=1'
+  }))
+
+  // 处理从分享进入首页的场景，先跳转到 loading
+  useLoad((options) => {
+    if (options && options.fromShare === '1') {
+      Taro.reLaunch({ url: '/pages/loading/index' })
+    }
+  })
 
   // 处理功能点击
   const handleEntryClick = (entry: FeatureEntry) => {

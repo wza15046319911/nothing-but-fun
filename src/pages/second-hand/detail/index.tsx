@@ -7,7 +7,7 @@ import {
   Dialog,
   Swiper,
 } from "@nutui/nutui-react-taro";
-import Taro, { useRouter } from "@tarojs/taro";
+import Taro, { useRouter, useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { secondhandApi, SecondhandItem } from "../../../services/secondhand";
 import "./index.less";
 
@@ -21,6 +21,23 @@ const statusMap = {
 const SecondHandDetail: React.FC = () => {
   const router = useRouter();
   const { id } = router.params;
+  // 分享给好友 / 群聊
+  useShareAppMessage(() => {
+    const title = item?.title ? `${item.title} - 二手好物` : "二手好物精选";
+    const imageUrl = item?.imageUrls?.[0] || item?.image;
+    const redirect = encodeURIComponent('/pages/second-hand/detail/index');
+    const path = `/pages/loading/index?redirect=${redirect}&id=${id || ''}`;
+    return { title, path, imageUrl };
+  });
+
+  // 朋友圈分享
+  useShareTimeline(() => {
+    const title = item?.title || "二手好物精选";
+    // 朋友圈落地默认到 loading，再由 loading 跳详情
+    const redirect = encodeURIComponent('/pages/second-hand/detail/index');
+    return { title, query: `redirect=${redirect}&id=${id || ''}` };
+  });
+
 
   // State management
   const [item, setItem] = useState<SecondhandItem | null>(null);
@@ -76,7 +93,10 @@ const SecondHandDetail: React.FC = () => {
   // Handle contact seller
   const handleContactSeller = () => {
     if (!item) return;
-
+    Taro.setClipboardData({
+      data: item.sellerContact,
+      
+    });
     Taro.showModal({
       title: "联系卖家",
       content: `卖家联系方式已拷贝`,
@@ -85,34 +105,6 @@ const SecondHandDetail: React.FC = () => {
     });
   };
 
-  // Handle buy now
-  const handleBuyNow = () => {
-    if (!item) return;
-
-    if (item.status !== "available") {
-      showToastMessage("商品当前不可购买");
-      return;
-    }
-
-    Taro.showModal({
-      title: "确认购买",
-      content: `确认购买 "${item.title}" 吗？\n价格: ¥${item.price}`,
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            // Update item status to reserved
-            await secondhandApi.updateItem(item.id, { status: "reserved" });
-            showToastMessage("购买成功！请联系卖家确认交易详情");
-            // Reload item details
-            loadItemDetail();
-          } catch (error) {
-            console.error("Purchase failed:", error);
-            showToastMessage("购买失败，请稍后重试");
-          }
-        }
-      },
-    });
-  };
 
   // Handle more actions
   const handleMoreActions = () => {

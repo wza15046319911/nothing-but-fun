@@ -1,18 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { Uploader, type FileItem } from '@nutui/nutui-react-taro'
 import './index.less'
 import { secondhandApi } from 'src/services/secondhand'
 import { API_BASE_URL } from 'src/services/api'
 import { useAuth } from 'src/context/auth'
+
+import "@taroify/core/uploader/style"
+import { Uploader } from "@taroify/core"
 
 const SecondHandPublish: React.FC = () => {
   // Form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [fileList, setFileList] = useState<FileItem[]>([])
+  const [fileList, setFileList] = useState<Uploader.File[]>([])
   const [titleTouched, setTitleTouched] = useState(false)
   const [descTouched, setDescTouched] = useState(false)
   const [priceTouched, setPriceTouched] = useState(false)
@@ -34,24 +36,26 @@ const SecondHandPublish: React.FC = () => {
   const titleRemaining = useMemo(() => 30 - title.length, [title])
   const descRemaining = useMemo(() => 500 - description.length, [description])
 
-  // Handle file operations - 只做本地预览，不上传
-  const onDelete = (file: FileItem, files: FileItem[]) => {
-    console.log('删除文件:', file)
-    setFileList(files)
-  }
+  const handleUpload = () => {
+    Taro.chooseImage({
+      count: maxImages - fileList.length,
+      sizeType: ["original", "compressed"],
+      sourceType: ["album", "camera"],
+    }).then(({ tempFiles }) => {
+      setFileList([
+        ...fileList,
+        ...tempFiles.map(({ path, type, originalFileObj }) => ({
+          type,
+          url: path,
+          name: originalFileObj?.name,
+        })),
+      ])
+    })
 
-  // 由于不使用自动上传，这些回调不会被触发，但保留以防需要
-  const onSuccess = (param: { responseText: any; option: any; files: FileItem[] }) => {
-    console.log('图片选择成功:', param)
-    // 不需要处理上传，只更新本地文件列表
-  }
-
-  const onFailure = (param: { responseText: string; option: any; files: FileItem[] }) => {
-    console.log('图片选择失败:', param)
   }
 
   // Handle file change - 当用户选择文件时
-  const handleFileChange = (files: FileItem[]) => {
+  const handleFileChange = (files: Uploader.File[]) => {
     console.log('文件列表更新:', files)
     setFileList(files)
   }
@@ -93,7 +97,7 @@ const SecondHandPublish: React.FC = () => {
             setPrice(item.price ? String(item.price) : '')
             const existingImages = (item.imageUrls || [])
               .filter(Boolean)
-              .map((url) => ({ url } as FileItem))
+              .map((url) => ({ url } as Uploader.File))
             setFileList(existingImages)
           } catch (e) {
             console.error('加载商品详情失败:', e)
@@ -271,19 +275,14 @@ const SecondHandPublish: React.FC = () => {
       <View className='form-section'>
         <View className='form-title'>上传图片</View>
         <View className='upload-section'>
-          <View className='upload-desc'>选择清晰的商品照片（{fileList.length}/{maxImages} 张，支持拖动排序）</View>
+          {/* <View className='upload-desc'>选择清晰的商品照片（{fileList.length}/{maxImages} 张，支持拖动排序）</View> */}
           <Uploader
             value={fileList}
+            onUpload={handleUpload}
             onChange={handleFileChange}
             multiple
-            maxCount={maxImages}
-            onDelete={onDelete}
-            onSuccess={onSuccess}
-            onFailure={onFailure}
-            accept="image/*"
-            deletable
-            preview
-            autoUpload={false}
+            maxFiles={maxImages}
+            removable
           />
         </View>
       </View>

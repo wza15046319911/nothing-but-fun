@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty, Toast } from '@nutui/nutui-react-taro'
+import { PullToRefresh, Toast } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { secondhandApi, SecondhandItem, SecondhandFilters } from '../../services/secondhand'
 import { useAuth } from '../../context/auth'
@@ -8,12 +8,7 @@ import SecondhandFiltersComponent from '../../components/SecondhandFilters'
 import Pagination from '../../components/Pagination'
 import './index.less'
 
-// Status display mapping
-const statusMap = {
-  'available': { text: '可购买', color: '#52c41a' },
-  'sold': { text: '已售出', color: '#ff4d4f' },
-  'reserved': { text: '已预订', color: '#faad14' }
-}
+
 
 const SecondHand: React.FC = () => {
   // Auth context

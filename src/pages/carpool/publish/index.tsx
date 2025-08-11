@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, Input, Textarea, Switch } from '@tarojs/components'
 import {
   DatePicker,
@@ -16,14 +16,16 @@ const CarpoolPublish: React.FC = () => {
   const { isLoggedIn, userInfo } = authState
 
   // Form state (independent states)
-  const [origin, setOrigin] = useState('Toowang')
-  const [destination, setDestination] = useState('UQ')
-  const [departureTime, setDepartureTime] = useState(new Date().toISOString())
+  const [origin, setOrigin] = useState('')
+  const [destination, setDestination] = useState('')
+  const [departureTime, setDepartureTime] = useState('')
   const [availableSeats, setAvailableSeats] = useState(1)
-  const [price, setPrice] = useState('20')
-  const [description, setDescription] = useState('wu')
+  const [price, setPrice] = useState('')
+  const [description, setDescription] = useState('')
   const [carDetails, setCarDetails] = useState('')
   const [insured, setInsured] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
 
   // UI state
   const [loading, setLoading] = useState(false)
@@ -108,6 +110,42 @@ const CarpoolPublish: React.FC = () => {
     setOrigin(route.origin)
     setDestination(route.destination)
   }
+
+  // 初始化：编辑模式预填 or 发布默认值
+  useEffect(() => {
+    const params = Taro.getCurrentInstance()?.router?.params || {}
+    const mode = params.mode
+    const idStr = params.id
+    if (mode === 'edit' && idStr) {
+      const id = parseInt(idStr)
+      if (!Number.isNaN(id)) {
+        setIsEditMode(true)
+        setEditingId(id)
+        ;(async () => {
+          const post = await carpoolApi.getCarpoolById(id)
+          if (post) {
+            setOrigin(post.origin || '')
+            setDestination(post.destination || '')
+            setDepartureTime(post.departureTime || '')
+            setAvailableSeats(post.availableSeats || 1)
+            setPrice(String(post.price ?? ''))
+            setDescription(post.description || '')
+            setCarDetails(post.carDetails || '')
+            setInsured(!!post.insured)
+          }
+        })()
+      }
+    } else {
+      setOrigin('Toowang')
+      setDestination('UQ')
+      setDepartureTime(new Date().toISOString())
+      setAvailableSeats(1)
+      setPrice('20')
+      setDescription('')
+      setCarDetails('')
+      setInsured(false)
+    }
+  }, [])
 
   // Handle date picker confirm
   const handleDateConfirm = (_options: any, values: any) => {
@@ -207,24 +245,32 @@ const CarpoolPublish: React.FC = () => {
         insured
       }
 
-      const result = await carpoolApi.createCarpool(parseInt(userInfo.id), carpoolData)
-
-      if (result) {
-        showToastMessage('发布成功')
-
-        // Navigate back to carpool list after a short delay
-        setTimeout(() => {
-          Taro.navigateBack()
-        }, 1500)
+      if (isEditMode && editingId) {
+        const result = await carpoolApi.updateCarpoolByOpenId(userInfo.openid, editingId, carpoolData)
+        if (result) {
+          showToastMessage('保存成功')
+        } else {
+          throw new Error('API returned null response')
+        }
       } else {
-        throw new Error('API returned null response')
+        const result = await carpoolApi.createCarpool(parseInt(userInfo.id), carpoolData)
+        if (result) {
+          showToastMessage('发布成功')
+        } else {
+          throw new Error('API returned null response')
+        }
       }
 
+      // Navigate back to previous page after a short delay
+      setTimeout(() => {
+        Taro.navigateBack()
+      }, 1500)
+
     } catch (error) {
-      console.error('发布拼车信息失败:', error)
+      console.error('发布/保存拼车信息失败:', error)
 
       // More detailed error handling
-      let errorMessage = '发布失败，请重试'
+      let errorMessage = '操作失败，请重试'
       if (error instanceof Error) {
         if (error.message.includes('network') || error.message.includes('fetch')) {
           errorMessage = '网络连接失败，请检查网络后重试'
@@ -257,7 +303,7 @@ const CarpoolPublish: React.FC = () => {
   return (
     <View className='carpool-publish-container'>
       <View className='header-section'>
-        <Text className='page-title'>发布拼车</Text>
+        <Text className='page-title'>{isEditMode ? '编辑拼车' : '发布拼车'}</Text>
       </View>
 
       <View className='form-container'>
@@ -420,7 +466,7 @@ const CarpoolPublish: React.FC = () => {
           onClick={handleSubmit}
           loading={loading}
         >
-          {loading ? '发布中...' : '发布拼车'}
+          {loading ? (isEditMode ? '保存中...' : '发布中...') : (isEditMode ? '保存修改' : '发布拼车')}
         </Button>
       </View>
 

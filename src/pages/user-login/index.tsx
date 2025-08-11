@@ -37,7 +37,7 @@ const UserLogin: React.FC = () => {
       // 上传头像到服务器
       const uploadResult = await new Promise<string>((resolve, reject) => {
         Taro.uploadFile({
-          url: 'http://192.168.18.34:3000/api/file',
+          url: 'https://nothing-but-fun-backend-production.up.railway.app/api/file',
           filePath: avatarUrl,
           name: 'image',
           formData: {
@@ -80,6 +80,8 @@ const UserLogin: React.FC = () => {
         icon: 'none',
         duration: 2000
       })
+      setAvatarUrl(defaultAvatarUrl)
+      setHasUploadedAvatar(false)
     } finally {
       setIsUploadingAvatar(false)
     }

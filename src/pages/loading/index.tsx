@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useLoad } from '@tarojs/taro';
 import { useAuth } from '../../context/auth';
 import './index.less';
 
@@ -8,6 +8,8 @@ const Loading: React.FC = () => {
   const { checkLoginStatus } = useAuth();
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [variantClass, setVariantClass] = useState<'compact' | 'regular' | 'spacious'>('regular');
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const redirectRef = useRef<string | null>(null);
 
   const tips = useMemo(
     () => [
@@ -30,7 +32,7 @@ const Loading: React.FC = () => {
       else setVariantClass('regular');
     } catch {}
 
-    initializeApp();
+    // 初始化流程将由 useLoad 在解析完成后触发，避免竞态
 
     const tipTimer = setInterval(() => {
       setCurrentTipIndex((prev) => (prev + 1) % tips.length);
@@ -55,16 +57,50 @@ const Loading: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, remain));
     }
 
-    navigateToIndex();
+    navigateToTarget();
   };
 
-  const navigateToIndex = () => {
-    Taro.reLaunch({
-      url: '/pages/index/index',
-    }).catch((error) => {
+  const navigateToTarget = () => {
+    const candidate = redirectRef.current ?? redirectUrl;
+    const url = candidate && candidate.startsWith('/pages/')
+      ? candidate
+      : '/pages/index/index';
+    console.log('redirectUrl', url);
+    Taro.reLaunch({ url }).catch((error) => {
       console.error('跳转失败:', error);
     });
   };
+
+  useLoad((options) => {
+    // 解析 redirect 及其余参数，生成最终跳转地址
+    try {
+      const redirect = options?.redirect ? decodeURIComponent(options.redirect as string) : '';
+      let finalUrl: string | null = null;
+      if (redirect) {
+        const otherParams: Record<string, string> = {};
+        Object.keys(options || {}).forEach((key) => {
+          if (key !== 'redirect' && options[key] !== undefined && options[key] !== null) {
+            otherParams[key] = String(options[key]);
+          }
+        });
+
+        const queryPairs = Object.keys(otherParams).map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(otherParams[k])}`);
+        const hasQuery = redirect.includes('?');
+        const queryString = queryPairs.length ? `${hasQuery ? '&' : '?'}${queryPairs.join('&')}` : '';
+        finalUrl = `${redirect}${queryString}`;
+      }
+
+      redirectRef.current = finalUrl;
+      setRedirectUrl(finalUrl);
+    } catch (err) {
+      console.warn('解析 redirect 参数失败:', err);
+      redirectRef.current = null;
+      setRedirectUrl(null);
+    } finally {
+      // 解析完成后再开始初始化流程
+      initializeApp();
+    }
+  });
 
 
   return (
