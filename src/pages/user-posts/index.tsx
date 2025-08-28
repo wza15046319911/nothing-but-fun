@@ -392,57 +392,6 @@ const UserPosts: React.FC = () => {
     )
   }
 
-  const renderCarpoolContent = () => {
-    if (!userCarpools || userCarpools.length === 0) {
-      return (
-        <View className='empty-container'>
-          <Empty description="暂无拼车信息" imageSize={120} />
-        </View>
-      )
-    }
-    return (
-      <View className='items-list'>
-        {userCarpools.map(c => {
-          const { date, time } = formatDateTime(c.departureTime)
-          const moderation = c.reviewStatus
-          return (
-            <View key={c.id} className='item-card'>
-              <View className='item-info'>
-                <Text className='item-name'>{c.origin} → {c.destination}</Text>
-                <Text className='item-description'>{c.description || '无描述'}</Text>
-                {/* 如果存在审核状态字段，则展示 */}
-                {moderation && (
-                  <View className='review-status-info'>
-                    <Text className='review-status-text'>审核状态: {moderation === 'pending' ? '⏳ 审核中' : moderation === 'approved' ? '✅ 已通过' : '❌ 已拒绝'}</Text>
-                    {c.reviewReason && moderation === 'rejected' && (
-                      <Text className='rejection-reason'>拒绝原因: {c.reviewReason}</Text>
-                    )}
-                  </View>
-                )}
-                <View className='item-footer'>
-                  <Text className='item-price'>{formatPrice(c.price)}</Text>
-                  <Text className='item-time'>{date} {time}</Text>
-                </View>
-                <View className='item-actions'>
-                  <Button className='action-button edit-button' size='small' onClick={(e) => {
-                    e.stopPropagation()
-                    // 跳转到拼车发布页的编辑模式
-                    Taro.navigateTo({ url: `/pages/carpool/publish/index?id=${c.id}&mode=edit` })
-                  }}>
-                    ✏️ 编辑
-                  </Button>
-                  <Button className='action-button delete-button' size='small' onClick={(e) => handleDeleteCarpoolClick(c, e)}>
-                    🗑️ 删除
-                  </Button>
-                </View>
-              </View>
-            </View>
-          )
-        })}
-      </View>
-    )
-  }
-
   return (
     <View className='user-posts-container'>
       {/* 页面头部 */}
@@ -468,12 +417,6 @@ const UserPosts: React.FC = () => {
         >
           餐厅评价
         </View>
-        <View 
-          className={`tab ${activeTab === 'carpool' ? 'active' : ''}`}
-          onClick={() => setActiveTab('carpool')}
-        >
-          拼车信息
-        </View>
       </View>
 
 
@@ -486,7 +429,7 @@ const UserPosts: React.FC = () => {
         completeText="刷新完成"
       >
         <ScrollView className='content' scrollY scrollTop={scrollTop} onScroll={handleScroll}>
-          {activeTab === 'secondhand' ? renderSecondhandContent() : activeTab === 'reviews' ? renderReviewsContent() : renderCarpoolContent()}
+          {activeTab === 'secondhand' ? renderSecondhandContent() : renderReviewsContent()}
         </ScrollView>
       </PullToRefresh>
 
@@ -505,14 +448,6 @@ const UserPosts: React.FC = () => {
         content={`确定要删除这条餐厅评价吗？此操作不可撤销。`}
         onCancel={() => setShowDeleteReviewDialog(false)}
         onConfirm={handleConfirmDeleteReview}
-      />
-      {/* 删除拼车信息确认 */}
-      <Dialog
-        visible={showDeleteCarpoolDialog}
-        title="确认删除"
-        content={`确定要删除这条拼车信息吗？此操作不可撤销。`}
-        onCancel={() => setShowDeleteCarpoolDialog(false)}
-        onConfirm={handleConfirmDeleteCarpool}
       />
     </View>
   )

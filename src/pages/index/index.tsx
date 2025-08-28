@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
 import Taro, { useShareAppMessage, useShareTimeline, useLoad } from '@tarojs/taro'
 import './index.less'
+import { useAuth } from '../../context/auth'
 
 // 主要功能 - 大卡片展示，突出显示
 const mainFeatures = [
@@ -27,11 +28,11 @@ const mainFeatures = [
   },
   {
     id: 3,
-    title: '拼车服务',
-    subtitle: '便捷拼车出行',
-    description: '安全拼车，节省出行成本',
-    icon: '🚗',
-    path: '/pages/carpool/index',
+    title: '周边商品',
+    subtitle: '便捷购买周边商品',
+    description: '更多周边商品，更多乐趣',
+    icon: '🎁',
+    path: '/pages/gift/index',
     gradient: 'linear-gradient(135deg, #45b7d1 0%, #6cc5e0 100%)',
     bgColor: '#f0f9ff'
   },
@@ -82,6 +83,8 @@ const getRandomImages = (images: string[], count: number): string[] => {
 }
 
 const Index: React.FC = () => {
+  const { state } = useAuth()
+  const { isLoggedIn } = state
   const randomImages = getRandomImages(recommendedImages, 4)
 
   // 分享给好友：落地到 loading 页面
@@ -105,6 +108,20 @@ const Index: React.FC = () => {
 
   // 处理功能点击
   const handleEntryClick = (entry: FeatureEntry) => {
+    const restrictedPaths = ['/pages/second-hand/index']
+    if (restrictedPaths.includes(entry.path) && !isLoggedIn) {
+      Taro.showModal({
+        title: '提示',
+        content: '请先登录后再使用该功能',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/user-login/index' })
+          }
+        }
+      })
+      return
+    }
     if (entry.path) {
       Taro.navigateTo({
         url: entry.path
@@ -133,7 +150,10 @@ const Index: React.FC = () => {
       <View className='main-features-section'>
         <Text className='section-title'>主要功能</Text>
         <View className='main-features-grid'>
-          {mainFeatures.map(feature => (
+          {(isLoggedIn
+            ? mainFeatures
+            : mainFeatures.filter(f => !['/pages/second-hand/index', '/pages/carpool/index'].includes(f.path))
+          ).map(feature => (
             <View
               key={feature.id}
               className='main-feature-card'

@@ -15,6 +15,52 @@
     }
   }
 
+  .disabled-notice {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 40rpx;
+
+    .notice-content {
+      background: white;
+      border-radius: 20rpx;
+      padding: 60rpx 40rpx;
+      text-align: center;
+      box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+      max-width: 500rpx;
+      width: 100%;
+
+      .notice-icon {
+        font-size: 80rpx;
+        margin-bottom: 20rpx;
+        display: block;
+      }
+
+      .notice-title {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20rpx;
+        display: block;
+      }
+
+      .notice-message {
+        font-size: 28rpx;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 40rpx;
+        display: block;
+      }
+
+      .back-button {
+        width: 200rpx;
+        height: 80rpx;
+        border-radius: 40rpx;
+      }
+    }
+  }
+
   .form-container {
     background: white;
     margin: 20rpx;

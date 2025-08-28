@@ -147,6 +147,7 @@ const Carpool: React.FC = () => {
           {/* Header */}
           <View className='header-section'>
             <Text className='page-title'>拼车信息</Text>
+            {/* 司机发布功能已暂时关闭 */}
             <Button type="primary" size="small" className='post-button' onClick={handlePostCarpool}>
               发布拼车
             </Button>
@@ -260,6 +261,7 @@ const Carpool: React.FC = () => {
                   description="暂无拼车信息"
                   imageSize={120}
                 >
+                  {/* 司机发布功能已暂时关闭 */}
                   <Button 
                     type="primary" 
                     onClick={handlePostCarpool}

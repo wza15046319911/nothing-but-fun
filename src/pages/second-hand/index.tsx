@@ -317,12 +317,14 @@ const SecondHand: React.FC = () => {
       </PullToRefresh>
 
       {/* 增强的浮动按钮 */}
-      <View className='enhanced-floating-button' onClick={handlePostNew}>
-        <View className='button-content'>
-          <Text className='button-icon'>+</Text>
+      {isLoggedIn && (
+        <View className='enhanced-floating-button' onClick={handlePostNew}>
+          <View className='button-content'>
+            <Text className='button-icon'>+</Text>
+          </View>
+          <View className='button-ripple'></View>
         </View>
-        <View className='button-ripple'></View>
-      </View>
+      )}
 
       {/* Toast */}
       <Toast

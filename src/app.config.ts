@@ -1,8 +1,8 @@
 export default defineAppConfig({
   pages: [
     'pages/loading/index',
-    'pages/carpool/index',
-    'pages/carpool/publish/index',
+    // 'pages/carpool/index',
+    // 'pages/carpool/publish/index',
     'pages/contact-info/index',
     'pages/past-activities/index',
     'pages/update-phone/index',
