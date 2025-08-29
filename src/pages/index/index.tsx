@@ -204,7 +204,7 @@ const Index: React.FC = () => {
       </View>
 
       {/* 推荐内容区域 */}
-      <View className='recommended-section'>
+      {/* <View className='recommended-section'>
         <Text className='section-title'>猜你喜欢</Text>
         <View className='recommended-items'>
           {randomImages.map((imgSrc, index) => (
@@ -220,7 +220,7 @@ const Index: React.FC = () => {
             </View>
           ))}
         </View>
-      </View>
+      </View> */}
     </ScrollView>
   )
 }
