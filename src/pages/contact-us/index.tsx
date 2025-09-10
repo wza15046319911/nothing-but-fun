@@ -57,47 +57,43 @@ const ContactUs: React.FC = () => {
           <Text className='section-subtitle'>选择您喜欢的联系方式</Text>
         </View>
         <View className='contact-cards'>
-          <View className='contact-card phone-card' onClick={() => handlePhoneCall('+61-XXX-XXX-XXX')}>
+          <View className='contact-card phone-card'>
             <View className='card-icon'>
               <Text className='icon-emoji'>📞</Text>
             </View>
             <View className='card-content'>
               <Text className='card-title'>电话咨询</Text>
-              <Text className='card-subtitle'>+61-XXX-XXX-XXX</Text>
-              <Text className='card-hint'>点击拨打</Text>
+              <Text className='card-subtitle'>+61-447-435-758</Text>
             </View>
           </View>
           
-          <View className='contact-card email-card' onClick={() => handleCopy('zianwang9911@gmail.com', '邮箱地址')}>
+          <View className='contact-card email-card'>
             <View className='card-icon'>
               <Text className='icon-emoji'>✉️</Text>
             </View>
             <View className='card-content'>
               <Text className='card-title'>邮箱联系</Text>
               <Text className='card-subtitle'>zianwang9911@gmail.com</Text>
-              <Text className='card-hint'>点击复制</Text>
             </View>
           </View>
           
-          <View className='contact-card location-card' onClick={handleOpenMap}>
+          <View className='contact-card location-card'>
             <View className='card-icon'>
               <Text className='icon-emoji'>📍</Text>
             </View>
             <View className='card-content'>
               <Text className='card-title'>地址位置</Text>
               <Text className='card-subtitle'>布里斯班市中心</Text>
-              <Text className='card-hint'>查看地图</Text>
             </View>
           </View>
           
-          <View className='contact-card wechat-card' onClick={() => handleCopy('nil_object_found', '微信号')}>
+          <View className='contact-card wechat-card'>
             <View className='card-icon'>
               <Text className='icon-emoji'>💬</Text>
             </View>
             <View className='card-content'>
               <Text className='card-title'>微信联系</Text>
               <Text className='card-subtitle'>nil_object_found</Text>
-              <Text className='card-hint'>复制微信号</Text>
             </View>
           </View>
         </View>

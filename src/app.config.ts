@@ -9,7 +9,7 @@ export default defineAppConfig({
     'pages/index/index',
     'pages/course/write-review/index',
     'pages/second-hand/index',
-    'pages/rental-house/index',
+    // 'pages/rental-house/index',
     'pages/restaurant/index',
     'pages/restaurant/detail/index',
     'pages/course/index',
@@ -22,13 +22,12 @@ export default defineAppConfig({
     'pages/gift/detail/index',
     'pages/rental/index',
     'pages/rental/detail/index',
-    'pages/rental-house/detail/index',
+    // 'pages/rental-house/detail/index',
     'pages/restaurant/reviews/index',
     'pages/restaurant/write-review/index',
     'pages/course/reviews/index',
     'pages/user-registrations/index',
-    'pages/car-rental/index',
-    'pages/custom-tour/index',
+
     'pages/contact-us/index'
   ],
   window: {
