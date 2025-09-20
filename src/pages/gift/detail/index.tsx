@@ -1,218 +1,251 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { Loading } from '@nutui/nutui-react-taro'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ScrollView, View, Text, Image } from '@tarojs/components'
+import { Swiper } from '@nutui/nutui-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
 import { peripheralsApi, PeripheralItem } from '../../../services/peripherals'
 import './index.less'
 
+const merchantEmail = 'market@nothingbutfun.au'
+const fallbackImage = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80'
+
+const formatStock = (stock: number) => {
+  if (stock > 100) {
+    return '库存充足'
+  }
+  if (stock > 10) {
+    return `剩余${stock}件`
+  }
+  if (stock > 0) {
+    return `仅剩${stock}件`
+  }
+  return '暂时缺货'
+}
+
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const formatPrice = (price: number | string) => {
+  const priceStr = typeof price === 'number' ? price.toString() : price
+  return priceStr.startsWith('¥') ? priceStr : `¥${priceStr}`
+}
+
 const GiftDetail: React.FC = () => {
   const router = useRouter()
   const { id } = router.params
-  
-  // 状态管理
+
   const [item, setItem] = useState<PeripheralItem | null>(null)
   const [loading, setLoading] = useState(false)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
-  // 加载商品详情
-  const loadItemDetail = async () => {
-    if (!id) return
-    
-    try {
-      setLoading(true)
-      const response = await peripheralsApi.getItemById(parseInt(id))
-      setItem(response)
-    } catch (error) {
-      console.error('加载商品详情失败:', error)
-      Taro.showToast({
-        title: '加载失败，请稍后重试',
-        icon: 'error',
-        duration: 2000
+  useEffect(() => {
+    const loadItemDetail = async () => {
+      if (!id) return
+      try {
+        setLoading(true)
+        const response = await peripheralsApi.getItemById(parseInt(id))
+        setItem(response)
+      } catch (error) {
+        console.error('加载商品详情失败:', error)
+        Taro.showToast({ title: '加载失败，请稍后重试', icon: 'none', duration: 1800 })
+        setItem(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadItemDetail()
+  }, [id])
+
+  const images = useMemo(() => {
+    if (!item) return []
+    if (item.imageUrls && item.imageUrls.length > 0) {
+      return item.imageUrls
+    }
+    if (item.image) {
+      return [item.image]
+    }
+    return []
+  }, [item])
+
+  useEffect(() => {
+    setActiveImageIndex(0)
+  }, [images])
+
+  const imageList = images.length > 0 ? images : [fallbackImage]
+
+  const handleImagePreview = (index: number) => {
+    Taro.previewImage({
+      current: imageList[Math.max(0, Math.min(index, imageList.length - 1))],
+      urls: imageList
+    })
+  }
+
+  const handleContactMerchant = () => {
+    Taro.setClipboardData({ data: merchantEmail })
+      .then(() => {
+        Taro.showToast({ title: '邮箱已复制', icon: 'success', duration: 1500 })
       })
-    } finally {
-      setLoading(false)
-    }
+      .catch(() => {
+        Taro.showToast({ title: '复制失败，请稍后重试', icon: 'none', duration: 1500 })
+      })
   }
 
-  // 格式化价格显示
-  const formatPrice = (price: string) => {
-    return `¥${price}`
-  }
-
-  // 格式化库存显示
-  const formatStock = (stock: number) => {
-    if (stock > 100) {
-      return '库存充足'
-    } else if (stock > 10) {
-      return `剩余${stock}件`
-    } else if (stock > 0) {
-      return `仅剩${stock}件`
-    } else {
-      return '暂时缺货'
-    }
-  }
-
-  // 获取库存状态样式
-  const getStockStatus = (stock: number) => {
-    if (stock > 10) {
-      return 'sufficient'
-    } else if (stock > 0) {
-      return 'low'
-    } else {
-      return 'out'
-    }
-  }
-
-  // 格式化时间
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
-  // 分享商品
   const handleShare = () => {
-    Taro.showShareMenu({
-      withShareTicket: true
-    })
+    Taro.showShareMenu({ withShareTicket: true })
+    Taro.showToast({ title: '可以分享给好友啦', icon: 'none', duration: 1500 })
   }
 
-  // 返回上一页
   const handleBack = () => {
     Taro.navigateBack()
   }
 
-  // 组件挂载时加载数据
-  useEffect(() => {
-    loadItemDetail()
-  }, [id])
-
   if (loading) {
     return (
-      <View className='detail-container'>
-        <View className='loading-container'>
-          <Loading type="spinner" />
-          <Text className='loading-text'>加载中...</Text>
-        </View>
+      <View className='flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500'>
+        <Text>正在加载周边商品详情...</Text>
       </View>
     )
   }
 
   if (!item) {
     return (
-      <View className='detail-container'>
-        <View className='error-container'>
-          <Text className='error-text'>商品不存在</Text>
-          <Text className='back-link' onClick={handleBack}>返回商品列表</Text>
+      <View className='flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-100 px-8 text-center text-slate-500'>
+        <Text className='text-4xl'>📦</Text>
+        <View>
+          <Text className='block text-lg text-slate-900'>没有找到这个周边商品</Text>
+          <Text className='mt-2 block text-sm text-slate-500'>可能已经下架或暂时不可用</Text>
+        </View>
+        <View
+          className='inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm text-slate-600 shadow-sm active:scale-95'
+          onClick={handleBack}
+        >
+          <Text>返回列表</Text>
         </View>
       </View>
     )
   }
 
+  const stockSummary = formatStock(item.stock)
+  const statusText = item.stock > 0 ? '现货发售' : '暂时缺货'
+  const statusType = item.stock > 0 ? 'available' : 'soldout'
+  const priceDisplay = formatPrice(item.price)
+
+  const tags = (() => {
+    const list = ['官方周边']
+    if (item.categoryName) list.push(item.categoryName)
+    list.push(stockSummary)
+    return list
+  })()
+
+  const specs = [
+    { label: '商品编号', value: `NBF-${item.id.toString().padStart(4, '0')}` },
+    { label: '商品分类', value: item.categoryName ?? '周边好物' },
+    { label: '上架时间', value: formatTime(item.dateCreated || item.createdAt || new Date().toISOString()) },
+    { label: '当前库存', value: item.stock > 0 ? `${item.stock} 件` : '暂时缺货' }
+  ]
+
   return (
-    <View className='detail-container'>
-      <ScrollView className='content' scrollY>
-        {/* 商品图片 */}
-        <View className='image-section'>
-          <Image 
-            className='main-image'
-            src={item.image}
-            mode='aspectFill'
-          />
-          <View className={`stock-badge ${getStockStatus(item.stock)}`}>
-            {formatStock(item.stock)}
+    <ScrollView className='peripheral-detail-page' scrollY>
+      <View className='detail-wrapper'>
+        <View className='top-bar'>
+          <View className='top-bar__button' onClick={handleBack}>
+            <Text className='top-bar__icon'>←</Text>
+            <Text>返回</Text>
+          </View>
+          <View className='top-bar__button' onClick={handleShare}>
+            <Text>分享</Text>
           </View>
         </View>
 
-        {/* 商品基本信息 */}
-        <View className='info-section'>
-          <View className='basic-info'>
-            <Text className='item-name'>{item.name}</Text>
-            <Text className='item-price'>{formatPrice(item.price)}</Text>
-          </View>
-          
-          <View className='item-description'>
-            <Text className='description-text'>{item.description}</Text>
-          </View>
-        </View>
-
-        {/* 商品详细信息 */}
-        <View className='details-section'>
-          <View className='section-title'>
-            <Text className='title-text'>商品详情</Text>
-          </View>
-          
-          <View className='detail-item'>
-            <Text className='detail-label'>商品编号:</Text>
-            <Text className='detail-value'>NBF-{item.id.toString().padStart(4, '0')}</Text>
-          </View>
-          
-          <View className='detail-item'>
-            <Text className='detail-label'>库存数量:</Text>
-            <Text className='detail-value'>{item.stock}件</Text>
-          </View>
-          
-          <View className='detail-item'>
-            <Text className='detail-label'>上架时间:</Text>
-            <Text className='detail-value'>{formatTime(item.createdAt)}</Text>
+        <View className='media-section'>
+          <Swiper
+            className='media-section__swiper'
+            circular
+            indicator
+            autoplay
+            onChange={(index) => setActiveImageIndex(index)}
+          >
+            {imageList.map((imageUrl, index) => (
+              <Swiper.Item key={`${imageUrl}-${index}`}>
+                <Image
+                  className='media-section__image'
+                  src={imageUrl}
+                  mode='aspectFill'
+                  onClick={() => handleImagePreview(index)}
+                />
+              </Swiper.Item>
+            ))}
+          </Swiper>
+          <View className='media-section__counter'>
+            <Text>{activeImageIndex + 1} / {imageList.length}</Text>
           </View>
         </View>
 
-        {/* 商品特色 */}
-        <View className='features-section'>
-          <View className='section-title'>
-            <Text className='title-text'>商品特色</Text>
-          </View>
-          
-          <View className='features-list'>
-            <View className='feature-item'>
-              <Text className='feature-icon'>✨</Text>
-              <Text className='feature-text'>官方正品保证</Text>
+        <View className='info-card'>
+          <View className='info-card__header'>
+            <View className={`info-card__status info-card__status--${statusType}`}>
+              <Text>{statusText}</Text>
             </View>
-            <View className='feature-item'>
-              <Text className='feature-icon'>🚚</Text>
-              <Text className='feature-text'>全国包邮配送</Text>
-            </View>
-            <View className='feature-item'>
-              <Text className='feature-icon'>🔄</Text>
-              <Text className='feature-text'>7天无理由退换</Text>
-            </View>
-            <View className='feature-item'>
-              <Text className='feature-icon'>💎</Text>
-              <Text className='feature-text'>精选优质材料</Text>
-            </View>
+            <Text className='info-card__price'>{priceDisplay}</Text>
+          </View>
+
+          <Text className='info-card__title'>{item.name}</Text>
+          {item.description && (
+            <Text className='info-card__subtitle'>{item.description}</Text>
+          )}
+
+          <View className='info-card__chips'>
+            {tags.map((tag) => (
+              <View className='info-card__chip' key={tag}>
+                <Text>{tag}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View className='info-card__meta'>
+            <Text>上架时间：{formatTime(item.dateCreated || item.createdAt || new Date().toISOString())}</Text>
+            <Text>{stockSummary}</Text>
           </View>
         </View>
 
-        {/* 购买须知 */}
-        <View className='notice-section'>
-          <View className='section-title'>
-            <Text className='title-text'>购买须知</Text>
-          </View>
-          
-          <View className='notice-content'>
-            <Text className='notice-text'>• 本商品为NBF官方周边产品</Text>
-            <Text className='notice-text'>• 商品图片仅供参考，以实物为准</Text>
-            <Text className='notice-text'>• 如有质量问题，支持7天无理由退换</Text>
-            <Text className='notice-text'>• 配送时间为3-7个工作日</Text>
-            <Text className='notice-text'>• 如有疑问，请联系客服咨询</Text>
+        <View className='spec-card'>
+          <Text className='section-title'>商品信息</Text>
+          <View className='spec-grid'>
+            {specs.map((spec) => (
+              <View className='spec-item' key={spec.label}>
+                <Text className='spec-item__label'>{spec.label}</Text>
+                <Text className='spec-item__value'>{spec.value}</Text>
+              </View>
+            ))}
           </View>
         </View>
-      </ScrollView>
 
-      {/* 底部操作栏 */}
-      <View className='bottom-actions'>
-        <View className='action-button share-button' onClick={handleShare}>
-          <Text className='action-text'>分享</Text>
-        </View>
-        <View className='action-button contact-button'>
-          <Text className='action-text'>联系客服</Text>
+        {item.description && (
+          <View className='description-card'>
+            <Text className='section-title'>商品描述</Text>
+            <Text className='description-card__text'>{item.description}</Text>
+          </View>
+        )}
+
+        <View className='contact-card'>
+          <Text className='section-title'>联系商家</Text>
+          <Text className='contact-card__hint'>团购、定制或合作咨询请联系 Nothing But Fun 团队，我们会在 1 个工作日内回复。</Text>
+          <View className='contact-card__info'>
+            <Text>{merchantEmail}</Text>
+          </View>
+          <View className='contact-card__button' onClick={handleContactMerchant}>
+            <Text>复制邮箱联系商家</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   )
 }
 
-export default GiftDetail 
+export default GiftDetail

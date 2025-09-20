@@ -1,54 +1,110 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty } from '@nutui/nutui-react-taro'
+import { Toast } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
-import { peripheralsApi, PeripheralItem } from '../../services/peripherals'
+import { peripheralsApi, PeripheralItem, PeripheralFilters } from '../../services/peripherals'
+import PeripheralFiltersComponent from '../../components/PeripheralFilters'
+import Pagination from '../../components/Pagination'
 import './index.less'
 
 const Gift: React.FC = () => {
-  // 状态管理
+  // State management
   const [items, setItems] = useState<PeripheralItem[]>([])
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
-  // 加载周边商品
-  const loadItems = async (showLoading = true) => {
+  // State for pagination
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  })
+
+  // State for filters
+  const [currentFilters, setCurrentFilters] = useState<PeripheralFilters>({
+    page: 1,
+    limit: 10
+  })
+
+  // Load peripheral items
+  const loadItems = async (showLoading = true, filters: PeripheralFilters = currentFilters) => {
     try {
       if (showLoading) {
         setLoading(true)
       }
-      
-      const response = await peripheralsApi.getAllItems()
-      setItems(response || [])
-    } catch (error) {
-      console.error('加载周边商品失败:', error)
-      Taro.showToast({
-        title: '加载失败，请稍后重试',
-        icon: 'error',
-        duration: 2000
+
+      // 使用新的分页API
+      const response = await peripheralsApi.getAllItems(filters)
+      setItems(response.data)
+      setPagination({
+        page: response.page,
+        limit: response.limit,
+        total: response.total,
+        totalPages: response.totalPages
       })
+    } catch (error) {
+      console.error('Failed to load peripheral items:', error)
+      showToastMessage('加载商品失败，请稍后重试')
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
-  // 下拉刷新
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    await loadItems(false)
+  // Handle filter changes
+  const handleFiltersChange = (filters: PeripheralFilters) => {
+    const newFilters = {
+      ...filters,
+      page: 1, // 重置到第一页
+      limit: 10
+    }
+    setCurrentFilters(newFilters)
+    loadItems(true, newFilters)
   }
 
-  // 商品点击事件
+  // Handle pagination change
+  const handlePageChange = (page: number) => {
+    const newFilters = {
+      ...currentFilters,
+      page
+    }
+    setCurrentFilters(newFilters)
+    loadItems(true, newFilters)
+  }
+
+  // Show toast message
+  const showToastMessage = (message: string) => {
+    setToastMessage(message)
+    setShowToast(true)
+  }
+
+  // Handle product click
   const handleItemClick = (item: PeripheralItem) => {
     Taro.navigateTo({
       url: `/pages/gift/detail/index?id=${item.id}`
     })
   }
 
-  // 格式化价格显示
-  const formatPrice = (price: string) => {
-    return `$${price}`
+  // Format time display
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+
+    const minutes = Math.floor(diff / (1000 * 60))
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+    if (minutes < 60) {
+      return `${minutes}分钟前`
+    } else if (hours < 24) {
+      return `${hours}小时前`
+    } else if (days < 7) {
+      return `${days}天前`
+    } else {
+      return date.toLocaleDateString()
+    }
   }
 
   // 格式化库存显示
@@ -75,79 +131,168 @@ const Gift: React.FC = () => {
     }
   }
 
-  // 组件挂载时加载数据
+  // Load items on component mount
   useEffect(() => {
     loadItems()
   }, [])
 
   return (
-    <View className='gift-container'>
-      {/* 页面头部 */}
-      <View className='header'>
+    <View className='enhanced-peripheral-container'>
+      {/* 增强的页面头部 */}
+      <View className='enhanced-header'>
+        <View className='header-background'>
+          <View className='floating-shapes'>
+            <View className='shape shape-1'></View>
+            <View className='shape shape-2'></View>
+            <View className='shape shape-3'></View>
+            <View className='shape shape-4'></View>
+          </View>
+          <View className='header-overlay'></View>
+        </View>
         <View className='header-content'>
-          <Text className='title'>NBF 周边商城</Text>
-          <Text className='subtitle'>精选周边商品，品质保证</Text>
+          <View className='title-section'>
+            <Text className='enhanced-title'>NBF 周边商城</Text>
+            <Text className='enhanced-subtitle'>精选周边商品，品质保证</Text>
+            <View className='stats-section'>
+              <View className='stat-item'>
+                <Text className='stat-number'>{items.length}</Text>
+                <Text className='stat-label'>件商品</Text>
+              </View>
+              <View className='stat-divider'></View>
+              <View className='stat-item'>
+                <Text className='stat-number'>{items.filter(item => item.stock > 0).length}</Text>
+                <Text className='stat-label'>有库存</Text>
+              </View>
+            </View>
+          </View>
         </View>
       </View>
 
-      {/* 商品列表 */}
-      <PullToRefresh onRefresh={handleRefresh}>
-        <ScrollView className='content' scrollY>
+      <PeripheralFiltersComponent
+        onFiltersChange={handleFiltersChange}
+        initialFilters={currentFilters}
+      />
+
+      {/* 增强的商品列表 */}
+      <ScrollView className='enhanced-content' scrollY>
           {loading ? (
-            <View className='loading-container'>
-              <Loading type="spinner" />
-              <Text className='loading-text'>加载中...</Text>
+            <View className='enhanced-loading-container'>
+              <View className='loading-animation'>
+                <View className='loading-dots'>
+                  <View className='dot dot-1'></View>
+                  <View className='dot dot-2'></View>
+                  <View className='dot dot-3'></View>
+                </View>
+                <Text className='loading-text'>正在寻找好物...</Text>
+              </View>
             </View>
           ) : items.length === 0 ? (
-            <Empty 
-              description="暂无商品"
-              imageSize={120}
-            />
+            <View className='enhanced-empty-container'>
+              <View className='empty-animation'>
+                <Text className='empty-icon'>🛍️</Text>
+                <Text className='empty-title'>暂无商品</Text>
+                <Text className='empty-subtitle'>敬请期待更多精彩周边</Text>
+              </View>
+            </View>
           ) : (
-            <View className='items-grid'>
+            <View className='enhanced-items-grid'>
               {items.map((item, index) => (
-                <View 
-                  key={item.id} 
-                  className='item-card fade-in-up'
-                  style={{ animationDelay: `${index * 60}ms` }}
-                  // onClick={() => handleItemClick(item)}
+                <View
+                  key={item.id}
+                  className={`enhanced-item-card card-${index % 2 === 0 ? 'left' : 'right'}`}
+                  onClick={() => handleItemClick(item)}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  {/* 商品图片 */}
-                  <View className='item-image-container'>
-                    <Image 
-                      className='item-image'
-                      src={item.image}
-                      mode='aspectFill'
-                      lazyLoad
-                    />
-                    {/* 库存标签 */}
-                    <View className={`stock-badge ${getStockStatus(item.stock)}`}>
-                      {formatStock(item.stock)}
+                  {/* 增强的商品图片 */}
+                  <View className='enhanced-item-image-container'>
+                    <View className='image-wrapper'>
+                      <Image
+                        className='enhanced-item-image'
+                        src={item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls[0] : (item.image || 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop')}
+                        mode='aspectFill'
+                        lazyLoad
+                      />
+                      <View className='image-overlay'></View>
                     </View>
-                    {/* 价格浮标 */}
-                    <View className='price-tag'>
-                      {formatPrice(item.price)}
+
+                    {/* 价格浮动标签 */}
+                    <View className='price-badge-floating'>
+                      <Text className='price-symbol'>¥</Text>
+                      <Text className='price-amount'>{typeof item.price === 'number' ? item.price : item.price}</Text>
+                    </View>
+
+                    {/* 库存状态标签 */}
+                    <View className={`stock-status-badge ${getStockStatus(item.stock)}`}>
+                      <Text className='stock-text'>{formatStock(item.stock)}</Text>
                     </View>
                   </View>
 
-                  {/* 商品信息 */}
-                  <View className='item-info'>
-                    <Text className='item-name'>{item.name}</Text>
-                    <Text className='item-description'>{item.description}</Text>
+                  {/* 增强的商品信息 */}
+                  <View className='enhanced-item-info'>
+                    <View className='info-header'>
+                      <Text className='enhanced-item-name'>{item.name}</Text>
+                      <View className='item-meta'>
+                        <Text className='meta-time'>{formatTime(item.dateCreated || item.createdAt || new Date().toISOString())}</Text>
+                        {item.categoryName && (
+                          <Text className='meta-category'>{item.categoryName}</Text>
+                        )}
+                      </View>
+                    </View>
+
+                    <View className='info-content'>
+                      <Text className='enhanced-item-description'>{item.description}</Text>
+                    </View>
+
+                    <View className='info-footer'>
+                      <View className='price-section'>
+                        <Text className='price-label'>价格</Text>
+                        <Text className='enhanced-item-price'>¥{typeof item.price === 'number' ? item.price : item.price}</Text>
+                      </View>
+                      <View className='action-section'>
+                        <View className='action-button'>
+                          <Text className='action-text'>查看详情</Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
                 </View>
               ))}
             </View>
           )}
 
-          {/* 底部提示 */}
-          {!loading && items.length > 0 && (
-            <View className='footer-tip'>
-              <Text className='tip-text'>— 已显示全部商品 —</Text>
+          {/* 增强的分页 */}
+          {!loading && items.length > 0 && pagination.totalPages > 1 && (
+            <View className='enhanced-pagination-wrapper'>
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                total={pagination.total}
+                pageSize={pagination.limit}
+                onPageChange={handlePageChange}
+                loading={loading}
+              />
             </View>
           )}
-        </ScrollView>
-      </PullToRefresh>
+
+          {/* 增强的底部提示 */}
+          {!loading && items.length > 0 && pagination.totalPages <= 1 && (
+            <View className='enhanced-footer-tip'>
+              <View className='tip-content'>
+                <Text className='tip-icon'>✨</Text>
+                <Text className='tip-text'>已显示全部商品</Text>
+                <Text className='tip-subtext'>发现了 {items.length} 件精品</Text>
+              </View>
+            </View>
+          )}
+      </ScrollView>
+
+      {/* Toast */}
+      <Toast
+        content={toastMessage}
+        visible={showToast}
+        type="text"
+        onClose={() => setShowToast(false)}
+      />
     </View>
   )
 }

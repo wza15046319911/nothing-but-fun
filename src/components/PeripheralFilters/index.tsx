@@ -1,28 +1,43 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Input } from "@tarojs/components";
-import { SecondhandFilters, SecondhandCategory, secondhandApi } from "../../services/secondhand";
 
-interface SecondhandFiltersProps {
-  onFiltersChange: (filters: SecondhandFilters) => void;
-  initialFilters?: SecondhandFilters;
+// 周边商品分类接口
+export interface PeripheralCategory {
+  id: number
+  name: string
 }
 
-const presetRanges = [
-  { label: "¥0-50", from: 0, to: 50 },
-  { label: "¥50-100", from: 50, to: 100 },
-  { label: "¥100-300", from: 100, to: 300 },
-  { label: "¥300-500", from: 300, to: 500 },
-  { label: "¥500+", from: 500 },
+// 周边商品筛选参数接口
+export interface PeripheralFilters {
+  keyword?: string
+  categoryId?: number
+  priceFrom?: number
+  priceTo?: number
+  page?: number
+  limit?: number
+}
+
+interface PeripheralFiltersProps {
+  onFiltersChange: (filters: PeripheralFilters) => void;
+  initialFilters?: PeripheralFilters;
+}
+
+const presetPriceRanges = [
+  { label: "¥30以下", to: 30 },
+  { label: "¥30-60", from: 30, to: 60 },
+  { label: "¥60-100", from: 60, to: 100 },
+  { label: "¥100-200", from: 100, to: 200 },
+  { label: "¥200+", from: 200 },
 ];
 
 const buildFilterPayload = (
-  base: SecondhandFilters,
+  base: PeripheralFilters,
   keyword: string,
   priceFrom: string,
   priceTo: string,
   categoryId?: number
-): SecondhandFilters | undefined => {
-  const next: SecondhandFilters = { ...base };
+): PeripheralFilters | undefined => {
+  const next: PeripheralFilters = { ...base };
 
   // Clear keyword & price & category fields before applying fresh values
   delete next.keyword;
@@ -61,7 +76,7 @@ const buildFilterPayload = (
   return next;
 };
 
-const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
+const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
   onFiltersChange,
   initialFilters = {},
 }) => {
@@ -75,7 +90,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(
     initialFilters.categoryId
   );
-  const [categories, setCategories] = useState<SecondhandCategory[]>([]);
+  const [categories, setCategories] = useState<PeripheralCategory[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
 
@@ -86,9 +101,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
 
   useEffect(() => {
     setPriceFrom(
-      initialFilters.priceFrom !== undefined
-        ? `${initialFilters.priceFrom}`
-        : ""
+      initialFilters.priceFrom !== undefined ? `${initialFilters.priceFrom}` : ""
     );
   }, [initialFilters.priceFrom]);
 
@@ -106,10 +119,21 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const categoryData = await secondhandApi.getAllCategories();
-        setCategories(categoryData);
+        // 动态导入 peripheralsApi
+        const { peripheralsApi } = await import('../../services/peripherals');
+        const categoriesData = await peripheralsApi.getAllCategories();
+        setCategories(categoriesData);
       } catch (error) {
         console.error('加载分类数据失败:', error);
+        // 如果API失败，使用模拟数据作为备选
+        const mockCategories = [
+          { id: 1, name: '服装' },
+          { id: 2, name: '配饰' },
+          { id: 3, name: '数码' },
+          { id: 4, name: '文具' },
+          { id: 5, name: '生活用品' },
+        ];
+        setCategories(mockCategories);
       }
     };
 
@@ -145,22 +169,6 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       return;
     }
 
-    const fromValue =
-      priceFromValue.trim() !== "" ? Number(priceFromValue) : undefined;
-    const toValue =
-      priceToValue.trim() !== "" ? Number(priceToValue) : undefined;
-
-    if (
-      fromValue !== undefined &&
-      toValue !== undefined &&
-      !Number.isNaN(fromValue) &&
-      !Number.isNaN(toValue) &&
-      fromValue > toValue
-    ) {
-      setError("最低价格不能高于最高价格");
-      return;
-    }
-
     setError("");
     onFiltersChange(payload);
   };
@@ -181,11 +189,10 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   const handleQuickRange = (from: number, to?: number) => {
     const fromValue = `${from}`;
     const toValue = to !== undefined ? `${to}` : "";
-
     setPriceFrom(fromValue);
     setPriceTo(toValue);
     setShowAdvanced(true);
-    applyFilters(keyword, fromValue, toValue);
+    applyFilters(keyword, fromValue, toValue, selectedCategoryId);
   };
 
   const handleKeywordClear = () => {
@@ -209,7 +216,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                 </View>
                 <Input
                   className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索商品名称或描述..."
+                  placeholder="搜索周边商品名称或描述..."
                   value={keyword}
                   onInput={(event) => setKeyword(event.detail.value)}
                   onConfirm={handleKeywordConfirm}
@@ -311,52 +318,51 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                 <View className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-emerald-300">
                     <Text className="pointer-events-none text-xs text-slate-400">
-                      最低价
+                      最低价格
                     </Text>
                     <Input
-                      className="mt-1 w-full text-sm text-gray-700 focus:outline-none"
-                      placeholder="¥0"
+                      className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-slate-700 focus:outline-none"
+                      placeholder="0"
                       type="number"
                       value={priceFrom}
                       onInput={(event) => setPriceFrom(event.detail.value)}
-                      onConfirm={handleKeywordConfirm}
                     />
                   </View>
 
-                  <Text className="text-center text-slate-400 sm:w-10">-</Text>
+                  <View className="flex-shrink-0 text-slate-400">
+                    <Text>—</Text>
+                  </View>
 
                   <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-emerald-300">
                     <Text className="pointer-events-none text-xs text-slate-400">
-                      最高价
+                      最高价格
                     </Text>
                     <Input
-                      className="mt-1 w-full text-sm text-gray-700 focus:outline-none"
+                      className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-slate-700 focus:outline-none"
                       placeholder="不限"
                       type="number"
                       value={priceTo}
                       onInput={(event) => setPriceTo(event.detail.value)}
-                      onConfirm={handleKeywordConfirm}
                     />
                   </View>
                 </View>
 
-                <View className="flex flex-wrap gap-2 pt-1">
-                  {presetRanges.map((range) => (
-                    <View
-                      key={range.label}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                        priceFrom === `${range.from}` &&
-                        (range.to === undefined
-                          ? priceTo === ""
-                          : priceTo === `${range.to}`)
-                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                      }`}
-                      onClick={() => handleQuickRange(range.from, range.to)}
-                    >
-                      <Text>{range.label}</Text>
-                    </View>
-                  ))}
+                {/* 快速价格选择 */}
+                <View className="flex flex-col gap-2">
+                  <Text className="text-sm font-medium text-slate-600">
+                    快速选择
+                  </Text>
+                  <View className="flex flex-wrap gap-2">
+                    {presetPriceRanges.map((range, index) => (
+                      <View
+                        key={index}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm hover:border-emerald-200 hover:text-emerald-500 active:scale-95"
+                        onClick={() => handleQuickRange(range.from || 0, range.to)}
+                      >
+                        <Text>{range.label}</Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
 
                 <View className="flex items-center justify-between pt-2">
@@ -371,7 +377,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                     className="rounded-2xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 active:scale-95"
                     onClick={() => applyFilters()}
                   >
-                    <Text>应用价格筛选</Text>
+                    <Text>应用筛选</Text>
                   </View>
                 </View>
               </View>
@@ -383,4 +389,4 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   );
 };
 
-export default SecondhandFiltersComponent;
+export default PeripheralFiltersComponent;

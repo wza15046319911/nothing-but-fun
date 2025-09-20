@@ -1,3 +1,7 @@
+// DEPRECATED: Course schema removed from database
+// TODO: Remove these files if no longer needed
+
+/*
 import request from './api'
 
 // 课程数据类型
@@ -966,3 +970,4 @@ const getMockCourseReviews = (): CourseReview[] => {
 }
 
 export default { courseApi, courseReviewApi }
+*/

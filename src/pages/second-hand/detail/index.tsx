@@ -143,8 +143,9 @@ const SecondHandDetail: React.FC = () => {
     setShowDeleteDialog(false);
   };
 
-  // Format time display
+  // Format time display - 更新以支持新的字段名
   const formatTime = (dateString: string) => {
+    if (!dateString) return "—";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "—";
     return date.toLocaleString("zh-CN", {
@@ -263,14 +264,14 @@ const SecondHandDetail: React.FC = () => {
               <View className="item-badges">
                 <View className="price-badge">
                   <Text className="badge-icon">💰</Text>
-                  <Text className="badge-text">¥{item.price}</Text>
+                  <Text className="badge-text">¥{typeof item.price === 'number' ? item.price : item.price}</Text>
                 </View>
                 <View
                   className="status-badge-chip"
-                  style={{ backgroundColor: statusMap[item.status].color }}
+                  style={{ backgroundColor: statusMap[item.status || 'available'].color }}
                 >
                   <Text className="badge-text">
-                    {statusMap[item.status].text}
+                    {statusMap[item.status || 'available'].text}
                   </Text>
                 </View>
               </View>
@@ -284,7 +285,7 @@ const SecondHandDetail: React.FC = () => {
             <View className="meta-row">
               <Text className="meta-icon">🕒</Text>
               <Text className="meta-text">
-                发布于 {formatTime(item.createdAt)}
+                发布于 {formatTime(item.dateCreated || item.createdAt || '')}
               </Text>
             </View>
           </View>

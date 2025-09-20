@@ -221,124 +221,125 @@ const SecondHandPublish: React.FC = () => {
   }
 
   return (
-    <ScrollView className='publish-container' scrollY>
-      {/* Hero */}
-      <View className='publish-hero'>
-        <Text className='hero-title'>发布二手好物</Text>
-        <Text className='hero-subtitle'>清晰描述 + 优质图片，更快成交</Text>
-        <View className='hero-stats'>
-          <View className='stat'><Text className='stat-number'>{fileList.length}</Text><Text className='stat-label'>已选图片</Text></View>
-          <View className='divider' />
-          <View className='stat'><Text className='stat-number'>{Math.max(0, maxImages - fileList.length)}</Text><Text className='stat-label'>剩余可选</Text></View>
+    <ScrollView className='publish-page' scrollY>
+      <View className='publish-page__header'>
+        <Text className='publish-page__title'>{isEditMode ? '编辑二手商品' : '发布二手商品'}</Text>
+        <Text className='publish-page__subtitle'>完善标题、描述与图片，能让好物更快找到买家</Text>
+        <View className='publish-page__stats'>
+          <View className='publish-page__stats-item'>
+            <Text className='publish-page__stats-value'>{fileList.length}</Text>
+            <Text className='publish-page__stats-label'>已选图片</Text>
+          </View>
+          <View className='publish-page__stats-divider' />
+          <View className='publish-page__stats-item'>
+            <Text className='publish-page__stats-value'>{Math.max(0, maxImages - fileList.length)}</Text>
+            <Text className='publish-page__stats-label'>可再添加</Text>
+          </View>
         </View>
       </View>
-      {/* Basic Info Section */}
-      <View className='form-section'>
-        <View className='form-title'>基本信息</View>
-        
-        {/* Title */}
-        <View className={`form-item ${titleTouched && title.trim() === '' ? 'error' : ''}`}>
-          <Input 
-            className='form-input'
-            placeholder='标题（建议30字以内）'
-            placeholderClass='form-placeholder'
-            value={title}
-            onInput={e => handleTitleInput(e.detail.value)}
-            onBlur={() => setTitleTouched(true)}
-            maxlength={30}
-          />
-          <View className='field-hint'>剩余 {Math.max(0, titleRemaining)} 字</View>
-          {titleTouched && title.trim() === '' && (
-            <View className='error-text'>请填写标题</View>
-          )}
-        </View>
-        
-        {/* Description */}
-        <View className={`form-item ${descTouched && description.trim() === '' ? 'error' : ''}`}>
-          <Textarea 
-            className='form-textarea'
-            placeholder='描述一下你的商品，例如：入手渠道、使用感受、新旧程度等'
-            placeholderClass='form-placeholder'
-            value={description}
-            onInput={e => handleDescInput(e.detail.value)}
-            onBlur={() => setDescTouched(true)}
-            maxlength={500}
-          />
-          <View className='field-hint'>剩余 {Math.max(0, descRemaining)} 字</View>
-          {descTouched && description.trim() === '' && (
-            <View className='error-text'>请填写商品描述</View>
-          )}
-        </View>
-      </View>
-      
-      {/* Image Upload Section */}
-      <View className='form-section'>
-        <View className='form-title'>上传图片</View>
-        <View className='upload-section'>
-          {/* <View className='upload-desc'>选择清晰的商品照片（{fileList.length}/{maxImages} 张，支持拖动排序）</View> */}
-          <Uploader
-            value={fileList}
-            onUpload={handleUpload}
-            onChange={handleFileChange}
-            multiple
-            maxFiles={maxImages}
-            removable
-          />
-        </View>
-      </View>
-      
-      {/* Price & Condition Section */}
-      <View className='form-section'>
-        <View className='form-title'>价格</View>
-        
-        {/* Price */}
-        <View className={`form-item ${priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) ? 'error' : ''}`}>
-          <View className='form-item-row'>
-            <View className='form-label'>售价</View>
-            <Input 
-              className='price-input'
-              placeholder='0'
-              placeholderClass='form-placeholder'
-              value={price}
-              onInput={e => handlePriceInput(e.detail.value)}
-              onBlur={() => setPriceTouched(true)}
-              type='digit'
+
+      <View className='publish-page__body'>
+        <View className='card'>
+          <Text className='card__title'>商品图片</Text>
+          <Text className='card__subtitle'>至少上传 1 张清晰照片，最多 {maxImages} 张，支持相册或拍照</Text>
+          <View className='card__content card__content--uploader'>
+            <Uploader
+              value={fileList}
+              onUpload={handleUpload}
+              onChange={handleFileChange}
+              multiple
+              maxFiles={maxImages}
+              removable
             />
-            <Text style={{ marginLeft: '4px' }}>AUD</Text>
-          </View>
-          {priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) && (
-            <View className='error-text'>请输入有效的价格（大于 0）</View>
-          )}
-        </View>
-      </View>
-      
-      {/* Tips Section */}
-      <View className='tips-section'>
-        <View className='tips-title'>发布提示</View>
-        <View className='tips-list'>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>请确保所发布物品为您个人闲置，严禁发布虚假信息</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>严禁发布违禁物品，包括但不限于管制刀具、仿真枪等</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>请如实描述物品状况，提供清晰照片，保障买卖双方权益</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>图片将在发布时上传，发布后请耐心等待审核</Text>
           </View>
         </View>
+
+        <View className='card'>
+          <Text className='card__title'>基本信息</Text>
+          <View className='card__content card__content--gap'>
+            <View className={`field ${titleTouched && title.trim() === '' ? 'field--error' : ''}`}>
+              <View className='field__label'>标题</View>
+              <Input
+                className='field__input'
+                placeholder='如：95新 Nintendo Switch OLED 主机'
+                placeholderClass='field__placeholder'
+                value={title}
+                onInput={(e) => handleTitleInput(e.detail.value)}
+                onBlur={() => setTitleTouched(true)}
+                maxlength={30}
+              />
+              <View className='field__hint'>还可输入 {Math.max(0, titleRemaining)} 个字符</View>
+              {titleTouched && title.trim() === '' && (
+                <View className='field__error'>请填写标题</View>
+              )}
+            </View>
+
+            <View className={`field field--textarea ${descTouched && description.trim() === '' ? 'field--error' : ''}`}>
+              <View className='field__label'>商品描述</View>
+              <Textarea
+                className='field__textarea'
+                placeholder='推荐写上入手渠道、使用情况、成色、配件等关键信息'
+                placeholderClass='field__placeholder'
+                value={description}
+                onInput={(e) => handleDescInput(e.detail.value)}
+                onBlur={() => setDescTouched(true)}
+                maxlength={500}
+              />
+              <View className='field__hint'>剩余 {Math.max(0, descRemaining)} 个字符</View>
+              {descTouched && description.trim() === '' && (
+                <View className='field__error'>请填写商品描述</View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        <View className='card'>
+          <Text className='card__title'>售价</Text>
+          <View className='card__content card__content--gap'>
+            <View className={`field ${priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) ? 'field--error' : ''}`}>
+              <View className='field__label'>标价 (AUD)</View>
+              <Input
+                className='field__input field__input--price'
+                placeholder='0.00'
+                placeholderClass='field__placeholder'
+                value={price}
+                onInput={(e) => handlePriceInput(e.detail.value)}
+                onBlur={() => setPriceTouched(true)}
+                type='digit'
+              />
+              {priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) && (
+                <View className='field__error'>请输入有效的价格（大于 0）</View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        <View className='card card--tips'>
+          <Text className='card__title'>发布须知</Text>
+          <View className='tips'>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>请确认商品为个人闲置物品，严禁发布虚假或违规内容</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>请如实描述商品成色与缺陷，上传清晰照片保障双方权益</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>若涉及邮寄，请提前说明邮费、发货时间等信息</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>发布后图片会同步上传，审核期间请耐心等待通知</Text>
+            </View>
+          </View>
+        </View>
       </View>
-      
-      {/* Submit Button */}
+
       <View className='submit-bar'>
-        <View 
-          className={`submit-button ${!isFormValid ? 'disabled' : ''}`}
+        <View
+          className={`submit-bar__button ${!isFormValid ? 'submit-bar__button--disabled' : ''}`}
           onClick={handleSubmit}
         >
           {isEditMode ? '保存修改' : '立即发布'}

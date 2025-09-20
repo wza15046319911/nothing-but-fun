@@ -1,20 +1,27 @@
 import request from './api'
 
-// 活动数据类型
+// 活动数据类型 - 更新以匹配后端schema
 export interface Event {
   id: number
-  organizerId: number
   title: string
   description: string
   location: string
   startTime: string
   endTime: string
-  image: string
+  image?: string  // Legacy field for backward compatibility
   imageUrls: string[]  // 多图片支持，来自Cloudinary
   capacity: number
-  createdAt: string
-  price?: number  // 活动价格
+  free?: boolean  // 是否免费 - schema中的字段
+  priceFrom?: number  // 起始价格
+  priceTo?: number  // 结束价格
   pricingDetails?: string  // 价格详情
+  video?: string  // 视频链接
+  dateCreated?: string  // 后端返回的字段名
+  dateUpdated?: string  // 后端返回的字段名
+  createdAt?: string  // Legacy field for backward compatibility
+  // Legacy fields - keeping for compatibility
+  organizerId?: number  // Legacy field
+  price?: number  // Legacy field, use priceFrom/priceTo instead
   eventTypeRid?: number  // 活动类型ID
 }
 
@@ -33,10 +40,14 @@ export interface PaginatedEventsResponse {
   totalPages: number
 }
 
-// 活动筛选参数接口
+// 活动筛选参数接口 - 更新以匹配后端API
 export interface EventFilters {
+  keyword?: string
   isHistorical?: boolean
-  event_type?: string
+  event_type?: string  // 后端期望的参数名
+  eventTypeRid?: number  // 前端使用的参数名，会映射到event_type
+  free?: boolean  // 使用schema字段名
+  isFree?: boolean  // Legacy field, mapped to free
   priceFrom?: number
   priceTo?: number
   page?: number
@@ -91,13 +102,26 @@ export const eventsApi = {
     try {
       // 构建查询参数
       const params = new URLSearchParams()
+      if (filters?.keyword) {
+        params.append('keyword', filters.keyword)
+      }
       if (filters?.isHistorical !== undefined) {
         params.append('isHistorical', filters.isHistorical.toString())
       }
       if (filters?.event_type) {
         params.append('event_type', filters.event_type)
-        // 兼容后端可能使用的 eventTypeRid 命名
-        params.append('eventTypeRid', filters.event_type)
+      }
+      if (filters?.eventTypeRid !== undefined) {
+        params.append('event_type', filters.eventTypeRid.toString())
+      }
+      if (filters?.event_type) {
+        params.append('event_type', filters.event_type)
+      }
+      if (filters?.isFree !== undefined) {
+        params.append('free', filters.isFree.toString())
+      }
+      if (filters?.free !== undefined) {
+        params.append('free', filters.free.toString())
       }
       if (filters?.priceFrom !== undefined) {
         params.append('priceFrom', filters.priceFrom.toString())

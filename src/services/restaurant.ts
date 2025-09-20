@@ -18,6 +18,8 @@ export interface Restaurant {
   pricingDetails?: string  // 价格详情
   priceRangeRid?: number  // 价格范围ID
   restaurantTypeRid?: number  // 餐厅类型ID
+  priceFrom?: number
+  priceTo?: number
 }
 
 // 餐厅类型接口
@@ -32,6 +34,10 @@ export interface PriceRange {
   name: string
 }
 
+// DEPRECATED: Restaurant review schema removed from database
+// TODO: Remove these review-related interfaces if no longer needed
+
+/*
 // 餐厅评论数据类型
 export interface RestaurantReview {
   id: number
@@ -68,6 +74,7 @@ export interface NewRestaurantReview {
   serviceRating?: number
   priceRating?: number
 }
+*/
 
 // 餐厅查询参数接口
 export interface RestaurantQueryParams {
@@ -80,6 +87,8 @@ export interface RestaurantQueryParams {
   minRating?: number
   priceRangeRid?: string  // 价格范围筛选
   restaurantTypeRid?: string  // 餐厅类型筛选
+  priceFrom?: number
+  priceTo?: number
 }
 
 // 餐厅过滤参数接口（用于过滤组件）
@@ -93,6 +102,9 @@ export interface RestaurantFilters {
   minRating?: number
   priceRangeRid?: string
   restaurantTypeRid?: string
+  keyword?: string  // 关键词搜索
+  priceFrom?: number
+  priceTo?: number
 }
 
 // 分页餐厅响应接口
@@ -104,6 +116,7 @@ export interface PaginatedRestaurantResponse {
   totalPages: number
 }
 
+/*
 // 评论查询参数接口
 export interface ReviewQueryParams {
   page?: number
@@ -141,6 +154,7 @@ export interface ModerationStats {
   approvedPercentage: number
   rejectedPercentage: number
 }
+*/
 
 // API响应接口
 export interface RestaurantResponse {
@@ -163,6 +177,7 @@ export interface SingleRestaurantResponse {
   data: Restaurant
 }
 
+/*
 export interface ReviewResponse {
   success: boolean
   message: string
@@ -194,6 +209,7 @@ export interface ModerationStatsResponse {
   message: string
   data: ModerationStats
 }
+*/
 
 // 重复定义移除（上方已定义 ReviewStatsResponse）
 
@@ -497,6 +513,7 @@ export const restaurantApi = {
   }
 }
 
+/*
 // 餐厅评论API
 export const restaurantReviewApi = {
   // 获取所有评论
@@ -766,6 +783,7 @@ export const restaurantReviewApi = {
     }
   },
 }
+*/
 
 // 模拟餐厅数据（用于展示和测试）
 const getMockRestaurants = (): Restaurant[] => {
@@ -819,6 +837,7 @@ const getMockRestaurants = (): Restaurant[] => {
   ]
 }
 
+/*
 // 模拟评论数据（用于展示和测试）
 const getMockReviews = (): RestaurantReview[] => {
   return [
@@ -1040,5 +1059,6 @@ const getMockReviews = (): RestaurantReview[] => {
     }
   ]
 }
+*/
 
-export default { restaurantApi, restaurantReviewApi }
+export default { restaurantApi }
