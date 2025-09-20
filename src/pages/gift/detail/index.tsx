@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ScrollView, View, Text, Image } from '@tarojs/components'
 import { Swiper } from '@nutui/nutui-react-taro'
-import Taro, { useRouter } from '@tarojs/taro'
+import Taro, { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { peripheralsApi, PeripheralItem } from '../../../services/peripherals'
 import './index.less'
 
@@ -79,6 +79,47 @@ const GiftDetail: React.FC = () => {
 
   const imageList = images.length > 0 ? images : [fallbackImage]
 
+  const resolveShareId = (): string | undefined => {
+    if (item?.id) return item.id.toString()
+    if (id) {
+      const parsed = Number(id)
+      if (Number.isFinite(parsed) && parsed > 0) {
+        return parsed.toString()
+      }
+      return id
+    }
+    return undefined
+  }
+
+  useShareAppMessage(() => {
+    const shareId = resolveShareId()
+    const redirect = encodeURIComponent('/pages/gift/detail/index')
+    const basePath = `/pages/loading/index?redirect=${redirect}`
+    const title = item?.name ? `${item.name} · 周边好物` : 'Nothing But Fun 周边好物'
+    const imageUrl = imageList[0]
+
+    return {
+      title,
+      path: `${basePath}${shareId ? `&id=${shareId}` : ''}`,
+      imageUrl
+    }
+  })
+
+  useShareTimeline(() => {
+    const shareId = resolveShareId()
+    const redirect = encodeURIComponent('/pages/gift/detail/index')
+    const title = item?.name ? `${item.name} · 周边好物` : 'Nothing But Fun 周边好物'
+    const queryParts = [`redirect=${redirect}`]
+    if (shareId) {
+      queryParts.push(`id=${shareId}`)
+    }
+
+    return {
+      title,
+      query: queryParts.join('&')
+    }
+  })
+
   const handleImagePreview = (index: number) => {
     Taro.previewImage({
       current: imageList[Math.max(0, Math.min(index, imageList.length - 1))],
@@ -97,8 +138,8 @@ const GiftDetail: React.FC = () => {
   }
 
   const handleShare = () => {
-    Taro.showShareMenu({ withShareTicket: true })
-    Taro.showToast({ title: '可以分享给好友啦', icon: 'none', duration: 1500 })
+    Taro.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] })
+    Taro.showToast({ title: '分享面板已打开', icon: 'none', duration: 1500 })
   }
 
   const handleBack = () => {

@@ -9,14 +9,14 @@ import Pagination from '../../components/Pagination'
 import { useEventTypes } from '../../hooks/useTypes'
 import './index.less'
 
-// Helper function to generate dates for the next 14 days
+// Helper function to generate dates for the next 7 days
 const generateDates = () => {
   const dates: any = []
   const days = ['日', '一', '二', '三', '四', '五', '六']
   const today = new Date()
 
-  for (let i = 0; i < 14; i++) {
-    const date = new Date()
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today)
     date.setDate(today.getDate() + i)
 
     dates.push({
@@ -142,6 +142,8 @@ const RecentActivities: React.FC = () => {
     })
   }
 
+  const selectedDateInfo = dates.find(date => date.dateString === selectedDate) || dates[0]
+
   return (
     <View className='enhanced-events-container'>
       {/* 增强的页面头部 */}
@@ -177,7 +179,7 @@ const RecentActivities: React.FC = () => {
       <ScrollView className='enhanced-content' scrollY>
         {/* Date navigation */}
         <View className='enhanced-date-nav'>
-          <View className='month-text'>{dates[0].month}月</View>
+          <View className='month-text'>{selectedDateInfo.month}月</View>
           <ScrollView className='date-scroll' scrollX showScrollbar={false}>
             {dates.map((date, index) => (
               <View

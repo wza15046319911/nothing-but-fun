@@ -93,10 +93,10 @@ const SecondHandDetail: React.FC = () => {
   // Handle contact seller
   const handleContactSeller = () => {
     if (!item) return;
-    Taro.setClipboardData({
-      data: item.sellerContact,
+    // Taro.setClipboardData({
+    //   data: item.sellerEmail,
       
-    });
+    // });
     Taro.showModal({
       title: "联系卖家",
       content: `卖家联系方式已拷贝`,
