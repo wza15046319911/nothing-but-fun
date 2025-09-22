@@ -20,6 +20,24 @@ export interface Restaurant {
   restaurantTypeRid?: number  // 餐厅类型ID
   priceFrom?: number
   priceTo?: number
+  aspectRatings?: {
+    taste: {
+      average: string
+      count: number
+    }
+    environment: {
+      average: string
+      count: number
+    }
+    service: {
+      average: string
+      count: number
+    }
+    price: {
+      average: string
+      count: number
+    }
+  }
 }
 
 // 餐厅类型接口
@@ -80,7 +98,7 @@ export interface NewRestaurantReview {
 export interface RestaurantQueryParams {
   page?: number
   limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt'
+  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
   sortOrder?: 'asc' | 'desc'
   name?: string
   suburb?: string
@@ -95,7 +113,7 @@ export interface RestaurantQueryParams {
 export interface RestaurantFilters {
   page?: number
   limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt'
+  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
   sortOrder?: 'asc' | 'desc'
   name?: string
   suburb?: string

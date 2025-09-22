@@ -24,13 +24,73 @@ const presetPriceRanges = [
   { label: "¥150+", from: 150 },
 ];
 
+type SortOptionKey = 'default' | 'priceLow' | 'priceHigh' | 'rating';
+
+const sortOptions: Array<{
+  key: SortOptionKey;
+  label: string;
+  description: string;
+  sortBy: RestaurantFilters['sortBy'];
+  sortOrder: RestaurantFilters['sortOrder'];
+}> = [
+  {
+    key: 'default',
+    label: '默认排序',
+    description: '按发布时间',
+    sortBy: 'createdAt',
+    sortOrder: 'asc',
+  },
+  {
+    key: 'priceLow',
+    label: '最低价格优先',
+    description: '价格从低到高',
+    sortBy: 'priceLow',
+    sortOrder: 'asc',
+  },
+  {
+    key: 'priceHigh',
+    label: '最高价格优先',
+    description: '价格从高到低',
+    sortBy: 'priceHigh',
+    sortOrder: 'desc',
+  },
+  {
+    key: 'rating',
+    label: '评分优先',
+    description: '评分由高到低',
+    sortBy: 'rating',
+    sortOrder: 'desc',
+  },
+];
+
+const getSortOption = (key: SortOptionKey) =>
+  sortOptions.find((option) => option.key === key) ?? sortOptions[0];
+
+const resolveSortKey = (
+  sortBy?: RestaurantFilters['sortBy'],
+  sortOrder?: RestaurantFilters['sortOrder']
+): SortOptionKey => {
+  if (sortBy === 'priceLow' && sortOrder === 'asc') {
+    return 'priceLow';
+  }
+  if (sortBy === 'priceHigh' && sortOrder === 'desc') {
+    return 'priceHigh';
+  }
+  if (sortBy === 'rating' && (sortOrder === undefined || sortOrder === 'desc')) {
+    return 'rating';
+  }
+  return 'default';
+};
+
 const buildFilterPayload = (
   base: RestaurantFilters,
   keyword: string,
   minRating?: number,
   priceFrom?: string,
   priceTo?: string,
-  restaurantTypeRid?: string
+  restaurantTypeRid?: string,
+  sortBy?: RestaurantFilters['sortBy'],
+  sortOrder?: RestaurantFilters['sortOrder']
 ): RestaurantFilters | undefined => {
   const next: RestaurantFilters = { ...base };
 
@@ -41,6 +101,8 @@ const buildFilterPayload = (
   delete next.priceFrom;
   delete next.priceTo;
   delete next.restaurantTypeRid;
+  delete next.sortBy;
+  delete next.sortOrder;
 
   const trimmedKeyword = keyword.trim();
   if (trimmedKeyword) {
@@ -81,6 +143,14 @@ const buildFilterPayload = (
     next.restaurantTypeRid = restaurantTypeRid;
   }
 
+  if (sortBy) {
+    next.sortBy = sortBy;
+  }
+
+  if (sortOrder) {
+    next.sortOrder = sortOrder;
+  }
+
   return next;
 };
 
@@ -109,6 +179,10 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [selectedSortKey, setSelectedSortKey] = useState<SortOptionKey>(
+    resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder)
+  );
 
   // Reflect upstream filter changes
   useEffect(() => {
@@ -135,6 +209,10 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
     setSelectedRestaurantTypeRid(initialFilters.restaurantTypeRid);
   }, [initialFilters.restaurantTypeRid]);
 
+  useEffect(() => {
+    setSelectedSortKey(resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder));
+  }, [initialFilters.sortBy, initialFilters.sortOrder]);
+
   const hasActiveRatingFilter = useMemo(
     () => selectedMinRating !== undefined && selectedMinRating > 0,
     [selectedMinRating]
@@ -155,15 +233,19 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
     minRatingValue = selectedMinRating,
     priceFromValue = priceFrom,
     priceToValue = priceTo,
-    restaurantTypeValue = selectedRestaurantTypeRid
+    restaurantTypeValue = selectedRestaurantTypeRid,
+    sortKey: SortOptionKey = selectedSortKey
   ) => {
+    const sortConfig = getSortOption(sortKey);
     const payload = buildFilterPayload(
       initialFilters,
       keywordValue,
       minRatingValue,
       priceFromValue,
       priceToValue,
-      restaurantTypeValue
+      restaurantTypeValue,
+      sortConfig.sortBy,
+      sortConfig.sortOrder
     );
 
     if (!payload) {
@@ -181,9 +263,21 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
     setPriceFrom("");
     setPriceTo("");
     setSelectedRestaurantTypeRid(undefined);
+    setSelectedSortKey('default');
+    setSortMenuOpen(false);
     setError("");
 
-    const payload = buildFilterPayload(initialFilters, "", undefined, "", "", undefined);
+    const defaultSort = getSortOption('default');
+    const payload = buildFilterPayload(
+      initialFilters,
+      "",
+      undefined,
+      "",
+      "",
+      undefined,
+      defaultSort.sortBy,
+      defaultSort.sortOrder
+    );
     if (payload) {
       onFiltersChange(payload);
     }
@@ -200,11 +294,30 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
 
   const handleKeywordClear = () => {
     setKeyword("");
-    applyFilters("", selectedMinRating, priceFrom, priceTo, selectedRestaurantTypeRid);
+    applyFilters(
+      "",
+      selectedMinRating,
+      priceFrom,
+      priceTo,
+      selectedRestaurantTypeRid
+    );
   };
 
   const handleKeywordConfirm = () => {
     applyFilters();
+  };
+
+  const handleSortSelect = (optionKey: SortOptionKey) => {
+    setSelectedSortKey(optionKey);
+    setSortMenuOpen(false);
+    applyFilters(
+      keyword,
+      selectedMinRating,
+      priceFrom,
+      priceTo,
+      selectedRestaurantTypeRid,
+      optionKey
+    );
   };
 
   return (
@@ -255,6 +368,48 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                 {(hasActiveRatingFilter || hasActivePriceFilter || hasActiveTypeFilter) && (
                   <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
                     <Text>ON</Text>
+                  </View>
+                )}
+              </View>
+
+              <View className="relative">
+                <View
+                  className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
+                    sortMenuOpen
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                      : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                  }`}
+                  onClick={() => setSortMenuOpen((prev) => !prev)}
+                >
+                  <Text>排序</Text>
+                  <Text className="ml-2 text-xs text-slate-500">
+                    {getSortOption(selectedSortKey).label}
+                  </Text>
+                  <Text className="ml-2 text-xs text-slate-400">
+                    {sortMenuOpen ? '▲' : '▼'}
+                  </Text>
+                </View>
+
+                {sortMenuOpen && (
+                  <View className="absolute right-0 top-full z-10 mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl shadow-emerald-500/20">
+                    {sortOptions.map((option) => (
+                      <View
+                        key={option.key}
+                        className={`px-4 py-2 text-xs transition-colors ${
+                          option.key === selectedSortKey
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
+                        }`}
+                        onClick={() => handleSortSelect(option.key)}
+                      >
+                        <Text className="block text-sm font-medium">
+                          {option.label}
+                        </Text>
+                        <Text className="mt-1 text-[10px] text-slate-400">
+                          {option.description}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 )}
               </View>

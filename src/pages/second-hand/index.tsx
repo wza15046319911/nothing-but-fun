@@ -35,6 +35,8 @@ const SecondHand: React.FC = () => {
   const [currentFilters, setCurrentFilters] = useState<SecondhandFilters>({
     page: 1,
     limit: 10,
+    sortBy: "dateCreated",
+    sortOrder: "desc",
   });
 
   // Load secondhand items
@@ -71,6 +73,14 @@ const SecondHand: React.FC = () => {
       page: 1, // 重置到第一页
       limit: 10,
     };
+
+    if (!newFilters.sortBy) {
+      newFilters.sortBy = "dateCreated";
+    }
+
+    if (!newFilters.sortOrder) {
+      newFilters.sortOrder = "desc";
+    }
     setCurrentFilters(newFilters);
     loadItems(true, newFilters);
   };
@@ -234,14 +244,6 @@ const SecondHand: React.FC = () => {
                     />
                     <View className="image-overlay"></View>
                   </View>
-
-                  {/* 价格浮动标签 - 更新以支持新的数据结构 */}
-                  <View className="price-badge-floating">
-                    <Text className="price-symbol">¥</Text>
-                    <Text className="price-amount">
-                      {typeof item.price === "number" ? item.price : item.price}
-                    </Text>
-                  </View>
                 </View>
 
                 {/* 增强的商品信息 */}
@@ -269,7 +271,7 @@ const SecondHand: React.FC = () => {
                     <View className="price-section">
                       <Text className="price-label">价格</Text>
                       <Text className="enhanced-item-price">
-                        ¥
+                        $
                         {typeof item.price === "number"
                           ? item.price
                           : item.price}

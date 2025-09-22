@@ -371,6 +371,82 @@ const RestaurantDetail: React.FC = () => {
                 <Text className='rating-reviews'>({restaurant.totalReviews || 0} 条评价)</Text>
               </View>
             </View>
+
+            {/* Detailed Aspect Ratings */}
+            {restaurant.aspectRatings && restaurant.totalReviews > 0 && (
+              <View className='aspect-ratings-section'>
+                <Text className='aspect-ratings-title'>详细评分</Text>
+                <View className='aspect-ratings-grid'>
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>🍽️</Text>
+                      <Text className='aspect-label'>口味</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.taste.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.taste.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.taste.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>🏪</Text>
+                      <Text className='aspect-label'>环境</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.environment.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.environment.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.environment.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>👨‍💼</Text>
+                      <Text className='aspect-label'>服务</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.service.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.service.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.service.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>💰</Text>
+                      <Text className='aspect-label'>性价比</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.price.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.price.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.price.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
 
           <View className='enhanced-location-section'>

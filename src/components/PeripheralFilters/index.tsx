@@ -1,21 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Input } from "@tarojs/components";
-
-// 周边商品分类接口
-export interface PeripheralCategory {
-  id: number
-  name: string
-}
-
-// 周边商品筛选参数接口
-export interface PeripheralFilters {
-  keyword?: string
-  categoryId?: number
-  priceFrom?: number
-  priceTo?: number
-  page?: number
-  limit?: number
-}
+import {
+  PeripheralFilters,
+  PeripheralCategory,
+} from "../../services/peripherals";
 
 interface PeripheralFiltersProps {
   onFiltersChange: (filters: PeripheralFilters) => void;
@@ -30,12 +18,72 @@ const presetPriceRanges = [
   { label: "¥200+", from: 200 },
 ];
 
+type SortOptionKey = "latest" | "priceLow" | "priceHigh" | "stock";
+
+const sortOptions: Array<{
+  key: SortOptionKey;
+  label: string;
+  description: string;
+  sortBy: PeripheralFilters["sortBy"];
+  sortOrder: PeripheralFilters["sortOrder"];
+}> = [
+  {
+    key: "latest",
+    label: "最新上架",
+    description: "按发布时间由新到旧",
+    sortBy: "dateCreated",
+    sortOrder: "desc",
+  },
+  {
+    key: "priceLow",
+    label: "价格从低到高",
+    description: "优先展示更实惠的商品",
+    sortBy: "priceLow",
+    sortOrder: "asc",
+  },
+  {
+    key: "priceHigh",
+    label: "价格从高到低",
+    description: "优先展示高端精选",
+    sortBy: "priceHigh",
+    sortOrder: "desc",
+  },
+  {
+    key: "stock",
+    label: "库存从高到低",
+    description: "优先显示库存充足商品",
+    sortBy: "stock",
+    sortOrder: "desc",
+  },
+];
+
+const getSortOption = (key: SortOptionKey) =>
+  sortOptions.find((option) => option.key === key) ?? sortOptions[0];
+
+const resolveSortKey = (
+  sortBy?: PeripheralFilters["sortBy"],
+  sortOrder?: PeripheralFilters["sortOrder"]
+): SortOptionKey => {
+  if (sortBy === "priceLow" && sortOrder === "asc") {
+    return "priceLow";
+  }
+  if (sortBy === "priceHigh" && sortOrder === "desc") {
+    return "priceHigh";
+  }
+  if (sortBy === "stock" && (!sortOrder || sortOrder === "desc")) {
+    return "stock";
+  }
+  return "latest";
+};
+
 const buildFilterPayload = (
   base: PeripheralFilters,
   keyword: string,
   priceFrom: string,
   priceTo: string,
-  categoryId?: number
+  categoryId?: number,
+  sortBy?: PeripheralFilters["sortBy"],
+  sortOrder?: PeripheralFilters["sortOrder"]
 ): PeripheralFilters | undefined => {
   const next: PeripheralFilters = { ...base };
 
@@ -44,6 +92,8 @@ const buildFilterPayload = (
   delete next.priceFrom;
   delete next.priceTo;
   delete next.categoryId;
+  delete next.sortBy;
+  delete next.sortOrder;
 
   const trimmedKeyword = keyword.trim();
   if (trimmedKeyword) {
@@ -73,6 +123,14 @@ const buildFilterPayload = (
     next.categoryId = categoryId;
   }
 
+  if (sortBy) {
+    next.sortBy = sortBy;
+  }
+
+  if (sortOrder) {
+    next.sortOrder = sortOrder;
+  }
+
   return next;
 };
 
@@ -93,6 +151,10 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
   const [categories, setCategories] = useState<PeripheralCategory[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [selectedSortKey, setSelectedSortKey] = useState<SortOptionKey>(
+    resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder)
+  );
 
   // Reflect upstream filter changes (e.g. external reset/pagination updates)
   useEffect(() => {
@@ -114,6 +176,10 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
   useEffect(() => {
     setSelectedCategoryId(initialFilters.categoryId);
   }, [initialFilters.categoryId]);
+
+  useEffect(() => {
+    setSelectedSortKey(resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder));
+  }, [initialFilters.sortBy, initialFilters.sortOrder]);
 
   // 加载分类数据
   useEffect(() => {
@@ -154,14 +220,18 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
     keywordValue = keyword,
     priceFromValue = priceFrom,
     priceToValue = priceTo,
-    categoryIdValue = selectedCategoryId
+    categoryIdValue = selectedCategoryId,
+    sortKey: SortOptionKey = selectedSortKey
   ) => {
+    const sortConfig = getSortOption(sortKey);
     const payload = buildFilterPayload(
       initialFilters,
       keywordValue,
       priceFromValue,
       priceToValue,
-      categoryIdValue
+      categoryIdValue,
+      sortConfig.sortBy,
+      sortConfig.sortOrder
     );
 
     if (!payload) {
@@ -170,6 +240,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
     }
 
     setError("");
+    setSortMenuOpen(false);
     onFiltersChange(payload);
   };
 
@@ -178,9 +249,20 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
     setPriceFrom("");
     setPriceTo("");
     setSelectedCategoryId(undefined);
+    setSelectedSortKey("latest");
+    setSortMenuOpen(false);
     setError("");
 
-    const payload = buildFilterPayload(initialFilters, "", "", "", undefined);
+    const defaultSort = getSortOption("latest");
+    const payload = buildFilterPayload(
+      initialFilters,
+      "",
+      "",
+      "",
+      undefined,
+      defaultSort.sortBy,
+      defaultSort.sortOrder
+    );
     if (payload) {
       onFiltersChange(payload);
     }
@@ -202,6 +284,18 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
 
   const handleKeywordConfirm = () => {
     applyFilters();
+  };
+
+  const handleSortSelect = (optionKey: SortOptionKey) => {
+    setSelectedSortKey(optionKey);
+    setSortMenuOpen(false);
+    applyFilters(
+      keyword,
+      priceFrom,
+      priceTo,
+      selectedCategoryId,
+      optionKey
+    );
   };
 
   return (
@@ -239,24 +333,69 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
               </View>
             </View>
 
-            <View className="flex items-center gap-3">
+          <View className="flex items-center gap-3">
+            <View
+              className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
+                showAdvanced
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                  : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+              }`}
+              onClick={() => setShowAdvanced((prev) => !prev)}
+            >
+              <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
+              {(hasActivePriceFilter || hasActiveCategoryFilter) && (
+                <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
+                  <Text>ON</Text>
+                </View>
+              )}
+            </View>
+
+            <View className="relative">
               <View
                 className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showAdvanced
+                  sortMenuOpen
                     ? "border-emerald-300 bg-emerald-50 text-emerald-600"
                     : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
                 }`}
-                onClick={() => setShowAdvanced((prev) => !prev)}
+                onClick={() => setSortMenuOpen((prev) => !prev)}
               >
-                <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
-                {(hasActivePriceFilter || hasActiveCategoryFilter) && (
-                  <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
-                    <Text>ON</Text>
-                  </View>
-                )}
+                <Text>排序</Text>
+                <Text className="ml-2 text-xs text-slate-500">
+                  {getSortOption(selectedSortKey).label}
+                </Text>
+                <Text className="ml-2 text-xs text-slate-400">
+                  {sortMenuOpen ? '▲' : '▼'}
+                </Text>
               </View>
+
+              {sortMenuOpen && (
+                <View
+                  className="peripheral-sort-menu absolute right-0 top-full mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl shadow-emerald-500/20"
+                  style={{ zIndex: 1200 }}
+                >
+                  {sortOptions.map((option) => (
+                    <View
+                      key={option.key}
+                      className={`px-4 py-2 text-xs transition-colors ${
+                        option.key === selectedSortKey
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
+                      }`}
+                      onClick={() => handleSortSelect(option.key)}
+                    >
+                      <Text className="block text-sm font-medium">
+                        {option.label}
+                      </Text>
+                      <Text className="mt-1 text-[10px] text-slate-400">
+                        {option.description}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           </View>
+        </View>
 
           {error && (
             <Text className="block text-xs font-medium text-rose-500">

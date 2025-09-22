@@ -25,7 +25,9 @@ const Gift: React.FC = () => {
   // State for filters
   const [currentFilters, setCurrentFilters] = useState<PeripheralFilters>({
     page: 1,
-    limit: 10
+    limit: 10,
+    sortBy: 'dateCreated',
+    sortOrder: 'desc'
   })
 
   // Load peripheral items
@@ -58,6 +60,14 @@ const Gift: React.FC = () => {
       ...filters,
       page: 1, // 重置到第一页
       limit: 10
+    }
+
+    if (!newFilters.sortBy) {
+      newFilters.sortBy = 'dateCreated'
+    }
+
+    if (!newFilters.sortOrder) {
+      newFilters.sortOrder = 'desc'
     }
     setCurrentFilters(newFilters)
     loadItems(true, newFilters)

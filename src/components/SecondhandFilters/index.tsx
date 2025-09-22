@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Input } from "@tarojs/components";
-import { SecondhandFilters, SecondhandCategory, secondhandApi } from "../../services/secondhand";
+import { SecondhandFilters, SecondhandCategory, SecondhandProductStatus, secondhandApi } from "../../services/secondhand";
 
 interface SecondhandFiltersProps {
   onFiltersChange: (filters: SecondhandFilters) => void;
@@ -15,12 +15,23 @@ const presetRanges = [
   { label: "¥500+", from: 500 },
 ];
 
+const listingStatusOptions = [
+  { value: 'available', label: '可购买' },
+  { value: 'reserved', label: '已预订' },
+  { value: 'sold', label: '已售出' },
+];
+
 const buildFilterPayload = (
   base: SecondhandFilters,
   keyword: string,
   priceFrom: string,
   priceTo: string,
-  categoryId?: number
+  categoryId?: number,
+  subCategoryId?: number,
+  productStatusId?: number,
+  listingStatus?: 'available' | 'sold' | 'reserved',
+  sortBy?: SecondhandFilters['sortBy'],
+  sortOrder?: SecondhandFilters['sortOrder']
 ): SecondhandFilters | undefined => {
   const next: SecondhandFilters = { ...base };
 
@@ -29,6 +40,11 @@ const buildFilterPayload = (
   delete next.priceFrom;
   delete next.priceTo;
   delete next.categoryId;
+  delete next.subCategoryId;
+  delete next.productStatusId;
+  delete next.status;
+  delete next.sortBy;
+  delete next.sortOrder;
 
   const trimmedKeyword = keyword.trim();
   if (trimmedKeyword) {
@@ -58,6 +74,26 @@ const buildFilterPayload = (
     next.categoryId = categoryId;
   }
 
+  if (subCategoryId !== undefined && subCategoryId > 0) {
+    next.subCategoryId = subCategoryId;
+  }
+
+  if (productStatusId !== undefined && productStatusId > 0) {
+    next.productStatusId = productStatusId;
+  }
+
+  if (listingStatus) {
+    next.status = listingStatus;
+  }
+
+  if (sortBy) {
+    next.sortBy = sortBy;
+  }
+
+  if (sortOrder) {
+    next.sortOrder = sortOrder;
+  }
+
   return next;
 };
 
@@ -76,8 +112,23 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     initialFilters.categoryId
   );
   const [categories, setCategories] = useState<SecondhandCategory[]>([]);
+  const [subCategories, setSubCategories] = useState<{ id: number; name: string }[]>([]);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | undefined>(
+    initialFilters.subCategoryId
+  );
+  const [productStatuses, setProductStatuses] = useState<SecondhandProductStatus[]>([]);
+  const [selectedProductStatusId, setSelectedProductStatusId] = useState<number | undefined>(
+    initialFilters.productStatusId
+  );
+  const [selectedListingStatus, setSelectedListingStatus] = useState<SecondhandFilters['status']>(
+    initialFilters.status
+  );
+  const [sortOrder, setSortOrder] = useState<SecondhandFilters['sortOrder']>(
+    initialFilters.sortOrder ?? 'desc'
+  );
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
+  const sortBy: SecondhandFilters['sortBy'] = 'dateCreated';
 
   // Reflect upstream filter changes (e.g. external reset/pagination updates)
   useEffect(() => {
@@ -102,10 +153,33 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setSelectedCategoryId(initialFilters.categoryId);
   }, [initialFilters.categoryId]);
 
+  useEffect(() => {
+    setSelectedSubCategoryId(initialFilters.subCategoryId);
+  }, [initialFilters.subCategoryId]);
+
+  useEffect(() => {
+    setSelectedProductStatusId(initialFilters.productStatusId);
+  }, [initialFilters.productStatusId]);
+
+  useEffect(() => {
+    setSelectedListingStatus(initialFilters.status);
+  }, [initialFilters.status]);
+
+  useEffect(() => {
+    if (initialFilters.sortOrder) {
+      setSortOrder(initialFilters.sortOrder);
+    }
+  }, [initialFilters.sortOrder]);
+
   // 加载分类数据
   useEffect(() => {
     const loadCategories = async () => {
       try {
+        // 使用新的API加载子分类（一级分类）
+        const subCategoryData = await secondhandApi.getAllSubCategories();
+        setSubCategories(subCategoryData);
+
+        // 加载所有分类数据，保持向后兼容
         const categoryData = await secondhandApi.getAllCategories();
         setCategories(categoryData);
       } catch (error) {
@@ -116,28 +190,106 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    if (initialFilters.categoryId && categories.length > 0) {
+      const matched = categories.find(category => category.id === initialFilters.categoryId);
+      if (matched?.subCategoryId) {
+        setSelectedSubCategoryId(prev => (prev === undefined ? matched.subCategoryId : prev));
+      }
+    }
+  }, [initialFilters.categoryId, categories]);
+
+  useEffect(() => {
+    const loadProductStatuses = async () => {
+      try {
+        const statuses = await secondhandApi.getProductStatuses();
+        setProductStatuses(statuses);
+      } catch (error) {
+        console.error('加载商品状况失败:', error);
+      }
+    };
+
+    loadProductStatuses();
+  }, []);
+
+  // 当选择子分类时，动态加载对应的二级分类
+  const loadCategoriesForSubCategory = async (subCategoryId: number) => {
+    try {
+      const categoryData = await secondhandApi.getCategoriesBySubCategory(subCategoryId);
+      setCategories(categoryData);
+    } catch (error) {
+      console.error('加载分类失败:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSubCategoryId !== undefined && selectedCategoryId !== undefined) {
+      const exists = categories.some(
+        (category) =>
+          category.id === selectedCategoryId &&
+          category.subCategoryId === selectedSubCategoryId
+      );
+      if (!exists) {
+        setSelectedCategoryId(undefined);
+      }
+    }
+  }, [selectedSubCategoryId, selectedCategoryId, categories]);
+
+  const filteredCategories = useMemo(() => {
+    // 由于我们现在动态加载分类，categories已经是过滤后的结果
+    return categories;
+  }, [categories]);
+
   const hasActivePriceFilter = useMemo(
     () => priceFrom.trim() !== "" || priceTo.trim() !== "",
     [priceFrom, priceTo]
   );
 
   const hasActiveCategoryFilter = useMemo(
-    () => selectedCategoryId !== undefined && selectedCategoryId > 0,
-    [selectedCategoryId]
+    () =>
+      (selectedCategoryId !== undefined && selectedCategoryId > 0) ||
+      (selectedSubCategoryId !== undefined && selectedSubCategoryId > 0),
+    [selectedCategoryId, selectedSubCategoryId]
+  );
+
+  const hasActiveProductStatusFilter = useMemo(
+    () => selectedProductStatusId !== undefined && selectedProductStatusId > 0,
+    [selectedProductStatusId]
+  );
+
+  const hasActiveListingStatusFilter = useMemo(
+    () => !!selectedListingStatus,
+    [selectedListingStatus]
+  );
+
+  const hasActiveAdvancedFilter = useMemo(
+    () =>
+      hasActivePriceFilter || hasActiveCategoryFilter || hasActiveProductStatusFilter || hasActiveListingStatusFilter,
+    [hasActivePriceFilter, hasActiveCategoryFilter, hasActiveProductStatusFilter, hasActiveListingStatusFilter]
   );
 
   const applyFilters = (
     keywordValue = keyword,
     priceFromValue = priceFrom,
     priceToValue = priceTo,
-    categoryIdValue = selectedCategoryId
+    categoryIdValue = selectedCategoryId,
+    subCategoryIdValue = selectedSubCategoryId,
+    productStatusIdValue = selectedProductStatusId,
+    listingStatusValue = selectedListingStatus,
+    sortByValue: SecondhandFilters['sortBy'] = sortBy,
+    sortOrderValue: SecondhandFilters['sortOrder'] = sortOrder
   ) => {
     const payload = buildFilterPayload(
       initialFilters,
       keywordValue,
       priceFromValue,
       priceToValue,
-      categoryIdValue
+      categoryIdValue,
+      subCategoryIdValue,
+      productStatusIdValue,
+      listingStatusValue,
+      sortByValue,
+      sortOrderValue
     );
 
     if (!payload) {
@@ -170,9 +322,23 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setPriceFrom("");
     setPriceTo("");
     setSelectedCategoryId(undefined);
+    setSelectedSubCategoryId(undefined);
+    setSelectedProductStatusId(undefined);
+    setSortOrder('desc');
     setError("");
 
-    const payload = buildFilterPayload(initialFilters, "", "", "", undefined);
+    const payload = buildFilterPayload(
+      initialFilters,
+      "",
+      "",
+      "",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      sortBy,
+      'desc'
+    );
     if (payload) {
       onFiltersChange(payload);
     }
@@ -188,9 +354,25 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     applyFilters(keyword, fromValue, toValue);
   };
 
+  const handleSortToggle = () => {
+    const nextOrder: SecondhandFilters['sortOrder'] = sortOrder === 'desc' ? 'asc' : 'desc';
+    setSortOrder(nextOrder);
+    applyFilters(
+      keyword,
+      priceFrom,
+      priceTo,
+      selectedCategoryId,
+      selectedSubCategoryId,
+      selectedProductStatusId,
+      selectedListingStatus,
+      sortBy,
+      nextOrder
+    );
+  };
+
   const handleKeywordClear = () => {
     setKeyword("");
-    applyFilters("", priceFrom, priceTo, selectedCategoryId);
+    applyFilters("", priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
   };
 
   const handleKeywordConfirm = () => {
@@ -242,11 +424,25 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                 onClick={() => setShowAdvanced((prev) => !prev)}
               >
                 <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
-                {(hasActivePriceFilter || hasActiveCategoryFilter) && (
+                {hasActiveAdvancedFilter && (
                   <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
                     <Text>ON</Text>
                   </View>
                 )}
+              </View>
+
+              <View
+                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors z-1000 ${
+                  sortOrder === 'asc'
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                }`}
+                onClick={handleSortToggle}
+              >
+                <Text>排序</Text>
+                <Text className="ml-2 text-xs text-slate-500">
+                  {sortOrder === 'desc' ? '最新发布' : '最早发布'}
+                </Text>
               </View>
             </View>
           </View>
@@ -260,10 +456,59 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
           {showAdvanced && (
             <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
               <View className="flex flex-col gap-4">
+                {subCategories.length > 0 && (
+                  <View className="flex flex-col gap-3">
+                    <Text className="text-sm font-semibold text-slate-700">
+                      商品大类
+                    </Text>
+                    <View className="flex flex-wrap gap-2">
+                      <View
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                          selectedSubCategoryId === undefined
+                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={async () => {
+                          setSelectedSubCategoryId(undefined);
+                          setSelectedCategoryId(undefined);
+                          // 加载所有分类数据
+                          try {
+                            const categoryData = await secondhandApi.getAllCategories();
+                            setCategories(categoryData);
+                          } catch (error) {
+                            console.error('加载分类失败:', error);
+                          }
+                          applyFilters(keyword, priceFrom, priceTo, undefined, undefined, selectedProductStatusId, selectedListingStatus);
+                        }}
+                      >
+                        <Text>全部</Text>
+                      </View>
+                      {subCategories.map((subCategory) => (
+                        <View
+                          key={subCategory.id}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                            selectedSubCategoryId === subCategory.id
+                              ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                          }`}
+                          onClick={async () => {
+                            setSelectedSubCategoryId(subCategory.id);
+                            setSelectedCategoryId(undefined);
+                            await loadCategoriesForSubCategory(subCategory.id);
+                            applyFilters(keyword, priceFrom, priceTo, undefined, subCategory.id, selectedProductStatusId, selectedListingStatus);
+                          }}
+                        >
+                          <Text>{subCategory.name}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
                 {/* 分类筛选 */}
                 <View className="flex flex-col gap-3">
                   <Text className="text-sm font-semibold text-slate-700">
-                    商品分类
+                    商品细分类
                   </Text>
                   <View className="flex flex-wrap gap-2">
                     <View
@@ -274,12 +519,12 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                       }`}
                       onClick={() => {
                         setSelectedCategoryId(undefined);
-                        applyFilters(keyword, priceFrom, priceTo, undefined);
+                        applyFilters(keyword, priceFrom, priceTo, undefined, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
                       }}
                     >
                       <Text>全部</Text>
                     </View>
-                    {categories.map((category) => (
+                    {filteredCategories.map((category) => (
                       <View
                         key={category.id}
                         className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
@@ -289,10 +534,90 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                         }`}
                         onClick={() => {
                           setSelectedCategoryId(category.id);
-                          applyFilters(keyword, priceFrom, priceTo, category.id);
+                          applyFilters(keyword, priceFrom, priceTo, category.id, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
                         }}
                       >
                         <Text>{category.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  {selectedSubCategoryId && filteredCategories.length === 0 && (
+                    <Text className="text-xs text-slate-400">该大类下暂无细分分类</Text>
+                  )}
+                </View>
+
+                {/* 商品状况筛选 */}
+                {productStatuses.length > 0 && (
+                  <View className="flex flex-col gap-3">
+                    <Text className="text-sm font-semibold text-slate-700">
+                      商品状况
+                    </Text>
+                    <View className="flex flex-wrap gap-2">
+                      <View
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                          selectedProductStatusId === undefined
+                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => {
+                          setSelectedProductStatusId(undefined);
+                          applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, undefined);
+                        }}
+                      >
+                        <Text>全部</Text>
+                      </View>
+                      {productStatuses.map((status) => (
+                        <View
+                          key={status.id}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                            selectedProductStatusId === status.id
+                              ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                          }`}
+                          onClick={() => {
+                            setSelectedProductStatusId(status.id);
+                            applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, status.id);
+                          }}
+                        >
+                          <Text>{status.name}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-semibold text-slate-700">
+                    上架状态
+                  </Text>
+                  <View className="flex flex-wrap gap-2">
+                    <View
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                        selectedListingStatus === undefined
+                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                      }`}
+                      onClick={() => {
+                        setSelectedListingStatus(undefined);
+                        applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, undefined);
+                      }}
+                    >
+                      <Text>全部</Text>
+                    </View>
+                    {listingStatusOptions.map((status) => (
+                      <View
+                        key={status.value}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                          selectedListingStatus === status.value
+                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => {
+                          setSelectedListingStatus(status.value);
+                          applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, status.value);
+                        }}
+                      >
+                        <Text>{status.label}</Text>
                       </View>
                     ))}
                   </View>

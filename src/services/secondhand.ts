@@ -20,9 +20,13 @@ export interface SecondhandItem {
   updatedAt?: string  // Legacy field for backward compatibility
   sellerName?: string | null
   sellerContact?: string | null
+  sellerEmail?: string | null
   sellerAvatar?: string | null
   categoryName?: string | null
   categoryRid?: number  // 分类ID
+  subCategoryName?: string | null
+  productStatusRid?: number | null
+  productStatusName?: string | null
 }
 
 // 创建二手商品请求类型 - 更新以匹配后端API
@@ -34,6 +38,7 @@ export interface CreateSecondhandItemRequest {
   images?: string[]  // Directus文件ID数组
   status?: 'available' | 'sold' | 'reserved'
   categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
 }
 
 // 创建带图片的二手商品请求类型 - 更新以匹配后端API
@@ -44,6 +49,7 @@ export interface CreateSecondhandItemWithImagesRequest {
   price: string | number
   status?: 'available' | 'sold' | 'reserved'
   categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
 }
 
 // API响应接口
@@ -67,6 +73,7 @@ export interface UpdateSecondhandItemRequest {
   images?: string[]  // Directus文件ID数组
   status?: 'available' | 'sold' | 'reserved'
   categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
 }
 
 // 审核二手商品请求类型
@@ -80,6 +87,19 @@ export interface ReviewSecondhandItemRequest {
 export interface SecondhandCategory {
   id: number
   name: string
+  subCategoryId?: number
+  subCategoryName?: string | null
+}
+
+// 二手商品子分类接口（一级分类）
+export interface SecondhandSubCategory {
+  id: number
+  name: string
+}
+
+export interface SecondhandProductStatus {
+  id: number
+  name: string
 }
 
 // 二手商品筛选参数接口
@@ -88,6 +108,11 @@ export interface SecondhandFilters {
   priceTo?: number
   keyword?: string
   categoryId?: number
+  subCategoryId?: number
+  productStatusId?: number
+  status?: 'available' | 'sold' | 'reserved'
+  sortBy?: 'dateCreated'
+  sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
 }
@@ -121,11 +146,26 @@ export const secondhandApi = {
       if (filters?.categoryId !== undefined) {
         queryParams.append('categoryId', filters.categoryId.toString())
       }
+      if (filters?.subCategoryId !== undefined) {
+        queryParams.append('subCategoryId', filters.subCategoryId.toString())
+      }
+      if (filters?.productStatusId !== undefined) {
+        queryParams.append('productStatusId', filters.productStatusId.toString())
+      }
+      if (filters?.status) {
+        queryParams.append('status', filters.status)
+      }
       if (filters?.page !== undefined) {
         queryParams.append('page', filters.page.toString())
       }
       if (filters?.limit !== undefined) {
         queryParams.append('limit', filters.limit.toString())
+      }
+      if (filters?.sortBy) {
+        queryParams.append('sortBy', filters.sortBy)
+      }
+      if (filters?.sortOrder) {
+        queryParams.append('sortOrder', filters.sortOrder)
       }
 
       const url = queryParams.toString() ? `/secondhand?${queryParams.toString()}` : '/secondhand'
@@ -284,4 +324,61 @@ export const secondhandApi = {
     }
   },
 
-} 
+  // 获取商品状况列表
+  getProductStatuses: async (): Promise<SecondhandProductStatus[]> => {
+    try {
+      const response = await request({
+        url: '/secondhand/product-statuses',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandProductStatus[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取商品状况失败:', error)
+      return []
+    }
+  },
+
+  // 获取所有子分类（一级分类）
+  getAllSubCategories: async (): Promise<SecondhandSubCategory[]> => {
+    try {
+      const response = await request({
+        url: '/secondhand/sub-categories',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandSubCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取子分类失败:', error)
+      return []
+    }
+  },
+
+  // 根据子分类ID获取二级分类
+  getCategoriesBySubCategory: async (subCategoryId: number): Promise<SecondhandCategory[]> => {
+    try {
+      const response = await request({
+        url: `/secondhand/categories/${subCategoryId}`,
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取分类失败:', error)
+      return []
+    }
+  },
+
+}

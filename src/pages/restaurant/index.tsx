@@ -68,6 +68,14 @@ const RestaurantList: React.FC = () => {
       page: 1, // 重置到第一页
       limit: 10
     }
+
+    if (!newFilters.sortBy) {
+      newFilters.sortBy = 'createdAt'
+    }
+
+    if (!newFilters.sortOrder) {
+      newFilters.sortOrder = 'asc'
+    }
     setCurrentFilters(newFilters)
     loadRestaurants(true, newFilters)
   }

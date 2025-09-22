@@ -1,6 +1,7 @@
 export default defineAppConfig({
   pages: [
     'pages/loading/index',
+    'pages/second-hand/publish/index',
     // 'pages/carpool/index',
     // 'pages/carpool/publish/index',
     'pages/contact-info/index',
@@ -13,7 +14,6 @@ export default defineAppConfig({
     'pages/restaurant/index',
     'pages/restaurant/detail/index',
     'pages/course/index',
-    'pages/second-hand/publish/index',
     'pages/recent-activities/index',
     'pages/events/detail/index',
     'pages/second-hand/detail/index',

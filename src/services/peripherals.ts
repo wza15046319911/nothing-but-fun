@@ -27,6 +27,8 @@ export interface PeripheralFilters {
   categoryId?: number
   priceFrom?: number
   priceTo?: number
+  sortBy?: 'dateCreated' | 'priceLow' | 'priceHigh' | 'stock'
+  sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
 }
@@ -72,6 +74,12 @@ export const peripheralsApi = {
       }
       if (filters?.limit !== undefined) {
         queryParams.append('limit', filters.limit.toString())
+      }
+      if (filters?.sortBy) {
+        queryParams.append('sortBy', filters.sortBy)
+      }
+      if (filters?.sortOrder) {
+        queryParams.append('sortOrder', filters.sortOrder)
       }
 
       const url = queryParams.toString() ? `/peripherals?${queryParams.toString()}` : '/peripherals'
