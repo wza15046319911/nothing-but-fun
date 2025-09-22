@@ -4,7 +4,7 @@ import { PullToRefresh, Rate, Swiper } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { restaurantApi, Restaurant, RestaurantFilters } from '../../services/restaurant'
 import { useRestaurantTypes } from '../../hooks/useTypes'
-import RestaurantFiltersComponent from '../../components/RestaurantFilters'
+import RestaurantFiltersComponent from '../../components/RestaurantFiltersNew'
 import Pagination from '../../components/Pagination'
 import './index.less'
 
@@ -67,6 +67,14 @@ const RestaurantList: React.FC = () => {
       ...filters,
       page: 1, // 重置到第一页
       limit: 10
+    }
+
+    if (!newFilters.sortBy) {
+      newFilters.sortBy = 'createdAt'
+    }
+
+    if (!newFilters.sortOrder) {
+      newFilters.sortOrder = 'asc'
     }
     setCurrentFilters(newFilters)
     loadRestaurants(true, newFilters)
@@ -157,12 +165,10 @@ const RestaurantList: React.FC = () => {
       </View>
 
       {/* 筛选器 - 浮动卡片样式 */}
-      <View className='filters-wrapper'>
-        <RestaurantFiltersComponent
-          onFiltersChange={handleFiltersChange}
-          initialFilters={currentFilters}
-        />
-      </View>
+      <RestaurantFiltersComponent
+        onFiltersChange={handleFiltersChange}
+        initialFilters={currentFilters}
+      />
 
       {/* 餐厅列表 - 重新设计 */}
       <PullToRefresh onRefresh={handleRefresh}>

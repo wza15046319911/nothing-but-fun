@@ -18,6 +18,26 @@ export interface Restaurant {
   pricingDetails?: string  // 价格详情
   priceRangeRid?: number  // 价格范围ID
   restaurantTypeRid?: number  // 餐厅类型ID
+  priceFrom?: number
+  priceTo?: number
+  aspectRatings?: {
+    taste: {
+      average: string
+      count: number
+    }
+    environment: {
+      average: string
+      count: number
+    }
+    service: {
+      average: string
+      count: number
+    }
+    price: {
+      average: string
+      count: number
+    }
+  }
 }
 
 // 餐厅类型接口
@@ -32,6 +52,10 @@ export interface PriceRange {
   name: string
 }
 
+// DEPRECATED: Restaurant review schema removed from database
+// TODO: Remove these review-related interfaces if no longer needed
+
+/*
 // 餐厅评论数据类型
 export interface RestaurantReview {
   id: number
@@ -68,31 +92,37 @@ export interface NewRestaurantReview {
   serviceRating?: number
   priceRating?: number
 }
+*/
 
 // 餐厅查询参数接口
 export interface RestaurantQueryParams {
   page?: number
   limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt'
+  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
   sortOrder?: 'asc' | 'desc'
   name?: string
   suburb?: string
   minRating?: number
   priceRangeRid?: string  // 价格范围筛选
   restaurantTypeRid?: string  // 餐厅类型筛选
+  priceFrom?: number
+  priceTo?: number
 }
 
 // 餐厅过滤参数接口（用于过滤组件）
 export interface RestaurantFilters {
   page?: number
   limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt'
+  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
   sortOrder?: 'asc' | 'desc'
   name?: string
   suburb?: string
   minRating?: number
   priceRangeRid?: string
   restaurantTypeRid?: string
+  keyword?: string  // 关键词搜索
+  priceFrom?: number
+  priceTo?: number
 }
 
 // 分页餐厅响应接口
@@ -104,6 +134,7 @@ export interface PaginatedRestaurantResponse {
   totalPages: number
 }
 
+/*
 // 评论查询参数接口
 export interface ReviewQueryParams {
   page?: number
@@ -141,6 +172,7 @@ export interface ModerationStats {
   approvedPercentage: number
   rejectedPercentage: number
 }
+*/
 
 // API响应接口
 export interface RestaurantResponse {
@@ -163,6 +195,18 @@ export interface SingleRestaurantResponse {
   data: Restaurant
 }
 
+export interface RateRestaurantResult {
+  overallRating: string
+  totalReviews: number
+}
+
+export interface RateRestaurantResponse {
+  success: boolean
+  message: string
+  data: RateRestaurantResult
+}
+
+/*
 export interface ReviewResponse {
   success: boolean
   message: string
@@ -194,6 +238,7 @@ export interface ModerationStatsResponse {
   message: string
   data: ModerationStats
 }
+*/
 
 // 重复定义移除（上方已定义 ReviewStatsResponse）
 
@@ -384,22 +429,23 @@ export const restaurantApi = {
   // 为餐厅评分
   rateRestaurant: async (restaurantId: number, ratingData: {
     userId: number
-    username: string
-    content: string
-    rating: number
-    tasteRating?: number
-    environmentRating?: number
-    serviceRating?: number
-    priceRating?: number
-  }): Promise<any> => {
+    tasteRating: number
+    environmentRating: number
+    serviceRating: number
+    priceRating: number
+  }): Promise<RateRestaurantResult | null> => {
     try {
       const response = await request({
         url: `/restaurants/rate/${restaurantId}`,
         method: 'POST',
         data: ratingData
-      })
+      }) as RateRestaurantResponse
 
-      return response?.data || null
+      if (response?.success && response.data) {
+        return response.data
+      }
+
+      return null
     } catch (error) {
       console.error('提交餐厅评分失败:', error)
       throw error
@@ -497,276 +543,6 @@ export const restaurantApi = {
   }
 }
 
-// 餐厅评论API
-export const restaurantReviewApi = {
-  // 获取所有评论
-  getAllReviews: async (params?: ReviewQueryParams): Promise<ReviewResponse> => {
-    try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-
-      const response = await request({
-        url: `/restaurant-reviews${queryString}`,
-        method: 'GET'
-      }) as ReviewResponse
-
-      return response || { success: false, message: '获取数据失败', data: [] }
-    } catch (error) {
-      console.error('获取评论列表失败:', error)
-      // 返回模拟数据用于展示
-      return {
-        success: true,
-        message: '获取评论列表成功（模拟数据）',
-        data: getMockReviews(),
-        pagination: {
-          page: 1,
-          limit: 10,
-          total: 14,
-          totalPages: 2,
-          hasNext: true,
-          hasPrev: false
-        }
-      }
-    }
-  },
-
-  // 根据 OpenID 获取用户发布的餐厅评价
-  getReviewsByOpenId: async (openid: string): Promise<RestaurantReview[]> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/user/openid/${openid}`,
-        method: 'GET'
-      })
-      if (response && typeof response === 'object' && 'data' in response) {
-        return (response as { data: RestaurantReview[] }).data || []
-      }
-      if (Array.isArray(response)) {
-        return response as RestaurantReview[]
-      }
-      return []
-    } catch (error) {
-      console.error('根据 OpenID 获取用户餐厅评价失败:', error)
-      return []
-    }
-  },
-
-  // 根据ID获取单个评论
-  getReviewById: async (id: number): Promise<RestaurantReview | null> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/${id}`,
-        method: 'GET'
-      }) as SingleReviewResponse
-
-      return response?.data || null
-    } catch (error) {
-      console.error('获取评论详情失败:', error)
-      // 返回模拟数据
-      const mockReviews = getMockReviews()
-      return mockReviews.find(review => review.id === id) || null
-    }
-  },
-
-  // 根据餐厅获取评论
-  getReviewsByRestaurant: async (restaurantId: number, params?: Omit<ReviewQueryParams, 'restaurantId'>): Promise<ReviewResponse> => {
-    try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-
-      const response = await request({
-        url: `/restaurant-reviews/restaurant/${restaurantId}${queryString}`,
-        method: 'GET'
-      }) as ReviewResponse
-
-      return response || { success: false, message: '获取数据失败', data: [] }
-    } catch (error) {
-      console.error('根据餐厅获取评论失败:', error)
-      // 返回模拟数据，根据餐厅ID筛选
-      const mockReviews = getMockReviews()
-      const filteredReviews = mockReviews.filter(review => review.restaurantId === restaurantId)
-      return {
-        success: true,
-        message: '获取餐厅评论成功（模拟数据）',
-        data: filteredReviews,
-        pagination: {
-          page: 1,
-          limit: 10,
-          total: filteredReviews.length,
-          totalPages: Math.ceil(filteredReviews.length / 10),
-          hasNext: false,
-          hasPrev: false
-        }
-      }
-    }
-  },
-
-  // 获取餐厅已审核通过的评论（公开展示用）
-  getApprovedReviewsByRestaurant: async (restaurantId: number, params?: Omit<ReviewQueryParams, 'restaurantId' | 'status'>): Promise<ReviewResponse> => {
-    try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-
-      const response = await request({
-        url: `/restaurant-reviews/restaurant/${restaurantId}/approved${queryString}`,
-        method: 'GET'
-      }) as ReviewResponse
-
-      return response || { success: false, message: '获取数据失败', data: [] }
-    } catch (error) {
-      console.error('获取餐厅已审核评论失败:', error)
-      // 返回模拟数据，只返回已审核通过的评论
-      const mockReviews = getMockReviews()
-      const approvedReviews = mockReviews.filter(review =>
-        review.restaurantId === restaurantId && review.status === 'approved'
-      )
-      return {
-        success: true,
-        message: '获取餐厅已审核评论成功（模拟数据）',
-        data: approvedReviews,
-        pagination: {
-          page: 1,
-          limit: 10,
-          total: approvedReviews.length,
-          totalPages: Math.ceil(approvedReviews.length / 10),
-          hasNext: false,
-          hasPrev: false
-        }
-      }
-    }
-  },
-
-  // 根据用户获取评论
-  getReviewsByUser: async (userId: number, params?: Omit<ReviewQueryParams, 'userId'>): Promise<ReviewResponse> => {
-    try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-
-      const response = await request({
-        url: `/restaurant-reviews/user/${userId}${queryString}`,
-        method: 'GET'
-      }) as ReviewResponse
-
-      return response || { success: false, message: '获取数据失败', data: [] }
-    } catch (error) {
-      console.error('根据用户获取评论失败:', error)
-      return { success: false, message: '获取数据失败', data: [] }
-    }
-  },
-
-  // 创建新评论（默认状态为pending，需要审核）
-  createReview: async (reviewData: NewRestaurantReview): Promise<RestaurantReview | null> => {
-    try {
-      // 确保新评论状态为pending
-      const reviewWithStatus = {
-        ...reviewData,
-        status: 'pending' as const
-      }
-
-      const response = await request({
-        url: '/restaurant-reviews',
-        method: 'POST',
-        data: reviewWithStatus
-      }) as SingleReviewResponse
-
-      return response?.data || null
-    } catch (error) {
-      console.error('创建评论失败:', error)
-      throw error
-    }
-  },
-
-  // 更新评论
-  updateReview: async (id: number, reviewData: Pick<RestaurantReview, 'content' | 'rating'>): Promise<RestaurantReview | null> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/${id}`,
-        method: 'PUT',
-        data: reviewData
-      }) as SingleReviewResponse
-
-      return response?.data || null
-    } catch (error) {
-      console.error('更新评论失败:', error)
-      throw error
-    }
-  },
-
-  // 删除评论
-  deleteReview: async (id: number): Promise<boolean> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/${id}`,
-        method: 'DELETE'
-      })
-
-      return response?.success || false
-    } catch (error) {
-      console.error('删除评论失败:', error)
-      throw error
-    }
-  },
-  // 根据 OpenID 更新评论
-  updateReviewByOpenId: async (
-    openid: string,
-    id: number,
-    data: Pick<RestaurantReview, 'content' | 'rating'> & {
-      tasteRating?: number
-      environmentRating?: number
-      serviceRating?: number
-      priceRating?: number
-    }
-  ): Promise<RestaurantReview | null> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/user/openid/${openid}/${id}`,
-        method: 'PUT',
-        data
-      }) as SingleReviewResponse
-      return response?.data || null
-    } catch (error) {
-      console.error('根据 OpenID 更新评论失败:', error)
-      throw error
-    }
-  },
-  // 根据 OpenID 删除评论
-  deleteReviewByOpenId: async (openid: string, id: number): Promise<boolean> => {
-    try {
-      const response = await request({
-        url: `/restaurant-reviews/user/openid/${openid}/${id}`,
-        method: 'DELETE'
-      })
-      return !!(response && (response.success === undefined || response.success === true))
-    } catch (error) {
-      console.error('根据 OpenID 删除评论失败:', error)
-      throw error
-    }
-  },
-}
-
 // 模拟餐厅数据（用于展示和测试）
 const getMockRestaurants = (): Restaurant[] => {
   return [
@@ -819,6 +595,7 @@ const getMockRestaurants = (): Restaurant[] => {
   ]
 }
 
+/*
 // 模拟评论数据（用于展示和测试）
 const getMockReviews = (): RestaurantReview[] => {
   return [
@@ -1040,5 +817,6 @@ const getMockReviews = (): RestaurantReview[] => {
     }
   ]
 }
+*/
 
-export default { restaurantApi, restaurantReviewApi }
+export default { restaurantApi }

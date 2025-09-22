@@ -190,9 +190,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("获取到openid:", openid);
 
       // 创建用户
+      const sanitizedNickname = userInfo.nickname.trim();
+
       const createUserResponse = await authApi.createUser({
         openid: openid,
-        nickname: userInfo.nickname,
+        nickname: sanitizedNickname,
         avatarUrl: userInfo.avatarUrl,
       });
 
@@ -227,9 +229,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error("创建用户失败:", error);
+      const backendMessage = (error as any)?.data?.message;
+      const message = backendMessage || (error instanceof Error ? error.message : "创建用户失败");
+      if (!backendMessage) {
+        Taro.showToast({
+          title: message,
+          icon: "none",
+          duration: 2000,
+        });
+      }
       dispatch({
         type: "LOGIN_FAILURE",
-        payload: error.message || "创建用户失败",
+        payload: message,
       });
       return false;
     }

@@ -362,28 +362,31 @@
   }
 }
 
-// 主要功能区域 - 重新设计
+// 主要功能区域 - 重新设计为上下排列
 .main-features-section {
   background-color: #fff;
   margin-bottom: @spacing-lg;
   padding: 10px;
 
-  .main-features-grid {
+  .main-features-vertical {
     padding: 0 @spacing-md @spacing-lg;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: @spacing-md;
   }
 
-  .main-feature-card {
+  .main-feature-card-vertical {
     position: relative;
     border-radius: @border-radius-lg;
-    padding: @spacing-md;
-    min-height: 180rpx;
+    padding: @spacing-lg;
+    min-height: 120rpx;
     box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     overflow: hidden;
     animation: slideInUp 0.6s ease-out;
+    display: flex;
+    align-items: center;
+    gap: @spacing-lg;
 
     &:nth-child(1) { animation-delay: 0.1s; }
     &:nth-child(2) { animation-delay: 0.2s; }
@@ -391,6 +394,7 @@
     &:nth-child(4) { animation-delay: 0.4s; }
     &:nth-child(5) { animation-delay: 0.5s; }
     &:nth-child(6) { animation-delay: 0.6s; }
+    &:nth-child(7) { animation-delay: 0.7s; }
 
     &:active {
       transform: translateY(-4rpx);
@@ -404,19 +408,18 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+      // background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
       pointer-events: none;
     }
 
     .feature-header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: @spacing-md;
+      align-items: center;
+      flex-shrink: 0;
 
       .feature-icon-container {
-        width: 50rpx;
-        height: 50rpx;
+        // width: 80rpx;
+        // height: 80rpx;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -424,27 +427,24 @@
         box-shadow: 0 3rpx 12rpx rgba(0, 0, 0, 0.1);
 
         .feature-icon {
-          font-size: 24rpx;
+          font-size: 160rpx;
         }
-      }
 
-      .feature-badge {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 4rpx 12rpx;
-        border-radius: 20rpx;
-        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-
-        .badge-text {
-          font-size: 20rpx;
-          font-weight: 600;
-          color: #ff6b6b;
+        .feature-icon-svg {
+          width: 120rpx;
+          height: 120rpx;
         }
       }
     }
 
     .feature-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
       .feature-title {
-        font-size: 28rpx;
+        font-size: 32rpx;
         font-weight: bold;
         color: @text-color;
         margin-bottom: 6rpx;
@@ -452,14 +452,14 @@
       }
 
       .feature-subtitle {
-        font-size: 22rpx;
+        font-size: 24rpx;
         color: @text-secondary;
-        margin-bottom: 8rpx;
+        margin-bottom: 4rpx;
         display: block;
       }
 
       .feature-description {
-        font-size: 20rpx;
+        font-size: 22rpx;
         color: @text-light;
         line-height: 1.3;
         display: block;
@@ -467,12 +467,12 @@
     }
 
     .feature-arrow {
-      position: absolute;
-      bottom: @spacing-md;
-      right: @spacing-md;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
 
       .arrow-icon {
-        font-size: 24rpx;
+        font-size: 28rpx;
         color: @text-secondary;
         font-weight: bold;
       }
@@ -485,58 +485,51 @@
 // 响应式设计
 @media (max-width: 750rpx) {
   .main-features-section {
-    .main-features-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: @spacing-md;
+    .main-features-vertical {
+      padding: 0 @spacing-sm @spacing-lg;
+      gap: @spacing-sm;
     }
 
-    .main-feature-card {
-      min-height: 140rpx;
-      padding: @spacing-sm;
+    .main-feature-card-vertical {
+      padding: @spacing-md;
+      min-height: 100rpx;
+      gap: @spacing-md;
 
       .feature-header {
-        margin-bottom: @spacing-sm;
-        
         .feature-icon-container {
-          width: 40rpx;
-          height: 40rpx;
+          width: 65rpx;
+          height: 65rpx;
 
           .feature-icon {
-            font-size: 20rpx;
+            font-size: 32rpx;
           }
-        }
-        
-        .feature-badge {
-          padding: 2rpx 8rpx;
-          
-          .badge-text {
-            font-size: 18rpx;
+
+          .feature-icon-svg {
+            width: 40rpx;
+            height: 40rpx;
           }
         }
       }
 
       .feature-content {
         .feature-title {
-          font-size: 24rpx;
+          font-size: 28rpx;
           margin-bottom: 4rpx;
         }
 
         .feature-subtitle {
-          font-size: 20rpx;
-          margin-bottom: 6rpx;
+          font-size: 22rpx;
+          margin-bottom: 4rpx;
         }
 
         .feature-description {
-          font-size: 18rpx;
+          font-size: 20rpx;
         }
       }
-      
+
       .feature-arrow {
-        bottom: @spacing-sm;
-        right: @spacing-sm;
-        
         .arrow-icon {
-          font-size: 20rpx;
+          font-size: 24rpx;
         }
       }
     }
@@ -548,25 +541,44 @@
 // 小屏幕适配
 @media (max-width: 600rpx) {
   .main-features-section {
-    .main-features-grid {
-      grid-template-columns: 1fr;
+    .main-feature-card-vertical {
+      padding: @spacing-sm;
+      min-height: 90rpx;
       gap: @spacing-sm;
-    }
-    
-    .main-feature-card {
-      min-height: 120rpx;
-      
+
+      .feature-header {
+        .feature-icon-container {
+          width: 58rpx;
+          height: 58rpx;
+
+          .feature-icon {
+            font-size: 28rpx;
+          }
+
+          .feature-icon-svg {
+            width: 34rpx;
+            height: 34rpx;
+          }
+        }
+      }
+
       .feature-content {
         .feature-title {
           font-size: 26rpx;
         }
-        
+
         .feature-subtitle {
-          font-size: 22rpx;
-        }
-        
-        .feature-description {
           font-size: 20rpx;
+        }
+
+        .feature-description {
+          font-size: 18rpx;
+        }
+      }
+
+      .feature-arrow {
+        .arrow-icon {
+          font-size: 22rpx;
         }
       }
     }

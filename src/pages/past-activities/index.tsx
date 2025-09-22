@@ -128,14 +128,8 @@ const PastActivities: React.FC = () => {
 
   // Handle event card click
   const handleEventClick = (event: Event) => {
-    const priceInfo = event.price ? `\n价格：$${event.price}` : ''
-    const pricingDetails = event.pricingDetails ? `\n${event.pricingDetails}` : ''
-
-    Taro.showModal({
-      title: event.title,
-      content: `${event.description}\n\n地点：${event.location}\n时间：${formatDate(event.startTime)} ${formatTime(event.startTime)}\n容量：${event.capacity}人${priceInfo}${pricingDetails}`,
-      showCancel: false,
-      confirmText: '知道了'
+    Taro.navigateTo({
+      url: `/pages/events/detail/index?id=${event.id}`
     })
   }
 
@@ -182,12 +176,12 @@ const PastActivities: React.FC = () => {
 
 
       {/* 增强的筛选器 */}
-      <View className='enhanced-filters-wrapper'>
-        <EventFiltersComponent
-          onFiltersChange={handleFiltersChange}
-          initialFilters={currentFilters}
-        />
-      </View>
+      {/* <View className='enhanced-filters-wrapper'> */}
+      <EventFiltersComponent
+        onFiltersChange={handleFiltersChange}
+        initialFilters={currentFilters}
+      />
+      {/* </View> */}
 
       {/* 增强的活动列表 */}
       <PullToRefresh onRefresh={handleRefresh}>
@@ -297,10 +291,24 @@ const PastActivities: React.FC = () => {
                               <Text className='meta-text'>{event.capacity}人</Text>
                             </View>
                           )}
-                          {event.price && (
+                          {(event.priceFrom || event.price) && (
                             <View className='enhanced-meta-item price-item'>
                               <Text className='meta-icon'>💰</Text>
-                              <Text className='meta-text'>${event.price}</Text>
+                              <Text className='meta-text'>
+                                {event.priceFrom ?
+                                  (event.priceTo && event.priceTo !== event.priceFrom ?
+                                    `¥${event.priceFrom}-${event.priceTo}` :
+                                    `¥${event.priceFrom}`
+                                  ) :
+                                  `¥${event.price}`
+                                }
+                              </Text>
+                            </View>
+                          )}
+                          {event.free && (
+                            <View className='enhanced-meta-item price-item'>
+                              <Text className='meta-icon'>💰</Text>
+                              <Text className='meta-text'>免费</Text>
                             </View>
                           )}
                         </View>

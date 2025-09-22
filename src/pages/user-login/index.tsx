@@ -3,6 +3,7 @@ import { View, Text, Image, Button, Input } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuth } from '../../context/auth'
 import './index.less'
+import { API_BASE_URL } from 'src/services/api'
 
 // 默认头像URL
 const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
@@ -10,7 +11,7 @@ const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia0
 const UserLogin: React.FC = () => {
   // 使用Auth Context
   const { state, createUser, logout, clearError } = useAuth()
-  const { isLoggedIn, isLoading, userInfo, error } = state
+  const { isLoggedIn, isLoading, userInfo } = state
   
   // 新增状态用于头像和昵称
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatarUrl)
@@ -35,9 +36,10 @@ const UserLogin: React.FC = () => {
 
     try {
       // 上传头像到服务器
+      const url = `${API_BASE_URL}/file`
       const uploadResult = await new Promise<string>((resolve, reject) => {
         Taro.uploadFile({
-          url: 'https://nothing-but-fun-backend-production.up.railway.app/api/file',
+          url: url,
           filePath: avatarUrl,
           name: 'image',
           formData: {

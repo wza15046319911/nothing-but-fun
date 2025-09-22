@@ -1,42 +1,55 @@
 import request from './api'
 
-// 二手商品数据类型定义
+// 二手商品数据类型定义 - 更新以匹配后端schema
 export interface SecondhandItem {
   id: number
-  sellerId: string
+  sellerId?: number | string  // 支持新旧格式
   title: string
   description: string
-  price: string
-  image: string
-  images?: string[]
-  imageUrls?: string[]
-  status: 'available' | 'sold' | 'reserved'
-  reviewStatus?: 'pending' | 'approved' | 'rejected'
-  reviewReason?: string
-  createdAt: string
-  updatedAt: string
-  sellerName: string
-  sellerContact: string
-  sellerAvatar: string
-}
-
-// 创建二手商品请求类型
-export interface CreateSecondhandItemRequest {
-  sellerId: number
-  title: string
-  description: string
-  price: string
-  images?: string[]
+  price: number | string  // 后端使用integer，但支持字符串兼容性
+  image?: string  // Legacy field for backward compatibility
+  images?: string[]  // Legacy field for backward compatibility
+  imageUrls: string[]  // 主要图片字段，来自关联表
   status?: 'available' | 'sold' | 'reserved'
+  reviewStatus: 'pending' | 'approved' | 'rejected'
+  reviewReason?: string
+  reviewedAt?: string
+  dateCreated: string  // 后端schema字段名
+  dateUpdated?: string  // 后端schema字段名
+  createdAt?: string  // Legacy field for backward compatibility
+  updatedAt?: string  // Legacy field for backward compatibility
+  sellerName?: string | null
+  sellerContact?: string | null
+  sellerEmail?: string | null
+  sellerAvatar?: string | null
+  categoryName?: string | null
+  categoryRid?: number  // 分类ID
+  subCategoryName?: string | null
+  productStatusRid?: number | null
+  productStatusName?: string | null
 }
 
-// 创建带图片的二手商品请求类型
+// 创建二手商品请求类型 - 更新以匹配后端API
+export interface CreateSecondhandItemRequest {
+  sellerId?: number
+  title: string
+  description?: string
+  price: string | number
+  images?: string[]  // Directus文件ID数组
+  status?: 'available' | 'sold' | 'reserved'
+  categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
+}
+
+// 创建带图片的二手商品请求类型 - 更新以匹配后端API
 export interface CreateSecondhandItemWithImagesRequest {
-  sellerId: number
+  sellerId?: number
   title: string
   description?: string
   price: string | number
   status?: 'available' | 'sold' | 'reserved'
+  categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
 }
 
 // API响应接口
@@ -49,14 +62,18 @@ export interface CreateItemWithImagesResponse {
   }
 }
 
-// 更新二手商品请求类型
+// 更新二手商品请求类型 - 更新以匹配后端API
 export interface UpdateSecondhandItemRequest {
-  sellerId?: string
+  id?: number  // 商品ID，用于更新操作
+  sellerId?: number | string
   title?: string
   description?: string
-  price?: string
-  image?: string
+  price?: string | number
+  image?: string  // Legacy field
+  images?: string[]  // Directus文件ID数组
   status?: 'available' | 'sold' | 'reserved'
+  categoryRid?: number  // 分类ID
+  productStatusRid?: number  // 商品状况ID
 }
 
 // 审核二手商品请求类型
@@ -66,10 +83,36 @@ export interface ReviewSecondhandItemRequest {
   reason: string
 }
 
+// 二手商品分类接口
+export interface SecondhandCategory {
+  id: number
+  name: string
+  subCategoryId?: number
+  subCategoryName?: string | null
+}
+
+// 二手商品子分类接口（一级分类）
+export interface SecondhandSubCategory {
+  id: number
+  name: string
+}
+
+export interface SecondhandProductStatus {
+  id: number
+  name: string
+}
+
 // 二手商品筛选参数接口
 export interface SecondhandFilters {
   priceFrom?: number
   priceTo?: number
+  keyword?: string
+  categoryId?: number
+  subCategoryId?: number
+  productStatusId?: number
+  status?: 'available' | 'sold' | 'reserved'
+  sortBy?: 'dateCreated'
+  sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
 }
@@ -97,11 +140,32 @@ export const secondhandApi = {
       if (filters?.priceTo !== undefined) {
         queryParams.append('priceTo', filters.priceTo.toString())
       }
+      if (filters?.keyword) {
+        queryParams.append('keyword', filters.keyword)
+      }
+      if (filters?.categoryId !== undefined) {
+        queryParams.append('categoryId', filters.categoryId.toString())
+      }
+      if (filters?.subCategoryId !== undefined) {
+        queryParams.append('subCategoryId', filters.subCategoryId.toString())
+      }
+      if (filters?.productStatusId !== undefined) {
+        queryParams.append('productStatusId', filters.productStatusId.toString())
+      }
+      if (filters?.status) {
+        queryParams.append('status', filters.status)
+      }
       if (filters?.page !== undefined) {
         queryParams.append('page', filters.page.toString())
       }
       if (filters?.limit !== undefined) {
         queryParams.append('limit', filters.limit.toString())
+      }
+      if (filters?.sortBy) {
+        queryParams.append('sortBy', filters.sortBy)
+      }
+      if (filters?.sortOrder) {
+        queryParams.append('sortOrder', filters.sortOrder)
       }
 
       const url = queryParams.toString() ? `/secondhand?${queryParams.toString()}` : '/secondhand'
@@ -241,4 +305,80 @@ export const secondhandApi = {
     })
   },
 
-} 
+  // 获取所有二手商品分类
+  getAllCategories: async (): Promise<SecondhandCategory[]> => {
+    try {
+      const response = await request({
+        url: '/secondhand/categories',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取二手商品分类失败:', error)
+      return []
+    }
+  },
+
+  // 获取商品状况列表
+  getProductStatuses: async (): Promise<SecondhandProductStatus[]> => {
+    try {
+      const response = await request({
+        url: '/secondhand/product-statuses',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandProductStatus[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取商品状况失败:', error)
+      return []
+    }
+  },
+
+  // 获取所有子分类（一级分类）
+  getAllSubCategories: async (): Promise<SecondhandSubCategory[]> => {
+    try {
+      const response = await request({
+        url: '/secondhand/sub-categories',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandSubCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取子分类失败:', error)
+      return []
+    }
+  },
+
+  // 根据子分类ID获取二级分类
+  getCategoriesBySubCategory: async (subCategoryId: number): Promise<SecondhandCategory[]> => {
+    try {
+      const response = await request({
+        url: `/secondhand/categories/${subCategoryId}`,
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as SecondhandCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取分类失败:', error)
+      return []
+    }
+  },
+
+}

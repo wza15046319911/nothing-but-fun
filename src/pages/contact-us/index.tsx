@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
 import { Toast } from '@nutui/nutui-react-taro'
 import './index.less'
 
@@ -9,29 +8,6 @@ import './index.less'
 const ContactUs: React.FC = () => {
   const [showToast, setShowToast] = useState(false)
 
-  const handlePhoneCall = (phoneNumber: string) => {
-    Taro.makePhoneCall({
-      phoneNumber: phoneNumber
-    })
-  }
-
-  const handleCopy = (text: string, type: string) => {
-    Taro.setClipboardData({
-      data: text,
-      success: () => {
-      }
-    })
-  }
-
-  const handleOpenMap = () => {
-    Taro.openLocation({
-      latitude: -27.4698,
-      longitude: 153.0251,
-      name: 'Nothing But Fun',
-      address: '布里斯班市中心，昆士兰州，澳大利亚',
-      scale: 18
-    })
-  }
 
 
   return (
@@ -132,28 +108,6 @@ const ContactUs: React.FC = () => {
           </View>
         </View>
       </View>
-
-      {/* Business Hours */}
-      <View className='hours-section'>
-        <View className='section-header'>
-          <Text className='section-title'>营业时间</Text>
-        </View>
-        
-        <View className='hours-card'>
-          <View className='hours-item'>
-            <Text className='day'>周一 - 周五</Text>
-            <Text className='time'>9:00 - 18:00</Text>
-          </View>
-          <View className='hours-item'>
-            <Text className='day'>周六 - 周日</Text>
-            <Text className='time'>10:00 - 17:00</Text>
-          </View>
-          <View className='hours-note'>
-            <Text className='note-text'>节假日营业时间可能有所调整，请提前咨询</Text>
-          </View>
-        </View>
-      </View>
-
       <Toast
         visible={showToast}
         onClose={() => setShowToast(false)}

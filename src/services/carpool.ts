@@ -1,3 +1,7 @@
+// DEPRECATED: Carpool schema removed from database
+// TODO: Remove these files if no longer needed
+
+/*
 import request from './api'
 
 // 拼车信息接口
@@ -295,3 +299,4 @@ export const getStatusClassName = (status: CarpoolPost['status']): string => {
   }
   return classMap[status] || 'status-unknown'
 }
+*/

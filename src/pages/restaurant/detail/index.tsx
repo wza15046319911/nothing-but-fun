@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
 import { Rate, Button } from '@nutui/nutui-react-taro'
-import Taro, { useRouter, useDidShow } from '@tarojs/taro'
+import Taro, { useRouter, useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { restaurantApi, Restaurant } from '../../../services/restaurant'
 import { useAuth } from '../../../context/auth'
 import './index.less'
@@ -75,27 +75,48 @@ const RestaurantDetail: React.FC = () => {
     }
 
     try {
+      const numericUserId = Number(userInfo.id)
+
+      if (!Number.isFinite(numericUserId)) {
+        Taro.showToast({
+          title: '用户信息异常，请重新登录',
+          icon: 'none',
+          duration: 2000
+        })
+        return
+      }
+
       const ratingData = {
-        userId: parseInt(userInfo.id),  // 修复：转换为number类型
-        username: userInfo.nickname || '匿名用户',  // 修复：使用userInfo而不是user
-        content: '用户评分', // 简化版本，不需要评价内容
-        rating: ratings.overall,
+        userId: numericUserId,
         tasteRating: ratings.taste,
         environmentRating: ratings.environment,
         serviceRating: ratings.service,
         priceRating: ratings.price
       }
 
-      await restaurantApi.rateRestaurant(restaurantId, ratingData)
-      
+      const ratingResult = await restaurantApi.rateRestaurant(restaurantId, ratingData)
+
+      if (ratingResult) {
+        setRestaurant(prev => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            overallRating: ratingResult.overallRating,
+            totalReviews: ratingResult.totalReviews
+          }
+        })
+
+        setRatings(prev => ({
+          ...prev,
+          overall: Math.round(Number(ratingResult.overallRating) || prev.overall)
+        }))
+      }
+
       Taro.showToast({
         title: '评分提交成功',
         icon: 'success',
         duration: 2000
       })
-      
-      // Reload restaurant details to get updated ratings
-      loadRestaurantDetail()
     } catch (error) {
       console.error('提交评分失败:', error)
       Taro.showToast({
@@ -126,6 +147,54 @@ const RestaurantDetail: React.FC = () => {
     }
     // 备用方案：使用单个 image 字段
     return restaurant.image ? [restaurant.image] : []
+  }
+
+  const resolveShareId = (): number | undefined => {
+    if (restaurantId > 0) return restaurantId
+    const paramId = router?.params?.id ? Number(router.params.id) : NaN
+    if (Number.isFinite(paramId) && paramId > 0) {
+      return paramId
+    }
+    const currentInstanceId = Taro.getCurrentInstance()?.router?.params?.id
+    const parsed = currentInstanceId ? Number(currentInstanceId) : NaN
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+  }
+
+  useShareAppMessage(() => {
+    const shareId = resolveShareId()
+    const redirect = encodeURIComponent('/pages/restaurant/detail/index')
+    const basePath = `/pages/loading/index?redirect=${redirect}`
+    const images = getAllImages()
+    const imageUrl = images.length > 0 ? images[0] : undefined
+
+    const title = restaurant?.name ? `${restaurant.name} · 精选美味` : '精选餐厅推荐'
+
+    return {
+      title,
+      path: `${basePath}${shareId ? `&id=${shareId}` : ''}`,
+      imageUrl
+    }
+  })
+
+  useShareTimeline(() => {
+    const shareId = resolveShareId()
+    const redirect = encodeURIComponent('/pages/restaurant/detail/index')
+    const title = restaurant?.name ? `${restaurant.name} · 精选美味` : '精选餐厅推荐'
+
+    const queryParts = [`redirect=${redirect}`]
+    if (shareId) {
+      queryParts.push(`id=${shareId}`)
+    }
+
+    return {
+      title,
+      query: queryParts.join('&')
+    }
+  })
+
+  const handleShare = () => {
+    Taro.showShareMenu({ withShareTicket: true})
+    Taro.showToast({ title: '分享面板已打开', icon: 'none', duration: 1500 })
   }
 
   // Handle swiper change
@@ -302,6 +371,82 @@ const RestaurantDetail: React.FC = () => {
                 <Text className='rating-reviews'>({restaurant.totalReviews || 0} 条评价)</Text>
               </View>
             </View>
+
+            {/* Detailed Aspect Ratings */}
+            {restaurant.aspectRatings && restaurant.totalReviews > 0 && (
+              <View className='aspect-ratings-section'>
+                <Text className='aspect-ratings-title'>详细评分</Text>
+                <View className='aspect-ratings-grid'>
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>🍽️</Text>
+                      <Text className='aspect-label'>口味</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.taste.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.taste.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.taste.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>🏪</Text>
+                      <Text className='aspect-label'>环境</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.environment.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.environment.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.environment.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>👨‍💼</Text>
+                      <Text className='aspect-label'>服务</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.service.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.service.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.service.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+
+                  <View className='aspect-rating-item'>
+                    <View className='aspect-rating-header'>
+                      <Text className='aspect-emoji'>💰</Text>
+                      <Text className='aspect-label'>性价比</Text>
+                    </View>
+                    <View className='aspect-rating-info'>
+                      <Text className='aspect-score'>{restaurant.aspectRatings.price.average}</Text>
+                      <Text className='aspect-count'>({restaurant.aspectRatings.price.count}人评价)</Text>
+                    </View>
+                    <View className='aspect-stars'>
+                      <Rate
+                        value={parseFloat(restaurant.aspectRatings.price.average || '0')}
+                        readOnly
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
 
           <View className='enhanced-location-section'>
@@ -335,7 +480,7 @@ const RestaurantDetail: React.FC = () => {
               <Text className='action-icon'>❤️</Text>
               <Text className='action-text'>收藏</Text>
             </View>
-            <View className='action-item' onClick={() => Taro.showToast({ title: '分享功能开发中', icon: 'none' })}>
+            <View className='action-item' onClick={handleShare}>
               <Text className='action-icon'>📤</Text>
               <Text className='action-text'>分享</Text>
             </View>

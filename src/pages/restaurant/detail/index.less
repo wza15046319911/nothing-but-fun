@@ -332,6 +332,82 @@
           }
         }
       }
+
+      // Aspect ratings section
+      .aspect-ratings-section {
+        margin-top: 32rpx;
+        padding: 24rpx;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 16rpx;
+        border: 1rpx solid #dee2e6;
+
+        .aspect-ratings-title {
+          font-size: 28rpx;
+          font-weight: 600;
+          color: #495057;
+          margin-bottom: 24rpx;
+          text-align: center;
+        }
+
+        .aspect-ratings-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20rpx;
+
+          .aspect-rating-item {
+            background: white;
+            padding: 20rpx;
+            border-radius: 12rpx;
+            box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+            border: 1rpx solid #f0f0f0;
+
+            .aspect-rating-header {
+              display: flex;
+              align-items: center;
+              gap: 8rpx;
+              margin-bottom: 12rpx;
+
+              .aspect-emoji {
+                font-size: 24rpx;
+              }
+
+              .aspect-label {
+                font-size: 24rpx;
+                font-weight: 500;
+                color: #333;
+              }
+            }
+
+            .aspect-rating-info {
+              margin-bottom: 12rpx;
+
+              .aspect-score {
+                font-size: 28rpx;
+                font-weight: bold;
+                color: #ff6b6b;
+                margin-bottom: 4rpx;
+                display: block;
+              }
+
+              .aspect-count {
+                font-size: 20rpx;
+                color: #666;
+              }
+            }
+
+            .aspect-stars {
+              .nut-rate {
+                transform: scale(0.8);
+                transform-origin: left center;
+
+                .nut-rate-item {
+                  margin-right: 4rpx;
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     .enhanced-location-section {

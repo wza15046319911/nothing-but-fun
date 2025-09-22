@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.less'
-import { secondhandApi } from 'src/services/secondhand'
+import { secondhandApi, SecondhandCategory, SecondhandSubCategory, SecondhandProductStatus } from 'src/services/secondhand'
 import { API_BASE_URL } from 'src/services/api'
 import { useAuth } from 'src/context/auth'
 
 import "@taroify/core/uploader/style"
-import { Uploader } from "@taroify/core"
+import "@taroify/core/picker/style"
+import "@taroify/core/popup/style"
+import { Uploader, Picker, Popup } from "@taroify/core"
 
 const SecondHandPublish: React.FC = () => {
   // Form state
@@ -21,17 +23,36 @@ const SecondHandPublish: React.FC = () => {
   const { state } = useAuth()
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
+
+  // Category and product status state
+  const [subCategories, setSubCategories] = useState<SecondhandSubCategory[]>([])
+  const [categories, setCategories] = useState<SecondhandCategory[]>([])
+  const [productStatuses, setProductStatuses] = useState<SecondhandProductStatus[]>([])
+  const [selectedSubCategoryIndex, setSelectedSubCategoryIndex] = useState(0)
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0)
+  const [selectedProductStatusIndex, setSelectedProductStatusIndex] = useState(0)
+  const [subCategoryTouched, setSubCategoryTouched] = useState(false)
+  const [categoryTouched, setCategoryTouched] = useState(false)
+  const [productStatusTouched, setProductStatusTouched] = useState(false)
+
+  // Picker popup states
+  const [subCategoryPickerOpen, setSubCategoryPickerOpen] = useState(false)
+  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
+  const [productStatusPickerOpen, setProductStatusPickerOpen] = useState(false)
   
   const maxImages = 10
   
   // Calculate if form is valid
-  const isFormValid = 
-    title.trim().length > 0 && 
-    description.trim().length > 0 && 
-    price.trim().length > 0 && 
+  const isFormValid =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    price.trim().length > 0 &&
     !Number.isNaN(parseFloat(price)) &&
     parseFloat(price) > 0 &&
-    fileList.length > 0
+    fileList.length > 0 &&
+    subCategories.length > 0 &&
+    categories.length > 0 &&
+    productStatuses.length > 0
 
   const titleRemaining = useMemo(() => 30 - title.length, [title])
   const descRemaining = useMemo(() => 500 - description.length, [description])
@@ -79,8 +100,32 @@ const SecondHandPublish: React.FC = () => {
     setPrice(decPart.length ? `${intPart}.${decPart}` : intPart)
   }
 
-  // 初始化：判断是否为编辑模式并预加载数据
+  // 初始化：加载分类和商品状况，判断是否为编辑模式并预加载数据
   useEffect(() => {
+    // 加载分类和商品状况
+    const loadData = async () => {
+      try {
+        const [subCategoriesData, statusesData] = await Promise.all([
+          secondhandApi.getAllSubCategories(),
+          secondhandApi.getProductStatuses()
+        ])
+        setSubCategories(subCategoriesData)
+        setProductStatuses(statusesData)
+
+        // 默认加载第一个子分类的分类
+        if (subCategoriesData.length > 0) {
+          const firstSubCategoryCategories = await secondhandApi.getCategoriesBySubCategory(subCategoriesData[0].id)
+          setCategories(firstSubCategoryCategories)
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        Taro.showToast({ title: '加载数据失败', icon: 'none' })
+      }
+    }
+
+    loadData()
+
+    // 检查编辑模式
     const params = Taro.getCurrentInstance()?.router?.params || {}
     const mode = params.mode
     const idStr = params.id
@@ -99,6 +144,35 @@ const SecondHandPublish: React.FC = () => {
               .filter(Boolean)
               .map((url) => ({ url } as Uploader.File))
             setFileList(existingImages)
+
+            // 设置分类和商品状况
+            // 通过categoryRid找到对应的子分类
+            if (item.categoryRid && subCategories.length > 0) {
+              // 先获取当前category的详细信息来找到它的subCategoryRid
+              try {
+                const allCategories = await secondhandApi.getAllCategories()
+                const currentCategory = allCategories.find(cat => cat.id === item.categoryRid)
+                if (currentCategory && currentCategory.subCategoryId) {
+                  const subCategoryIndex = subCategories.findIndex(subCat => subCat.id === currentCategory.subCategoryId)
+                  if (subCategoryIndex >= 0) {
+                    setSelectedSubCategoryIndex(subCategoryIndex)
+                    // 加载对应的二级分类
+                    const subCategoryCategories = await secondhandApi.getCategoriesBySubCategory(currentCategory.subCategoryId)
+                    setCategories(subCategoryCategories)
+                  }
+                }
+              } catch (error) {
+                console.error('加载分类信息失败:', error)
+              }
+            }
+            if (item.categoryRid && categories.length > 0) {
+              const categoryIndex = categories.findIndex(cat => cat.id === item.categoryRid)
+              if (categoryIndex >= 0) setSelectedCategoryIndex(categoryIndex)
+            }
+            if (item.productStatusRid && productStatuses.length > 0) {
+              const statusIndex = productStatuses.findIndex(status => status.id === item.productStatusRid)
+              if (statusIndex >= 0) setSelectedProductStatusIndex(statusIndex)
+            }
           } catch (e) {
             console.error('加载商品详情失败:', e)
             Taro.showToast({ title: '加载失败', icon: 'none' })
@@ -109,6 +183,23 @@ const SecondHandPublish: React.FC = () => {
   }, [])
   
   // Handle form submission
+  // 处理子分类选择变更
+  const handleSubCategoryChange = async (index: number) => {
+    setSelectedSubCategoryIndex(index)
+    setSelectedCategoryIndex(0) // 重置二级分类选择
+    setSubCategoryTouched(true)
+
+    if (subCategories.length > 0) {
+      try {
+        const subCategoryCategories = await secondhandApi.getCategoriesBySubCategory(subCategories[index].id)
+        setCategories(subCategoryCategories)
+      } catch (error) {
+        console.error('加载分类失败:', error)
+        Taro.showToast({ title: '加载分类失败', icon: 'none' })
+      }
+    }
+  }
+
   const handleSubmit = async() => {
     if (!isFormValid) {
       Taro.showToast({
@@ -168,6 +259,12 @@ const SecondHandPublish: React.FC = () => {
         if (fileIds && fileIds.length > 0) {
           payload.images = fileIds
         }
+        if (categories.length > 0) {
+          payload.categoryRid = categories[selectedCategoryIndex].id
+        }
+        if (productStatuses.length > 0) {
+          payload.productStatusRid = productStatuses[selectedProductStatusIndex].id
+        }
 
         await secondhandApi.updateUserItem(
           state.userInfo.openid,
@@ -197,7 +294,9 @@ const SecondHandPublish: React.FC = () => {
           description: description.trim(),
           price: price.trim(),
           status: 'available',
-          images: fileIds
+          images: fileIds,
+          categoryRid: categories.length > 0 ? categories[selectedCategoryIndex].id : undefined,
+          productStatusRid: productStatuses.length > 0 ? productStatuses[selectedProductStatusIndex].id : undefined
         })
         if (res.id) {
           Taro.hideLoading()
@@ -221,124 +320,250 @@ const SecondHandPublish: React.FC = () => {
   }
 
   return (
-    <ScrollView className='publish-container' scrollY>
-      {/* Hero */}
-      <View className='publish-hero'>
-        <Text className='hero-title'>发布二手好物</Text>
-        <Text className='hero-subtitle'>清晰描述 + 优质图片，更快成交</Text>
-        <View className='hero-stats'>
-          <View className='stat'><Text className='stat-number'>{fileList.length}</Text><Text className='stat-label'>已选图片</Text></View>
-          <View className='divider' />
-          <View className='stat'><Text className='stat-number'>{Math.max(0, maxImages - fileList.length)}</Text><Text className='stat-label'>剩余可选</Text></View>
+    <ScrollView className='publish-page' scrollY>
+      {/* <Text className='publish-page__subtitle'>完善标题、描述与图片，能让好物更快找到买家</Text> */}
+      <View className='publish-page__header'>
+        <Text className='publish-page__title'>{isEditMode ? '编辑二手商品' : '发布二手商品'}</Text>
+        <View className='publish-page__stats'>
+          <View className='publish-page__stats-item'>
+            <Text className='publish-page__stats-value'>{fileList.length}</Text>
+            <Text className='publish-page__stats-label'>已选图片</Text>
+          </View>
+          <View className='publish-page__stats-divider' />
+          <View className='publish-page__stats-item'>
+            <Text className='publish-page__stats-value'>{Math.max(0, maxImages - fileList.length)}</Text>
+            <Text className='publish-page__stats-label'>可再添加</Text>
+          </View>
         </View>
       </View>
-      {/* Basic Info Section */}
-      <View className='form-section'>
-        <View className='form-title'>基本信息</View>
+
+      <View className='publish-page__body'>
         
-        {/* Title */}
-        <View className={`form-item ${titleTouched && title.trim() === '' ? 'error' : ''}`}>
-          <Input 
-            className='form-input'
-            placeholder='标题（建议30字以内）'
-            placeholderClass='form-placeholder'
-            value={title}
-            onInput={e => handleTitleInput(e.detail.value)}
-            onBlur={() => setTitleTouched(true)}
-            maxlength={30}
-          />
-          <View className='field-hint'>剩余 {Math.max(0, titleRemaining)} 字</View>
-          {titleTouched && title.trim() === '' && (
-            <View className='error-text'>请填写标题</View>
-          )}
-        </View>
-        
-        {/* Description */}
-        <View className={`form-item ${descTouched && description.trim() === '' ? 'error' : ''}`}>
-          <Textarea 
-            className='form-textarea'
-            placeholder='描述一下你的商品，例如：入手渠道、使用感受、新旧程度等'
-            placeholderClass='form-placeholder'
-            value={description}
-            onInput={e => handleDescInput(e.detail.value)}
-            onBlur={() => setDescTouched(true)}
-            maxlength={500}
-          />
-          <View className='field-hint'>剩余 {Math.max(0, descRemaining)} 字</View>
-          {descTouched && description.trim() === '' && (
-            <View className='error-text'>请填写商品描述</View>
-          )}
-        </View>
-      </View>
-      
-      {/* Image Upload Section */}
-      <View className='form-section'>
-        <View className='form-title'>上传图片</View>
-        <View className='upload-section'>
-          {/* <View className='upload-desc'>选择清晰的商品照片（{fileList.length}/{maxImages} 张，支持拖动排序）</View> */}
-          <Uploader
-            value={fileList}
-            onUpload={handleUpload}
-            onChange={handleFileChange}
-            multiple
-            maxFiles={maxImages}
-            removable
-          />
-        </View>
-      </View>
-      
-      {/* Price & Condition Section */}
-      <View className='form-section'>
-        <View className='form-title'>价格</View>
-        
-        {/* Price */}
-        <View className={`form-item ${priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) ? 'error' : ''}`}>
-          <View className='form-item-row'>
-            <View className='form-label'>售价</View>
-            <Input 
-              className='price-input'
-              placeholder='0'
-              placeholderClass='form-placeholder'
-              value={price}
-              onInput={e => handlePriceInput(e.detail.value)}
-              onBlur={() => setPriceTouched(true)}
-              type='digit'
+        <View className='card'>
+          <View className='card__title'>商品图片</View>
+          <View className='card__subtitle'>至少上传 1 张清晰照片，最多 {maxImages} 张，支持相册或拍照</View>
+          <View className='card__content card__content--uploader'>
+            <Uploader
+              value={fileList}
+              onUpload={handleUpload}
+              onChange={handleFileChange}
+              multiple
+              maxFiles={maxImages}
+              removable
             />
-            <Text style={{ marginLeft: '4px' }}>AUD</Text>
-          </View>
-          {priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) && (
-            <View className='error-text'>请输入有效的价格（大于 0）</View>
-          )}
-        </View>
-      </View>
-      
-      {/* Tips Section */}
-      <View className='tips-section'>
-        <View className='tips-title'>发布提示</View>
-        <View className='tips-list'>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>请确保所发布物品为您个人闲置，严禁发布虚假信息</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>严禁发布违禁物品，包括但不限于管制刀具、仿真枪等</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>请如实描述物品状况，提供清晰照片，保障买卖双方权益</Text>
-          </View>
-          <View className='tips-item'>
-            <Text className='tips-dot'>•</Text>
-            <Text className='tips-text'>图片将在发布时上传，发布后请耐心等待审核</Text>
           </View>
         </View>
+
+        <View className='card'>
+          <Text className='card__title'>基本信息</Text>
+          <View className='card__content card__content--gap'>
+            <View className={`field ${titleTouched && title.trim() === '' ? 'field--error' : ''}`}>
+              <View className='field__label'>标题</View>
+              <Input
+                className='field__input'
+                // placeholder='如：95新 Nintendo Switch OLED 主机'
+                // placeholderClass='field__placeholder'
+                value={title}
+                onInput={(e) => handleTitleInput(e.detail.value)}
+                onBlur={() => setTitleTouched(true)}
+                maxlength={30}
+              />
+              <View className='field__hint'>还可输入 {Math.max(0, titleRemaining)} 个字符</View>
+              {titleTouched && title.trim() === '' && (
+                <View className='field__error'>请填写标题</View>
+              )}
+            </View>
+
+            <View className={`field field--textarea ${descTouched && description.trim() === '' ? 'field--error' : ''}`}>
+              <View className='field__label'>商品描述</View>
+              <Textarea
+                className='field__textarea'
+                // placeholder='推荐写上入手渠道、使用情况、成色、配件等关键信息'
+                // placeholderClass='field__placeholder'
+                value={description}
+                onInput={(e) => handleDescInput(e.detail.value)}
+                onBlur={() => setDescTouched(true)}
+                maxlength={500}
+              />
+              <View className='field__hint'>剩余 {Math.max(0, descRemaining)} 个字符</View>
+              {descTouched && description.trim() === '' && (
+                <View className='field__error'>请填写商品描述</View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        <View className='card'>
+          <Text className='card__title'>分类信息</Text>
+          <View className='card__content card__content--gap'>
+            <View className={`field ${subCategoryTouched && subCategories.length === 0 ? 'field--error' : ''}`}>
+              <View className='field__label'>商品大类</View>
+              <View
+                className='field__picker'
+                onClick={() => setSubCategoryPickerOpen(true)}
+              >
+                <Text className={subCategories.length === 0 ? 'field__placeholder' : ''}>
+                  {subCategories.length > 0 ? subCategories[selectedSubCategoryIndex]?.name || '请选择大类' : '正在加载大类...'}
+                </Text>
+              </View>
+              {subCategoryTouched && subCategories.length === 0 && (
+                <View className='field__error'>请选择商品大类</View>
+              )}
+
+              <Popup open={subCategoryPickerOpen} placement="bottom" onClose={() => setSubCategoryPickerOpen(false)}>
+                <Picker
+                  value={[selectedSubCategoryIndex.toString()]}
+                  onConfirm={(values) => {
+                    const index = parseInt(values[0] as string)
+                    handleSubCategoryChange(index)
+                    setSubCategoryPickerOpen(false)
+                  }}
+                  onCancel={() => setSubCategoryPickerOpen(false)}
+                >
+                  <Picker.Toolbar>
+                    <Picker.Button>取消</Picker.Button>
+                    <Picker.Button>确认</Picker.Button>
+                  </Picker.Toolbar>
+                  <Picker.Column>
+                    {subCategories.map((subCat, index) => (
+                      <Picker.Option key={subCat.id} value={index.toString()}>
+                        {subCat.name}
+                      </Picker.Option>
+                    ))}
+                  </Picker.Column>
+                </Picker>
+              </Popup>
+            </View>
+
+            <View className={`field ${categoryTouched && categories.length === 0 ? 'field--error' : ''}`}>
+              <View className='field__label'>商品细分类</View>
+              <View
+                className='field__picker'
+                onClick={() => setCategoryPickerOpen(true)}
+              >
+                <Text className={categories.length === 0 ? 'field__placeholder' : ''}>
+                  {categories.length > 0 ? categories[selectedCategoryIndex]?.name || '请选择细分类' : subCategories.length === 0 ? '请先选择大类' : '正在加载细分类...'}
+                </Text>
+              </View>
+              {categoryTouched && categories.length === 0 && subCategories.length > 0 && (
+                <View className='field__error'>请选择商品细分类</View>
+              )}
+
+              <Popup open={categoryPickerOpen} placement="bottom" onClose={() => setCategoryPickerOpen(false)}>
+                <Picker
+                  value={[selectedCategoryIndex.toString()]}
+                  onConfirm={(values) => {
+                    const index = parseInt(values[0] as string)
+                    setSelectedCategoryIndex(index)
+                    setCategoryTouched(true)
+                    setCategoryPickerOpen(false)
+                  }}
+                  onCancel={() => setCategoryPickerOpen(false)}
+                >
+                  <Picker.Toolbar>
+                    <Picker.Button>取消</Picker.Button>
+                    <Picker.Button>确认</Picker.Button>
+                  </Picker.Toolbar>
+                  <Picker.Column>
+                    {categories.map((cat, index) => (
+                      <Picker.Option key={cat.id} value={index.toString()}>
+                        {cat.name}
+                      </Picker.Option>
+                    ))}
+                  </Picker.Column>
+                </Picker>
+              </Popup>
+            </View>
+
+            <View className={`field ${productStatusTouched && productStatuses.length === 0 ? 'field--error' : ''}`}>
+              <View className='field__label'>商品状况</View>
+              <View
+                className='field__picker'
+                onClick={() => setProductStatusPickerOpen(true)}
+              >
+                <Text className={productStatuses.length === 0 ? 'field__placeholder' : ''}>
+                  {productStatuses.length > 0 ? productStatuses[selectedProductStatusIndex]?.name || '请选择状况' : '正在加载状况...'}
+                </Text>
+              </View>
+              {productStatusTouched && productStatuses.length === 0 && (
+                <View className='field__error'>请选择商品状况</View>
+              )}
+
+              <Popup open={productStatusPickerOpen} placement="bottom" onClose={() => setProductStatusPickerOpen(false)}>
+                <Picker
+                  value={[selectedProductStatusIndex.toString()]}
+                  onConfirm={(values) => {
+                    const index = parseInt(values[0] as string)
+                    setSelectedProductStatusIndex(index)
+                    setProductStatusTouched(true)
+                    setProductStatusPickerOpen(false)
+                  }}
+                  onCancel={() => setProductStatusPickerOpen(false)}
+                >
+                  <Picker.Toolbar>
+                    <Picker.Button>取消</Picker.Button>
+                    <Picker.Button>确认</Picker.Button>
+                  </Picker.Toolbar>
+                  <Picker.Column>
+                    {productStatuses.map((status, index) => (
+                      <Picker.Option key={status.id} value={index.toString()}>
+                        {status.name}
+                      </Picker.Option>
+                    ))}
+                  </Picker.Column>
+                </Picker>
+              </Popup>
+            </View>
+          </View>
+        </View>
+
+        <View className='card'>
+          <Text className='card__title'>售价</Text>
+          <View className='card__content card__content--gap'>
+            <View className={`field ${priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) ? 'field--error' : ''}`}>
+              <View className='field__label'>标价 (AUD)</View>
+              <Input
+                className='field__input field__input--price'
+                placeholder='0.00'
+                placeholderClass='field__placeholder'
+                value={price}
+                onInput={(e) => handlePriceInput(e.detail.value)}
+                onBlur={() => setPriceTouched(true)}
+                type='digit'
+              />
+              {priceTouched && (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) && (
+                <View className='field__error'>请输入有效的价格（大于 0）</View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        <View className='card card--tips'>
+          <Text className='card__title'>发布须知</Text>
+          <View className='tips'>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>请确认商品为个人闲置物品，严禁发布虚假或违规内容</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>请如实描述商品成色与缺陷，上传清晰照片保障双方权益</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>若涉及邮寄，请提前说明邮费、发货时间等信息</Text>
+            </View>
+            <View className='tips__item'>
+              <View className='tips__dot' />
+              <Text className='tips__text'>发布后图片会同步上传，审核期间请耐心等待通知</Text>
+            </View>
+          </View>
+        </View>
       </View>
-      
-      {/* Submit Button */}
+
       <View className='submit-bar'>
-        <View 
-          className={`submit-button ${!isFormValid ? 'disabled' : ''}`}
+        <View
+          className={`submit-bar__button ${!isFormValid ? 'submit-bar__button--disabled' : ''}`}
           onClick={handleSubmit}
         >
           {isEditMode ? '保存修改' : '立即发布'}

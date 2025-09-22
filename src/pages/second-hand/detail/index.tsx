@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, ScrollView } from "@tarojs/components";
-import {
-  Button,
-  Toast,
-  ActionSheet,
-  Dialog,
-  Swiper,
-} from "@nutui/nutui-react-taro";
+import { Button, Toast, Dialog } from "@nutui/nutui-react-taro";
+import { Swiper } from "@taroify/core";
 import Taro, { useRouter, useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { secondhandApi, SecondhandItem } from "../../../services/secondhand";
 import "./index.less";
+
+import "@taroify/core/swiper/style";
 
 // Status display mapping
 const statusMap = {
@@ -21,6 +18,7 @@ const statusMap = {
 const SecondHandDetail: React.FC = () => {
   const router = useRouter();
   const { id } = router.params;
+
   // 分享给好友 / 群聊
   useShareAppMessage(() => {
     const title = item?.title ? `${item.title} - 二手好物` : "二手好物精选";
@@ -33,19 +31,16 @@ const SecondHandDetail: React.FC = () => {
   // 朋友圈分享
   useShareTimeline(() => {
     const title = item?.title || "二手好物精选";
-    // 朋友圈落地默认到 loading，再由 loading 跳详情
     const redirect = encodeURIComponent('/pages/second-hand/detail/index');
     return { title, query: `redirect=${redirect}&id=${id || ''}` };
   });
 
-
   // State management
   const [item, setItem] = useState<SecondhandItem | null>(null);
   const [loading, setLoading] = useState(true);
-  // const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [showActionSheet, setShowActionSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Load item details
@@ -93,38 +88,44 @@ const SecondHandDetail: React.FC = () => {
   // Handle contact seller
   const handleContactSeller = () => {
     if (!item) return;
-    Taro.setClipboardData({
-      data: item.sellerContact,
-      
-    });
-    Taro.showModal({
-      title: "联系卖家",
-      content: `卖家联系方式已拷贝`,
-      showCancel: false,
-      confirmText: "好",
-    });
+    const contactChunks: string[] = []
+    if (item.sellerContact) {
+      contactChunks.push(`联系方式：${item.sellerContact}`)
+    }
+    if (item.sellerEmail) {
+      contactChunks.push(`邮箱：${item.sellerEmail}`)
+    }
+
+    if (contactChunks.length === 0) {
+      Taro.showToast({
+        title: '卖家暂未提供联系方式',
+        icon: 'none',
+        duration: 1800
+      })
+      return
+    }
+
+    const clipboardText = contactChunks.join('\n')
+
+    Taro.setClipboardData({ data: clipboardText })
+      .then(() => {
+        Taro.showModal({
+          title: '联系卖家',
+          content: '联系方式已复制，快去联系吧~',
+          showCancel: false,
+          confirmText: '好'
+        })
+      })
+      .catch(() => {
+        Taro.showToast({
+          title: '复制失败，请稍后重试',
+          icon: 'none',
+          duration: 1800
+        })
+      })
   };
 
 
-  // Handle more actions
-  const handleMoreActions = () => {
-    setShowActionSheet(true);
-  };
-
-  // Handle report
-  const handleReport = () => {
-    setShowActionSheet(false);
-    Taro.showToast({
-      title: "举报功能开发中",
-      icon: "none",
-    });
-  };
-
-  // Handle delete (only for item owner)
-  const handleDelete = () => {
-    setShowActionSheet(false);
-    setShowDeleteDialog(true);
-  };
 
   // Confirm delete
   const confirmDelete = async () => {
@@ -143,8 +144,9 @@ const SecondHandDetail: React.FC = () => {
     setShowDeleteDialog(false);
   };
 
-  // Format time display
+  // Format time display - 更新以支持新的字段名
   const formatTime = (dateString: string) => {
+    if (!dateString) return "—";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "—";
     return date.toLocaleString("zh-CN", {
@@ -205,147 +207,133 @@ const SecondHandDetail: React.FC = () => {
     );
   }
 
-  const actionSheetOptions = isOwner()
-    ? [
-        { name: "删除商品", value: "delete" },
-        { name: "取消", value: "cancel" },
-      ]
-    : [
-        { name: "举报商品", value: "report" },
-        { name: "取消", value: "cancel" },
-      ];
 
   return (
-    <View className="enhanced-item-detail-container">
-      <ScrollView className="enhanced-content" scrollY>
-        <View className="enhanced-header-image-section">
-          <View className="image-hero-container">
-            {item?.imageUrls && item?.imageUrls.length > 1 ? (
-              <View className="enhanced-swiper-container">
-                <Swiper
-                  defaultValue={0}
-                  indicator
-                  autoplay
-                  width={500}
-                  height={500}
-                >
-                  {item?.imageUrls.map((imageUrl, index) => (
-                    <Swiper.Item key={imageUrl}>
-                        <Image
-                          className="enhanced-item-main-image"
-                          src={imageUrl}
-                          mode="aspectFill"
-                          onClick={() => handleImagePreview(index)}
-                        />
-                    </Swiper.Item>
-                  ))}
-                </Swiper>
-              </View>
-            ) : (
-              <View className="enhanced-single-image-container">
-                <Image
-                  className="enhanced-item-main-image"
-                  src={item?.imageUrls?.[0] || item?.image}
-                  mode="aspectFill"
-                  onClick={() => handleImagePreview(0)}
-                />
-                <View className="image-overlay"></View>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Basic info card */}
-        <View className="enhanced-basic-info-card">
-          <View className="info-header">
-            <View className="name-section">
-              <Text className="enhanced-item-name">{item.title}</Text>
-              <View className="item-badges">
-                <View className="price-badge">
-                  <Text className="badge-icon">💰</Text>
-                  <Text className="badge-text">¥{item.price}</Text>
-                </View>
-                <View
-                  className="status-badge-chip"
-                  style={{ backgroundColor: statusMap[item.status].color }}
-                >
-                  <Text className="badge-text">
-                    {statusMap[item.status].text}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="more-button" onClick={handleMoreActions}>
-              ⋯
-            </View>
-          </View>
-
-          <View className="meta-section-enhanced">
-            <View className="meta-row">
-              <Text className="meta-icon">🕒</Text>
-              <Text className="meta-text">
-                发布于 {formatTime(item.createdAt)}
-              </Text>
-            </View>
-          </View>
-
-          {item.description && (
-            <View className="enhanced-description-section">
-              <Text className="section-title">商品描述</Text>
-              <Text className="enhanced-description-text">
-                {item.description}
-              </Text>
+    <View className="detail-container">
+      <ScrollView className="detail-content" scrollY>
+        {/* 图片展示区域 */}
+        <View className="image-section">
+          {item?.imageUrls && item?.imageUrls.length > 0 ? (
+            <Swiper
+              className="image-swiper"
+              autoplay={3000}
+              indicator={item.imageUrls.length > 1}
+              onChange={(current) => setCurrentImageIndex(current)}
+            >
+              {item.imageUrls.map((imageUrl, index) => (
+                <Swiper.Item key={index}>
+                  <Image
+                    className="detail-image"
+                    src={imageUrl}
+                    mode="aspectFill"
+                    onClick={() => handleImagePreview(index)}
+                  />
+                </Swiper.Item>
+              ))}
+            </Swiper>
+          ) : (
+            <View className="no-image">
+              <Text>暂无图片</Text>
             </View>
           )}
 
-          <View className="quick-actions">
-            <View
-              className="action-item"
-              onClick={() =>
-                Taro.showToast({ title: "收藏功能开发中", icon: "none" })
-              }
-            >
-              <Text className="action-icon">❤️</Text>
-              <Text className="action-text">收藏</Text>
+          {/* 图片计数器 */}
+          {item?.imageUrls && item.imageUrls.length > 1 && (
+            <View className="image-counter">
+              {currentImageIndex + 1} / {item.imageUrls.length}
             </View>
-            <View
-              className="action-item"
-              onClick={() =>
-                Taro.showToast({ title: "分享功能开发中", icon: "none" })
-              }
-            >
-              <Text className="action-icon">📤</Text>
-              <Text className="action-text">分享</Text>
-            </View>
-          </View>
+          )}
         </View>
 
-        {/* Action Buttons */}
+        {/* 商品基本信息 */}
+        <View className="info-card">
+          <View className="title-section">
+            <Text className="item-title">{item.title}</Text>
+            <View className="price-status-row">
+              <Text className="item-price">¥{item.price}</Text>
+              <View
+                className="status-tag"
+                style={{ backgroundColor: statusMap[item.status || 'available'].color }}
+              >
+                <Text className="status-text">
+                  {statusMap[item.status || 'available'].text}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 商品详细信息 */}
+          <View className="detail-info">
+            {item.productStatusName && (
+              <View className="info-row">
+                <Text className="info-label">使用状况</Text>
+                <Text className="info-value">{item.productStatusName}</Text>
+              </View>
+            )}
+
+            {(item.subCategoryName || item.categoryName) && (
+              <View className="info-row">
+                <Text className="info-label">商品分类</Text>
+                <Text className="info-value">
+                  {item.subCategoryName && item.categoryName
+                    ? `${item.subCategoryName} / ${item.categoryName}`
+                    : item.categoryName || item.subCategoryName
+                  }
+                </Text>
+              </View>
+            )}
+
+            <View className="info-row">
+              <Text className="info-label">发布时间</Text>
+              <Text className="info-value">
+                {formatTime(item.dateCreated || item.createdAt || '')}
+              </Text>
+            </View>
+
+            {item.sellerName && (
+              <View className="info-row">
+                <Text className="info-label">卖家</Text>
+                <Text className="info-value">{item.sellerName}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* 商品描述 */}
+          {item.description && (
+            <View className="description-section">
+              <Text className="description-title">商品描述</Text>
+              <Text className="description-text">{item.description}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* 操作按钮区域 */}
         {!isOwner() && (
           <View className="action-section">
-            <Button className="contact-button" onClick={handleContactSeller}>
+            <Button
+              className="contact-btn"
+              onClick={handleContactSeller}
+              block
+            >
               联系卖家
             </Button>
           </View>
         )}
 
-        {/* Action Sheet */}
-        <ActionSheet
-          visible={showActionSheet}
-          options={actionSheetOptions}
-          onSelect={(item) => {
-            if (item.value === "delete") {
-              handleDelete();
-            } else if (item.value === "report") {
-              handleReport();
-            } else {
-              setShowActionSheet(false);
-            }
-          }}
-          onCancel={() => setShowActionSheet(false)}
-        />
+        {/* 卖家操作 */}
+        {isOwner() && (
+          <View className="owner-actions">
+            <Button
+              className="delete-btn"
+              onClick={() => setShowDeleteDialog(true)}
+              block
+            >
+              删除商品
+            </Button>
+          </View>
+        )}
 
-        {/* Delete Confirmation Dialog */}
+        {/* 删除确认对话框 */}
         <Dialog
           visible={showDeleteDialog}
           title="确认删除"
@@ -354,7 +342,7 @@ const SecondHandDetail: React.FC = () => {
           onCancel={() => setShowDeleteDialog(false)}
         />
 
-        {/* Toast */}
+        {/* Toast提示 */}
         <Toast
           content={toastMessage}
           visible={showToast}

@@ -1,14 +1,45 @@
 import request from './api'
 
-// 周边商品数据类型
+// 周边商品数据类型 - 更新以匹配后端schema
 export interface PeripheralItem {
   id: number
   name: string
   description: string
-  price: string
+  price: number | string  // 后端使用integer，但支持字符串兼容性
   stock: number
-  image: string
-  createdAt: string
+  image?: string  // Legacy field for backward compatibility
+  imageUrls: string[]  // 主要图片字段，来自关联表
+  dateCreated: string  // 后端schema字段名
+  createdAt?: string  // Legacy field for backward compatibility
+  categoryName?: string | null
+  categoryRid?: number  // 分类ID
+}
+
+// 周边商品分类接口
+export interface PeripheralCategory {
+  id: number
+  name: string
+}
+
+// 周边商品筛选参数接口
+export interface PeripheralFilters {
+  keyword?: string
+  categoryId?: number
+  priceFrom?: number
+  priceTo?: number
+  sortBy?: 'dateCreated' | 'priceLow' | 'priceHigh' | 'stock'
+  sortOrder?: 'asc' | 'desc'
+  page?: number
+  limit?: number
+}
+
+// 分页响应接口
+export interface PaginatedPeripheralResponse {
+  data: PeripheralItem[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 // API响应类型
@@ -20,20 +51,94 @@ interface ApiResponse<T> {
 
 // 周边商品API
 export const peripheralsApi = {
-  // 获取所有周边商品
-  getAllItems: async (): Promise<PeripheralItem[]> => {
+  // 获取所有周边商品（支持筛选和分页）
+  getAllItems: async (filters?: PeripheralFilters): Promise<PaginatedPeripheralResponse> => {
     try {
+      // 构建查询参数
+      const queryParams = new URLSearchParams()
+
+      if (filters?.keyword) {
+        queryParams.append('keyword', filters.keyword)
+      }
+      if (filters?.categoryId !== undefined) {
+        queryParams.append('categoryId', filters.categoryId.toString())
+      }
+      if (filters?.priceFrom !== undefined) {
+        queryParams.append('priceFrom', filters.priceFrom.toString())
+      }
+      if (filters?.priceTo !== undefined) {
+        queryParams.append('priceTo', filters.priceTo.toString())
+      }
+      if (filters?.page !== undefined) {
+        queryParams.append('page', filters.page.toString())
+      }
+      if (filters?.limit !== undefined) {
+        queryParams.append('limit', filters.limit.toString())
+      }
+      if (filters?.sortBy) {
+        queryParams.append('sortBy', filters.sortBy)
+      }
+      if (filters?.sortOrder) {
+        queryParams.append('sortOrder', filters.sortOrder)
+      }
+
+      const url = queryParams.toString() ? `/peripherals?${queryParams.toString()}` : '/peripherals'
+
       const response = await request({
-        url: '/peripherals',
+        url,
         method: 'GET'
-      }) as PeripheralItem[]
-      
-      return response || []
+      })
+
+      // 检查响应格式 - 后端返回的格式是 { data: PeripheralItem[], total, page, limit, totalPages }
+      if (response && typeof response === 'object' && 'data' in response && 'total' in response) {
+        // 处理数据兼容性
+        const processedData = response.data.map((item: any) => ({
+          ...item,
+          createdAt: item.dateCreated || item.createdAt, // 兼容旧字段
+          imageUrls: item.imageUrls || [], // 确保图片数组存在
+        }))
+        return {
+          ...response,
+          data: processedData
+        } as PaginatedPeripheralResponse
+      }
+
+      // 如果是简单数组格式，包装成分页响应
+      if (Array.isArray(response)) {
+        return {
+          data: response,
+          total: response.length,
+          page: 1,
+          limit: response.length,
+          totalPages: 1
+        } as PaginatedPeripheralResponse
+      }
+
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0
+      } as PaginatedPeripheralResponse
     } catch (error) {
       console.error('获取周边商品失败:', error)
       // 返回模拟数据用于展示
-      return getMockPeripherals()
+      const mockData = getMockPeripherals()
+      return {
+        data: mockData,
+        total: mockData.length,
+        page: 1,
+        limit: mockData.length,
+        totalPages: 1
+      }
     }
+  },
+
+  // 获取所有周边商品（简化版本，保持向后兼容）
+  getAllItemsSimple: async (): Promise<PeripheralItem[]> => {
+    const result = await peripheralsApi.getAllItems()
+    return result.data
   },
 
   // 根据ID获取单个周边商品
@@ -42,37 +147,76 @@ export const peripheralsApi = {
       const response = await request({
         url: `/peripherals/${id}`,
         method: 'GET'
-      }) as PeripheralItem
-      
-      return response || null
+      }) as any
+
+      if (response) {
+        // 处理数据兼容性
+        return {
+          ...response,
+          createdAt: response.dateCreated || response.createdAt, // 兼容旧字段
+          imageUrls: response.imageUrls || [], // 确保图片数组存在
+        } as PeripheralItem
+      }
+
+      return null
     } catch (error) {
       console.error('获取周边商品详情失败:', error)
       // 返回模拟数据
       const mockItems = getMockPeripherals()
       return mockItems.find(item => item.id === id) || null
     }
+  },
+
+  // 获取所有周边商品分类
+  getAllCategories: async (): Promise<PeripheralCategory[]> => {
+    try {
+      const response = await request({
+        url: '/peripherals/categories',
+        method: 'GET'
+      })
+
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
+        return response.data as PeripheralCategory[]
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取周边商品分类失败:', error)
+      // 返回模拟分类数据
+      return [
+        { id: 1, name: '服装' },
+        { id: 2, name: '配饰' },
+        { id: 3, name: '数码' },
+        { id: 4, name: '文具' },
+        { id: 5, name: '生活用品' },
+      ]
+    }
   }
 }
 
-// 模拟数据（用于展示）
+// 模拟数据（用于展示）- 更新以匹配新的数据结构
 const getMockPeripherals = (): PeripheralItem[] => {
   return [
     {
       id: 1,
       name: 'NBF 经典T恤',
       description: '100%纯棉材质，舒适透气，经典LOGO设计，多色可选',
-      price: '99.00',
+      price: 99,
       stock: 150,
       image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+      imageUrls: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'],
+      dateCreated: '2024-01-15T10:00:00Z',
       createdAt: '2024-01-15T10:00:00Z'
     },
     {
       id: 2,
       name: 'NBF 限量版帽子',
       description: '棒球帽设计，可调节帽围，刺绣工艺LOGO，时尚百搭',
-      price: '79.00',
+      price: 79,
       stock: 88,
       image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop',
+      imageUrls: ['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop'],
+      dateCreated: '2024-01-20T14:30:00Z',
       createdAt: '2024-01-20T14:30:00Z'
     },
     {

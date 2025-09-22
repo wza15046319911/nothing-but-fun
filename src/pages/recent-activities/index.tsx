@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty } from '@nutui/nutui-react-taro'
+import { Toast } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { eventsApi, Event, EventFilters, PaginatedEventsResponse } from '../../services/events'
 import EventRegistrationStatus from '../../components/EventRegistrationStatus'
@@ -9,16 +9,16 @@ import Pagination from '../../components/Pagination'
 import { useEventTypes } from '../../hooks/useTypes'
 import './index.less'
 
-// Helper function to generate dates for the next 14 days
+// Helper function to generate dates for the next 7 days
 const generateDates = () => {
   const dates: any = []
   const days = ['日', '一', '二', '三', '四', '五', '六']
   const today = new Date()
-  
-  for (let i = 0; i < 14; i++) {
-    const date = new Date()
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today)
     date.setDate(today.getDate() + i)
-    
+
     dates.push({
       date: date,
       day: date.getDate(),
@@ -28,11 +28,9 @@ const generateDates = () => {
       dateString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     })
   }
-  
+
   return dates
 }
-
-
 
 const RecentActivities: React.FC = () => {
   // Use event types hook
@@ -45,7 +43,8 @@ const RecentActivities: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(dates[0].dateString)
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
   // State for pagination
   const [pagination, setPagination] = useState({
@@ -80,14 +79,9 @@ const RecentActivities: React.FC = () => {
       })
     } catch (error) {
       console.error('获取即将到来的活动失败:', error)
-      Taro.showToast({
-        title: '加载失败，请稍后重试',
-        icon: 'error',
-        duration: 2000
-      })
+      showToastMessage('加载失败，请稍后重试')
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
@@ -113,10 +107,10 @@ const RecentActivities: React.FC = () => {
     fetchUpcomingEvents(true, newFilters)
   }
 
-  // Pull to refresh functionality
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    await fetchUpcomingEvents(false)
+  // Show toast message
+  const showToastMessage = (message: string) => {
+    setToastMessage(message)
+    setShowToast(true)
   }
 
   // Load events on component mount
@@ -141,34 +135,67 @@ const RecentActivities: React.FC = () => {
     })
   }
 
+  // Handle event click
+  const handleEventClick = (event: Event) => {
+    Taro.navigateTo({
+      url: `/pages/events/detail/index?id=${event.id}`
+    })
+  }
 
+  const selectedDateInfo = dates.find(date => date.dateString === selectedDate) || dates[0]
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <ScrollView className='recent-activities-container' scrollY>
-        {/* Header section */}
-        <View className='header-section'>
-          <View className='header-title'>最近活动</View>
-          <View className='header-desc'>探索丰富多彩的活动，加入我们一起玩乐！</View>
+    <View className='enhanced-events-container'>
+      {/* 增强的页面头部 */}
+      <View className='enhanced-header'>
+        <View className='header-background'>
+          <View className='floating-shapes'>
+            <View className='shape shape-1'></View>
+            <View className='shape shape-2'></View>
+            <View className='shape shape-3'></View>
+            <View className='shape shape-4'></View>
+          </View>
+          <View className='header-overlay'></View>
         </View>
-
-        {/* Date navigation */}
-        <View className='date-nav'>
-          <View className='month-text'>{dates[0].month}月</View>
-          {dates.map((date, index) => (
-            <View
-              key={index}
-              className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
-              onClick={() => setSelectedDate(date.dateString)}
-            >
-              <View className='day-number'>
-                {date.day}
+        <View className='header-content'>
+          <View className='title-section'>
+            <Text className='enhanced-title'>最近活动</Text>
+            <Text className='enhanced-subtitle'>探索丰富多彩的活动，加入我们一起玩乐！</Text>
+            <View className='stats-section'>
+              <View className='stat-item'>
+                <Text className='stat-number'>{events.length}</Text>
+                <Text className='stat-label'>个活动</Text>
               </View>
-              <View className='day-name'>
-                {date.isToday ? '今天' : `周${date.weekday}`}
+              <View className='stat-divider'></View>
+              <View className='stat-item'>
+                <Text className='stat-number'>{filteredEvents.length}</Text>
+                <Text className='stat-label'>今日活动</Text>
               </View>
             </View>
-          ))}
+          </View>
+        </View>
+      </View>
+
+      <ScrollView className='enhanced-content' scrollY>
+        {/* Date navigation */}
+        <View className='enhanced-date-nav'>
+          <View className='month-text'>{selectedDateInfo.month}月</View>
+          <ScrollView className='date-scroll' scrollX showScrollbar={false}>
+            {dates.map((date, index) => (
+              <View
+                key={index}
+                className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
+                onClick={() => setSelectedDate(date.dateString)}
+              >
+                <View className='day-number'>
+                  {date.day}
+                </View>
+                <View className='day-name'>
+                  {date.isToday ? '今天' : `周${date.weekday}`}
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
         {/* Event Filters */}
@@ -184,78 +211,162 @@ const RecentActivities: React.FC = () => {
           </View>
 
           {loading ? (
-            <View className='loading-container'>
-              <Loading type="spinner" />
-              <Text className='loading-text'>加载中...</Text>
-            </View>
-          ) : filteredEvents.length > 0 ? (
-          filteredEvents.map(event => (
-            <View key={event.id} className='activity-card'>
-              <Image
-                className='activity-image'
-                src={event.imageUrls?.[0] || event.image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop'}
-                mode='aspectFill'
-              />
-              <View className='activity-content'>
-                <View className='activity-title'>{event.title}</View>
-
-                <View className='activity-time-location'>
-                  <View className='activity-time'>
-                    <Text className='icon'>🕒</Text>
-                    <Text>{formatTime(event.startTime)}</Text>
-                  </View>
-                  <View className='activity-location'>
-                    <Text className='icon'>📍</Text>
-                    <Text>{event.location || '线上活动'}</Text>
-                  </View>
+            <View className='enhanced-loading-container'>
+              <View className='loading-animation'>
+                <View className='loading-dots'>
+                  <View className='dot dot-1'></View>
+                  <View className='dot dot-2'></View>
+                  <View className='dot dot-3'></View>
                 </View>
-
-                <View className='activity-desc'>{event.description || '暂无描述'}</View>
-
-                <View className='activity-footer'>
-                  <View className='activity-tags'>
-                    {event.capacity && (
-                      <View className='activity-tag limit-tag'>
-                        {event.capacity}人
-                      </View>
-                    )}
-                    {event.price && (
-                      <View className='activity-tag'>
-                        ${event.price}
-                      </View>
-                    )}
-                  </View>
-
-                  <EventRegistrationStatus
-                    event={event}
-                    onRegistrationChange={() => fetchUpcomingEvents(false)}
-                  />
-                </View>
+                <Text className='loading-text'>正在加载活动...</Text>
               </View>
             </View>
-          ))
-        ) : (
-          <Empty
-            description={selectedDate === dates[0].dateString ? '今日暂无活动安排' : `${selectedDate.slice(5).replace('-', '月')}日暂无活动安排`}
-            imageSize={120}
-          />
-        )}
+          ) : filteredEvents.length > 0 ? (
+            <View className='enhanced-events-grid'>
+              {filteredEvents.map((event, index) => (
+                <View
+                  key={event.id}
+                  className={`enhanced-event-card card-${index % 2 === 0 ? 'left' : 'right'}`}
+                  onClick={() => handleEventClick(event)}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {/* 增强的活动图片 */}
+                  <View className='enhanced-event-image-container'>
+                    <View className='image-wrapper'>
+                      <Image
+                        className='enhanced-event-image'
+                        src={event.imageUrls?.[0] || event.image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop'}
+                        mode='aspectFill'
+                        lazyLoad
+                      />
+                      <View className='image-overlay'></View>
+                    </View>
 
-        {/* Pagination */}
-        {!loading && events.length > 0 && pagination.totalPages > 1 && (
-          <Pagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            pageSize={pagination.limit}
-            onPageChange={handlePageChange}
-            loading={loading}
-          />
-        )}
-      </View>
-    </ScrollView>
-    </PullToRefresh>
+                    {/* 价格浮动标签 - 更新以支持新的价格结构 */}
+                    {event.priceFrom || event.price ? (
+                      <View className='price-badge-floating'>
+                        <Text className='price-symbol'>¥</Text>
+                        <Text className='price-amount'>
+                          {event.priceFrom ?
+                            (event.priceTo && event.priceTo !== event.priceFrom ?
+                              `${event.priceFrom}-${event.priceTo}` :
+                              `${event.priceFrom}`
+                            ) :
+                            event.price
+                          }
+                        </Text>
+                      </View>
+                    ) : event.free ? (
+                      <View className='price-badge-floating free'>
+                        <Text className='free-text'>免费</Text>
+                      </View>
+                    ) : (
+                      <View className='price-badge-floating free'>
+                        <Text className='free-text'>免费</Text>
+                      </View>
+                    )}
+
+                    {/* 活动类型标签 */}
+                    {event.eventTypeRid && (
+                      <View className='event-type-badge'>
+                        <Text className='type-text'>{getEventTypeName(event.eventTypeRid)}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* 增强的活动信息 */}
+                  <View className='enhanced-event-info'>
+                    <View className='info-header'>
+                      <Text className='enhanced-event-title'>{event.title}</Text>
+                      <View className='event-meta'>
+                        <Text className='meta-time'>{formatTime(event.startTime)}</Text>
+                      </View>
+                    </View>
+
+                    <View className='info-content'>
+                      <View className='event-time-location'>
+                        <View className='time-location-item'>
+                          <Text className='icon'>🕒</Text>
+                          <Text className='text'>{formatTime(event.startTime)}</Text>
+                        </View>
+                        <View className='time-location-item'>
+                          <Text className='icon'>📍</Text>
+                          <Text className='text'>{event.location || '线上活动'}</Text>
+                        </View>
+                      </View>
+                      <Text className='enhanced-event-description'>{event.description || '暂无描述'}</Text>
+                    </View>
+
+                    <View className='info-footer'>
+                      <View className='event-tags'>
+                        {event.capacity && (
+                          <View className='event-tag capacity-tag'>
+                            <Text className='tag-text'>{event.capacity}人</Text>
+                          </View>
+                        )}
+                        {event.pricingDetails && (
+                          <View className='event-tag pricing-tag'>
+                            <Text className='tag-text'>{event.pricingDetails}</Text>
+                          </View>
+                        )}
+                      </View>
+                      <View className='registration-section'>
+                        <EventRegistrationStatus
+                          event={event}
+                          onRegistrationChange={() => fetchUpcomingEvents(false)}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className='enhanced-empty-container'>
+              <View className='empty-animation'>
+                <Text className='empty-icon'>🎉</Text>
+                <Text className='empty-title'>{selectedDate === dates[0].dateString ? '今日暂无活动安排' : `${selectedDate.slice(5).replace('-', '月')}日暂无活动安排`}</Text>
+                <Text className='empty-subtitle'>敬请期待更多精彩活动</Text>
+              </View>
+            </View>
+          )}
+
+          {/* 增强的分页 */}
+          {!loading && events.length > 0 && pagination.totalPages > 1 && (
+            <View className='enhanced-pagination-wrapper'>
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                total={pagination.total}
+                pageSize={pagination.limit}
+                onPageChange={handlePageChange}
+                loading={loading}
+              />
+            </View>
+          )}
+
+          {/* 增强的底部提示 */}
+          {!loading && filteredEvents.length > 0 && (
+            <View className='enhanced-footer-tip'>
+              <View className='tip-content'>
+                <Text className='tip-icon'>✨</Text>
+                <Text className='tip-text'>已显示全部活动</Text>
+                <Text className='tip-subtext'>发现了 {filteredEvents.length} 个精彩活动</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Toast */}
+      <Toast
+        content={toastMessage}
+        visible={showToast}
+        type="text"
+        onClose={() => setShowToast(false)}
+      />
+    </View>
   )
 }
 
-export default RecentActivities 
+export default RecentActivities
