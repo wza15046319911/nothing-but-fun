@@ -127,6 +127,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     initialFilters.sortOrder ?? 'desc'
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
   const [error, setError] = useState("");
   const sortBy: SecondhandFilters['sortBy'] = 'dateCreated';
 
@@ -354,9 +355,80 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     applyFilters(keyword, fromValue, toValue);
   };
 
-  const handleSortToggle = () => {
-    const nextOrder: SecondhandFilters['sortOrder'] = sortOrder === 'desc' ? 'asc' : 'desc';
-    setSortOrder(nextOrder);
+  type SortOptionKey = 'latest' | 'oldest' | 'priceLow' | 'priceHigh' | 'conditionNew' | 'conditionOld';
+
+  const sortOptions: Array<{
+    key: SortOptionKey;
+    label: string;
+    description: string;
+    sortBy: SecondhandFilters['sortBy'];
+    sortOrder: SecondhandFilters['sortOrder'];
+  }> = [
+    {
+      key: 'latest',
+      label: '最新发布',
+      description: '按发布时间由新到旧',
+      sortBy: 'dateCreated',
+      sortOrder: 'desc',
+    },
+    {
+      key: 'oldest',
+      label: '最早发布',
+      description: '按发布时间由旧到新',
+      sortBy: 'dateCreated',
+      sortOrder: 'asc',
+    },
+    {
+      key: 'priceLow',
+      label: '价格从低到高',
+      description: '优先展示更实惠的商品',
+      sortBy: 'price',
+      sortOrder: 'asc',
+    },
+    {
+      key: 'priceHigh',
+      label: '价格从高到低',
+      description: '优先展示高价商品',
+      sortBy: 'price',
+      sortOrder: 'desc',
+    },
+    {
+      key: 'conditionNew',
+      label: '状况从新到旧',
+      description: '优先展示状况较新的商品',
+      sortBy: 'condition',
+      sortOrder: 'desc',
+    },
+    {
+      key: 'conditionOld',
+      label: '状况从旧到新',
+      description: '优先展示状况较旧的商品',
+      sortBy: 'condition',
+      sortOrder: 'asc',
+    },
+  ];
+
+  const getCurrentSortKey = (): SortOptionKey => {
+    // 根据当前的 sortBy 和 sortOrder 确定选中的排序键
+    if (sortBy === 'dateCreated') {
+      return sortOrder === 'desc' ? 'latest' : 'oldest';
+    }
+    if (sortBy === 'price') {
+      return sortOrder === 'desc' ? 'priceHigh' : 'priceLow';
+    }
+    if (sortBy === 'condition') {
+      return sortOrder === 'desc' ? 'conditionNew' : 'conditionOld';
+    }
+    return 'latest';
+  };
+
+  const getSortOption = (key: SortOptionKey) =>
+    sortOptions.find((option) => option.key === key) ?? sortOptions[0];
+
+  const handleSortSelect = (optionKey: SortOptionKey) => {
+    const option = getSortOption(optionKey);
+    setSortOrder(option.sortOrder);
+    setShowSortOptions(false);
     applyFilters(
       keyword,
       priceFrom,
@@ -365,8 +437,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       selectedSubCategoryId,
       selectedProductStatusId,
       selectedListingStatus,
-      sortBy,
-      nextOrder
+      option.sortBy,
+      option.sortOrder
     );
   };
 
@@ -391,7 +463,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                 </View>
                 <Input
                   className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索商品名称或描述..."
+                  placeholder="搜索商品..."
                   value={keyword}
                   onInput={(event) => setKeyword(event.detail.value)}
                   onConfirm={handleKeywordConfirm}
@@ -432,16 +504,16 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
               </View>
 
               <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors z-1000 ${
-                  sortOrder === 'asc'
+                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
+                  showSortOptions
                     ? "border-emerald-300 bg-emerald-50 text-emerald-600"
                     : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
                 }`}
-                onClick={handleSortToggle}
+                onClick={() => setShowSortOptions((prev) => !prev)}
               >
-                <Text>排序</Text>
+                <Text>{showSortOptions ? "收起排序" : "排序"}</Text>
                 <Text className="ml-2 text-xs text-slate-500">
-                  {sortOrder === 'desc' ? '最新发布' : '最早发布'}
+                  {getSortOption(getCurrentSortKey()).label}
                 </Text>
               </View>
             </View>
@@ -697,6 +769,100 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                     onClick={() => applyFilters()}
                   >
                     <Text>应用价格筛选</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {showSortOptions && (
+            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
+              <View className="flex flex-col gap-4">
+                {/* 排序选项 */}
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-semibold text-slate-700">
+                    排序方式
+                  </Text>
+                  
+                  {/* 第一行：时间 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按时间</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "latest"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("latest")}
+                      >
+                        <Text className="text-sm font-medium">最新</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "oldest"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("oldest")}
+                      >
+                        <Text className="text-sm font-medium">最早</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 第二行：价格 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按价格</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "priceHigh"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceHigh")}
+                      >
+                        <Text className="text-sm font-medium">从高到低</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "priceLow"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceLow")}
+                      >
+                        <Text className="text-sm font-medium">从低到高</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 第三行：使用状况 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按使用状况</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "conditionNew"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("conditionNew")}
+                      >
+                        <Text className="text-sm font-medium">从新到旧</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          getCurrentSortKey() === "conditionOld"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("conditionOld")}
+                      >
+                        <Text className="text-sm font-medium">从旧到新</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>

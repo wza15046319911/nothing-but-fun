@@ -1,23 +1,29 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { Toast } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
 import './index.less'
 
-
+const wechatContact = 'dorimifa_55'
 
 const ContactUs: React.FC = () => {
-  const [showToast, setShowToast] = useState(false)
-
-
+  const handleCopyWechat = () => {
+    Taro.setClipboardData({ data: `微信号：${wechatContact}` })
+      .then(() => {
+        Taro.showToast({ title: '微信号已复制', icon: 'success', duration: 1500 })
+      })
+      .catch(() => {
+        Taro.showToast({ title: '复制失败，请稍后重试', icon: 'none', duration: 1500 })
+      })
+  }
 
   return (
     <ScrollView className='contact-page' scrollY>
       {/* Hero Section */}
       <View className='hero-section'>
         <View className='hero-content'>
-          <Text className='hero-title'>联系我们</Text>
-          <Text className='hero-subtitle'>Nothing But Fun - 让生活更精彩</Text>
-          <Text className='hero-description'>期待与您的每一次交流，共同创造美好体验</Text>
+          <Text className='hero-title'>布玩小秘书</Text>
+          <Text className='hero-subtitle'>贴心客服随时待命</Text>
+          <Text className='hero-description'>活动报名、问题反馈，一条消息搞定</Text>
         </View>
         <View className='hero-decoration'>
           <View className='decoration-circle circle-1'></View>
@@ -30,46 +36,17 @@ const ContactUs: React.FC = () => {
       <View className='quick-contact-section'>
         <View className='section-header'>
           <Text className='section-title'>快速联系</Text>
-          <Text className='section-subtitle'>选择您喜欢的联系方式</Text>
+          <Text className='section-subtitle'>添加微信 dorimifa_55，连接布玩小秘书</Text>
         </View>
         <View className='contact-cards'>
-          <View className='contact-card phone-card'>
-            <View className='card-icon'>
-              <Text className='icon-emoji'>📞</Text>
-            </View>
-            <View className='card-content'>
-              <Text className='card-title'>电话咨询</Text>
-              <Text className='card-subtitle'>+61-447-435-758</Text>
-            </View>
-          </View>
-          
-          <View className='contact-card email-card'>
-            <View className='card-icon'>
-              <Text className='icon-emoji'>✉️</Text>
-            </View>
-            <View className='card-content'>
-              <Text className='card-title'>邮箱联系</Text>
-              <Text className='card-subtitle'>zianwang9911@gmail.com</Text>
-            </View>
-          </View>
-          
-          <View className='contact-card location-card'>
-            <View className='card-icon'>
-              <Text className='icon-emoji'>📍</Text>
-            </View>
-            <View className='card-content'>
-              <Text className='card-title'>地址位置</Text>
-              <Text className='card-subtitle'>布里斯班市中心</Text>
-            </View>
-          </View>
-          
-          <View className='contact-card wechat-card'>
+          <View className='contact-card wechat-card' onClick={handleCopyWechat}>
             <View className='card-icon'>
               <Text className='icon-emoji'>💬</Text>
             </View>
             <View className='card-content'>
               <Text className='card-title'>微信联系</Text>
-              <Text className='card-subtitle'>nil_object_found</Text>
+              <Text className='card-subtitle'>{wechatContact}</Text>
+              <Text className='card-hint'>点击复制微信号</Text>
             </View>
           </View>
         </View>
@@ -108,11 +85,6 @@ const ContactUs: React.FC = () => {
           </View>
         </View>
       </View>
-      <Toast
-        visible={showToast}
-        onClose={() => setShowToast(false)}
-        duration={2000}
-      />
     </ScrollView>
   )
 }

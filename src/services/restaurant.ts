@@ -240,7 +240,21 @@ export interface ModerationStatsResponse {
 }
 */
 
-// 重复定义移除（上方已定义 ReviewStatsResponse）
+// 用户餐厅评分接口
+export interface UserRestaurantRating {
+  id: number
+  restaurantId: number
+  restaurantName: string
+  restaurantImage?: string
+  restaurantImageUrls: string[]
+  tasteRating: number
+  environmentRating: number
+  serviceRating: number
+  priceRating: number
+  overallRating: number
+  createdAt: string
+  updatedAt: string
+}
 
 // 餐厅API
 export const restaurantApi = {
@@ -540,6 +554,29 @@ export const restaurantApi = {
       console.error('获取热门餐厅失败:', error)
       return []
     }
+  },
+
+  // 获取用户餐厅评分
+  getUserRatings: async (userId: string): Promise<UserRestaurantRating[]> => {
+    try {
+      const response = await request({
+        url: `/users/${userId}/restaurant-ratings`,
+        method: 'GET'
+      }) as { success: boolean; data: UserRestaurantRating[] }
+
+      if (response?.data) {
+        return response.data.map(rating => ({
+          ...rating,
+          restaurantImageUrls: rating.restaurantImageUrls || []
+        }))
+      }
+
+      return []
+    } catch (error) {
+      console.error('获取用户餐厅评分失败:', error)
+      // 返回模拟数据用于展示
+      return getMockUserRatings()
+    }
   }
 }
 
@@ -592,6 +629,62 @@ const getMockRestaurants = (): Restaurant[] => {
       restaurantTypeRid: 2
     },
 
+  ]
+}
+
+// 模拟用户餐厅评分数据
+const getMockUserRatings = (): UserRestaurantRating[] => {
+  return [
+    {
+      id: 1,
+      restaurantId: 1,
+      restaurantName: '龙宫亚洲融合餐厅',
+      restaurantImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+      restaurantImageUrls: [
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop'
+      ],
+      tasteRating: 5,
+      environmentRating: 4,
+      serviceRating: 5,
+      priceRating: 4,
+      overallRating: 4.5,
+      createdAt: '2024-01-20T10:00:00.000Z',
+      updatedAt: '2024-01-20T10:00:00.000Z'
+    },
+    {
+      id: 2,
+      restaurantId: 2,
+      restaurantName: '意式风情餐厅',
+      restaurantImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+      restaurantImageUrls: [
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop'
+      ],
+      tasteRating: 5,
+      environmentRating: 4,
+      serviceRating: 4,
+      priceRating: 3,
+      overallRating: 4.0,
+      createdAt: '2024-01-22T14:30:00.000Z',
+      updatedAt: '2024-01-22T14:30:00.000Z'
+    },
+    {
+      id: 3,
+      restaurantId: 3,
+      restaurantName: '海鲜码头',
+      restaurantImage: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop',
+      restaurantImageUrls: [
+        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop'
+      ],
+      tasteRating: 5,
+      environmentRating: 4,
+      serviceRating: 5,
+      priceRating: 3,
+      overallRating: 4.25,
+      createdAt: '2024-01-25T18:45:00.000Z',
+      updatedAt: '2024-01-25T18:45:00.000Z'
+    }
   ]
 }
 

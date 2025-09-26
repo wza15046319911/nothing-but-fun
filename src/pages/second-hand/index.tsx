@@ -167,8 +167,8 @@ const SecondHand: React.FC = () => {
         </View>
         <View className="header-content">
           <View className="title-section">
-            <Text className="enhanced-title">二手闲置</Text>
-            <Text className="enhanced-subtitle">发现好物，交换价值</Text>
+            <Text className="enhanced-title">布村换换乐</Text>
+            <Text className="enhanced-subtitle">闲置宝贝轻松上新</Text>
             <View className="stats-section">
               <View className="stat-item">
                 <Text className="stat-number">{items.length}</Text>
@@ -196,7 +196,7 @@ const SecondHand: React.FC = () => {
       />
 
       {/* 增强的商品列表 */}
-      <ScrollView className="enhanced-content" scrollY>
+      <ScrollView className="enhanced-content -z-1" scrollY>
         {loading ? (
           <View className="enhanced-loading-container">
             <View className="loading-animation">
@@ -261,15 +261,9 @@ const SecondHand: React.FC = () => {
                     </View>
                   </View>
 
-                  <View className="info-content">
-                    <Text className="enhanced-item-description">
-                      {item.description}
-                    </Text>
-                  </View>
 
                   <View className="info-footer">
                     <View className="price-section">
-                      <Text className="price-label">价格</Text>
                       <Text className="enhanced-item-price">
                         $
                         {typeof item.price === "number"

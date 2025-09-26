@@ -161,8 +161,8 @@ const Gift: React.FC = () => {
         </View>
         <View className='header-content'>
           <View className='title-section'>
-            <Text className='enhanced-title'>NBF 周边商城</Text>
-            <Text className='enhanced-subtitle'>精选周边商品，品质保证</Text>
+            <Text className='enhanced-title'>布玩好物铺</Text>
+            <Text className='enhanced-subtitle'>精选周边伴手礼</Text>
             <View className='stats-section'>
               <View className='stat-item'>
                 <Text className='stat-number'>{items.length}</Text>
@@ -198,10 +198,10 @@ const Gift: React.FC = () => {
             </View>
           ) : items.length === 0 ? (
             <View className='enhanced-empty-container'>
-              <View className='empty-animation'>
-                <Text className='empty-icon'>🛍️</Text>
-                <Text className='empty-title'>暂无商品</Text>
-                <Text className='empty-subtitle'>敬请期待更多精彩周边</Text>
+            <View className='empty-animation'>
+              <Text className='empty-icon'>🛍️</Text>
+              <Text className='empty-title'>暂无精选好物</Text>
+              <Text className='empty-subtitle'>敬请期待更多布玩伴手礼</Text>
               </View>
             </View>
           ) : (
@@ -224,17 +224,6 @@ const Gift: React.FC = () => {
                       />
                       <View className='image-overlay'></View>
                     </View>
-
-                    {/* 价格浮动标签 */}
-                    <View className='price-badge-floating'>
-                      <Text className='price-symbol'>¥</Text>
-                      <Text className='price-amount'>{typeof item.price === 'number' ? item.price : item.price}</Text>
-                    </View>
-
-                    {/* 库存状态标签 */}
-                    <View className={`stock-status-badge ${getStockStatus(item.stock)}`}>
-                      <Text className='stock-text'>{formatStock(item.stock)}</Text>
-                    </View>
                   </View>
 
                   {/* 增强的商品信息 */}
@@ -249,14 +238,10 @@ const Gift: React.FC = () => {
                       </View>
                     </View>
 
-                    <View className='info-content'>
-                      <Text className='enhanced-item-description'>{item.description}</Text>
-                    </View>
 
                     <View className='info-footer'>
                       <View className='price-section'>
-                        <Text className='price-label'>价格</Text>
-                        <Text className='enhanced-item-price'>¥{typeof item.price === 'number' ? item.price : item.price}</Text>
+                        <Text className='enhanced-item-price'>${typeof item.price === 'number' ? item.price : item.price}</Text>
                       </View>
                       <View className='action-section'>
                         <View className='action-button'>

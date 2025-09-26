@@ -13,7 +13,7 @@ const Loading: React.FC = () => {
 
   const tips = useMemo(
     () => [
-      '上滑探索最近活动',
+      '上滑探索布玩新鲜事',
       '餐厅点评，真实可依',
     ],
     []

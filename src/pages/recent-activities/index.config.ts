@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '最近活动'
+  navigationBarTitleText: '布玩新鲜事'
 }) 

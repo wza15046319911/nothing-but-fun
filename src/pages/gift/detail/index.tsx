@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ScrollView, View, Text, Image } from '@tarojs/components'
-import { Swiper } from '@nutui/nutui-react-taro'
+import { Swiper } from '@taroify/core'
 import Taro, { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { peripheralsApi, PeripheralItem } from '../../../services/peripherals'
 import './index.less'
+import '@taroify/core/swiper/style'
 
-const merchantEmail = 'market@nothingbutfun.au'
+const merchantWechatLabel = '微信号：dorimifa_55'
 const fallbackImage = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80'
 
 const formatStock = (stock: number) => {
@@ -95,7 +96,7 @@ const GiftDetail: React.FC = () => {
     const shareId = resolveShareId()
     const redirect = encodeURIComponent('/pages/gift/detail/index')
     const basePath = `/pages/loading/index?redirect=${redirect}`
-    const title = item?.name ? `${item.name} · 周边好物` : 'Nothing But Fun 周边好物'
+    const title = item?.name ? `${item.name} · 布玩好物铺` : '布玩好物精选'
     const imageUrl = imageList[0]
 
     return {
@@ -108,7 +109,7 @@ const GiftDetail: React.FC = () => {
   useShareTimeline(() => {
     const shareId = resolveShareId()
     const redirect = encodeURIComponent('/pages/gift/detail/index')
-    const title = item?.name ? `${item.name} · 周边好物` : 'Nothing But Fun 周边好物'
+    const title = item?.name ? `${item.name} · 布玩好物铺` : '布玩好物精选'
     const queryParts = [`redirect=${redirect}`]
     if (shareId) {
       queryParts.push(`id=${shareId}`)
@@ -127,10 +128,21 @@ const GiftDetail: React.FC = () => {
     })
   }
 
+  const handleSwiperChange = (value: number | { detail?: { current?: number } }) => {
+    if (typeof value === 'number') {
+      setActiveImageIndex(value)
+      return
+    }
+    const next = value?.detail?.current
+    if (typeof next === 'number') {
+      setActiveImageIndex(next)
+    }
+  }
+
   const handleContactMerchant = () => {
-    Taro.setClipboardData({ data: merchantEmail })
+    Taro.setClipboardData({ data: merchantWechatLabel })
       .then(() => {
-        Taro.showToast({ title: '邮箱已复制', icon: 'success', duration: 1500 })
+        Taro.showToast({ title: '微信号已复制', icon: 'success', duration: 1500 })
       })
       .catch(() => {
         Taro.showToast({ title: '复制失败，请稍后重试', icon: 'none', duration: 1500 })
@@ -138,7 +150,7 @@ const GiftDetail: React.FC = () => {
   }
 
   const handleShare = () => {
-    Taro.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] })
+    Taro.showShareMenu({ withShareTicket: true })
     Taro.showToast({ title: '分享面板已打开', icon: 'none', duration: 1500 })
   }
 
@@ -149,7 +161,7 @@ const GiftDetail: React.FC = () => {
   if (loading) {
     return (
       <View className='flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500'>
-        <Text>正在加载周边商品详情...</Text>
+        <Text>正在加载好物详情...</Text>
       </View>
     )
   }
@@ -159,7 +171,7 @@ const GiftDetail: React.FC = () => {
       <View className='flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-100 px-8 text-center text-slate-500'>
         <Text className='text-4xl'>📦</Text>
         <View>
-          <Text className='block text-lg text-slate-900'>没有找到这个周边商品</Text>
+          <Text className='block text-lg text-slate-900'>没有找到这个好物</Text>
           <Text className='mt-2 block text-sm text-slate-500'>可能已经下架或暂时不可用</Text>
         </View>
         <View
@@ -178,7 +190,7 @@ const GiftDetail: React.FC = () => {
   const priceDisplay = formatPrice(item.price)
 
   const tags = (() => {
-    const list = ['官方周边']
+    const list = ['布玩好物']
     if (item.categoryName) list.push(item.categoryName)
     list.push(stockSummary)
     return list
@@ -186,7 +198,7 @@ const GiftDetail: React.FC = () => {
 
   const specs = [
     { label: '商品编号', value: `NBF-${item.id.toString().padStart(4, '0')}` },
-    { label: '商品分类', value: item.categoryName ?? '周边好物' },
+    { label: '商品分类', value: item.categoryName ?? '布玩好物' },
     { label: '上架时间', value: formatTime(item.dateCreated || item.createdAt || new Date().toISOString()) },
     { label: '当前库存', value: item.stock > 0 ? `${item.stock} 件` : '暂时缺货' }
   ]
@@ -208,9 +220,10 @@ const GiftDetail: React.FC = () => {
           <Swiper
             className='media-section__swiper'
             circular
-            indicator
-            autoplay
-            onChange={(index) => setActiveImageIndex(index)}
+            indicator={imageList.length > 1}
+            autoplay={imageList.length > 1 ? 4000 : false}
+            defaultValue={0}
+            onChange={handleSwiperChange}
           >
             {imageList.map((imageUrl, index) => (
               <Swiper.Item key={`${imageUrl}-${index}`}>
@@ -218,7 +231,9 @@ const GiftDetail: React.FC = () => {
                   className='media-section__image'
                   src={imageUrl}
                   mode='aspectFill'
+                  lazyLoad
                   onClick={() => handleImagePreview(index)}
+                  onError={() => console.warn('图片加载失败:', imageUrl)}
                 />
               </Swiper.Item>
             ))}
@@ -278,10 +293,10 @@ const GiftDetail: React.FC = () => {
           <Text className='section-title'>联系商家</Text>
           <Text className='contact-card__hint'>团购、定制或合作咨询请联系 Nothing But Fun 团队，我们会在 1 个工作日内回复。</Text>
           <View className='contact-card__info'>
-            <Text>{merchantEmail}</Text>
+            <Text>{merchantWechatLabel}</Text>
           </View>
           <View className='contact-card__button' onClick={handleContactMerchant}>
-            <Text>复制邮箱联系商家</Text>
+            <Text>复制微信号联系商家</Text>
           </View>
         </View>
       </View>

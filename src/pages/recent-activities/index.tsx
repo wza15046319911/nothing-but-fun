@@ -159,8 +159,8 @@ const RecentActivities: React.FC = () => {
         </View>
         <View className='header-content'>
           <View className='title-section'>
-            <Text className='enhanced-title'>最近活动</Text>
-            <Text className='enhanced-subtitle'>探索丰富多彩的活动，加入我们一起玩乐！</Text>
+            <Text className='enhanced-title'>布玩新鲜事</Text>
+            <Text className='enhanced-subtitle'>最新活动日历，一眼掌握玩乐灵感</Text>
             <View className='stats-section'>
               <View className='stat-item'>
                 <Text className='stat-number'>{events.length}</Text>

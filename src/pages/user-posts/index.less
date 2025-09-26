@@ -72,24 +72,39 @@
 .tabs {
   display: flex;
   background: white;
-  margin: -@spacing-lg @spacing-md @spacing-md;
+  margin: 0 @spacing-md @spacing-md;
   border-radius: @border-radius;
-  padding: 6px;
+  padding: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid @border-color;
 
   .tab {
     flex: 1;
     text-align: center;
-    padding: 10px 12px;
+    padding: 12px 16px;
     border-radius: @border-radius;
     color: @text-secondary;
-    font-size: 14px;
-  }
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
 
-  .tab.active {
-    color: white;
-    background: linear-gradient(135deg, @primary-color 0%, #5ba3f5 100%);
-    box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+    &.active {
+      color: white;
+      background: linear-gradient(135deg, @primary-color 0%, #5ba3f5 100%);
+      box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+      transform: translateY(-1px);
+    }
+
+    &:hover {
+      background: rgba(74, 144, 226, 0.05);
+      color: @primary-color;
+    }
+
+    &.active:hover {
+      background: linear-gradient(135deg, @primary-color 0%, #5ba3f5 100%);
+      color: white;
+    }
   }
 }
 
@@ -324,6 +339,97 @@
             }
           }
         }
+      }
+    }
+  }
+}
+
+// Restaurant ratings list
+.ratings-list {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-md;
+
+  .rating-card {
+    background: white;
+    border-radius: @border-radius;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .rating-image-container {
+      position: relative;
+      height: 200px;
+
+      .rating-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: @border-radius @border-radius 0 0;
+      }
+
+      .overall-rating-badge {
+        position: absolute;
+        top: @spacing-sm;
+        right: @spacing-sm;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 10;
+      }
+    }
+
+    .rating-info {
+      padding: @spacing-md;
+
+      .restaurant-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: @text-color;
+        margin-bottom: @spacing-md;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .rating-details {
+        display: flex;
+        flex-direction: column;
+        gap: @spacing-sm;
+        margin-bottom: @spacing-md;
+
+        .rating-item {
+          display: flex;
+          align-items: center;
+          gap: @spacing-sm;
+
+          .rating-label {
+            font-size: 14px;
+            color: @text-secondary;
+            min-width: 40px;
+          }
+
+          .rating-value {
+            font-size: 14px;
+            color: @text-color;
+            font-weight: 500;
+            min-width: 20px;
+          }
+        }
+      }
+
+      .rating-time {
+        font-size: 12px;
+        color: @text-secondary;
+        text-align: right;
       }
     }
   }

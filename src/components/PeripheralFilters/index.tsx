@@ -18,7 +18,7 @@ const presetPriceRanges = [
   { label: "¥200+", from: 200 },
 ];
 
-type SortOptionKey = "latest" | "priceLow" | "priceHigh" | "stock";
+type SortOptionKey = "latest" | "oldest" | "priceLow" | "priceHigh" | "stock" | "stockLow";
 
 const sortOptions: Array<{
   key: SortOptionKey;
@@ -33,6 +33,13 @@ const sortOptions: Array<{
     description: "按发布时间由新到旧",
     sortBy: "dateCreated",
     sortOrder: "desc",
+  },
+  {
+    key: "oldest",
+    label: "最早上架",
+    description: "按发布时间由旧到新",
+    sortBy: "dateCreated",
+    sortOrder: "asc",
   },
   {
     key: "priceLow",
@@ -55,6 +62,13 @@ const sortOptions: Array<{
     sortBy: "stock",
     sortOrder: "desc",
   },
+  {
+    key: "stockLow",
+    label: "库存从低到高",
+    description: "优先显示库存较少商品",
+    sortBy: "stock",
+    sortOrder: "asc",
+  },
 ];
 
 const getSortOption = (key: SortOptionKey) =>
@@ -64,14 +78,20 @@ const resolveSortKey = (
   sortBy?: PeripheralFilters["sortBy"],
   sortOrder?: PeripheralFilters["sortOrder"]
 ): SortOptionKey => {
+  if (sortBy === "dateCreated" && sortOrder === "asc") {
+    return "oldest";
+  }
   if (sortBy === "priceLow" && sortOrder === "asc") {
     return "priceLow";
   }
   if (sortBy === "priceHigh" && sortOrder === "desc") {
     return "priceHigh";
   }
-  if (sortBy === "stock" && (!sortOrder || sortOrder === "desc")) {
+  if (sortBy === "stock" && sortOrder === "desc") {
     return "stock";
+  }
+  if (sortBy === "stock" && sortOrder === "asc") {
+    return "stockLow";
   }
   return "latest";
 };
@@ -151,7 +171,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
   const [categories, setCategories] = useState<PeripheralCategory[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
   const [selectedSortKey, setSelectedSortKey] = useState<SortOptionKey>(
     resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder)
   );
@@ -240,7 +260,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
     }
 
     setError("");
-    setSortMenuOpen(false);
+    setShowSortOptions(false);
     onFiltersChange(payload);
   };
 
@@ -250,7 +270,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
     setPriceTo("");
     setSelectedCategoryId(undefined);
     setSelectedSortKey("latest");
-    setSortMenuOpen(false);
+    setShowSortOptions(false);
     setError("");
 
     const defaultSort = getSortOption("latest");
@@ -288,7 +308,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
 
   const handleSortSelect = (optionKey: SortOptionKey) => {
     setSelectedSortKey(optionKey);
-    setSortMenuOpen(false);
+    setShowSortOptions(false);
     applyFilters(
       keyword,
       priceFrom,
@@ -310,7 +330,7 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
                 </View>
                 <Input
                   className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索周边商品名称或描述..."
+                  placeholder="搜索周边..."
                   value={keyword}
                   onInput={(event) => setKeyword(event.detail.value)}
                   onConfirm={handleKeywordConfirm}
@@ -350,49 +370,18 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
               )}
             </View>
 
-            <View className="relative">
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  sortMenuOpen
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                }`}
-                onClick={() => setSortMenuOpen((prev) => !prev)}
-              >
-                <Text>排序</Text>
-                <Text className="ml-2 text-xs text-slate-500">
-                  {getSortOption(selectedSortKey).label}
-                </Text>
-                <Text className="ml-2 text-xs text-slate-400">
-                  {sortMenuOpen ? '▲' : '▼'}
-                </Text>
-              </View>
-
-              {sortMenuOpen && (
-                <View
-                  className="peripheral-sort-menu absolute right-0 top-full mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl shadow-emerald-500/20"
-                  style={{ zIndex: 1200 }}
-                >
-                  {sortOptions.map((option) => (
-                    <View
-                      key={option.key}
-                      className={`px-4 py-2 text-xs transition-colors ${
-                        option.key === selectedSortKey
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
-                      }`}
-                      onClick={() => handleSortSelect(option.key)}
-                    >
-                      <Text className="block text-sm font-medium">
-                        {option.label}
-                      </Text>
-                      <Text className="mt-1 text-[10px] text-slate-400">
-                        {option.description}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
+            <View
+              className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
+                showSortOptions
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                  : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+              }`}
+              onClick={() => setShowSortOptions((prev) => !prev)}
+            >
+              <Text>{showSortOptions ? "收起排序" : "排序"}</Text>
+              <Text className="ml-2 text-xs text-slate-500">
+                {getSortOption(selectedSortKey).label}
+              </Text>
             </View>
           </View>
         </View>
@@ -517,6 +506,100 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
                     onClick={() => applyFilters()}
                   >
                     <Text>应用筛选</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {showSortOptions && (
+            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
+              <View className="flex flex-col gap-4">
+                {/* 排序选项 */}
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-semibold text-slate-700">
+                    排序方式
+                  </Text>
+                  
+                  {/* 第一行：时间 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按时间</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "latest"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("latest")}
+                      >
+                        <Text className="text-sm font-medium">最新</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "oldest"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("oldest")}
+                      >
+                        <Text className="text-sm font-medium">最早</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 第二行：价格 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按价格</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "priceLow"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceLow")}
+                      >
+                        <Text className="text-sm font-medium">从低到高</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "priceHigh"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceHigh")}
+                      >
+                        <Text className="text-sm font-medium">从高到低</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 第三行：库存 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按库存</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "stock"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("stock")}
+                      >
+                        <Text className="text-sm font-medium">从高到低</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "stockLow"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("stockLow")}
+                      >
+                        <Text className="text-sm font-medium">从低到高</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>

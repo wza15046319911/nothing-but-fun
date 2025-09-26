@@ -21,7 +21,7 @@ const SecondHandDetail: React.FC = () => {
 
   // 分享给好友 / 群聊
   useShareAppMessage(() => {
-    const title = item?.title ? `${item.title} - 二手好物` : "二手好物精选";
+    const title = item?.title ? `${item.title} · 布村换换乐` : "布村换换乐精选";
     const imageUrl = item?.imageUrls?.[0] || item?.image;
     const redirect = encodeURIComponent('/pages/second-hand/detail/index');
     const path = `/pages/loading/index?redirect=${redirect}&id=${id || ''}`;
@@ -30,7 +30,7 @@ const SecondHandDetail: React.FC = () => {
 
   // 朋友圈分享
   useShareTimeline(() => {
-    const title = item?.title || "二手好物精选";
+    const title = item?.title || "布村换换乐精选";
     const redirect = encodeURIComponent('/pages/second-hand/detail/index');
     return { title, query: `redirect=${redirect}&id=${id || ''}` };
   });
@@ -176,6 +176,19 @@ const SecondHandDetail: React.FC = () => {
     });
   };
 
+  const handleSwiperChange = (
+    value: number | { detail?: { current?: number } }
+  ) => {
+    if (typeof value === "number") {
+      setCurrentImageIndex(value);
+      return;
+    }
+    const next = value?.detail?.current;
+    if (typeof next === "number") {
+      setCurrentImageIndex(next);
+    }
+  };
+
   // const handleSwiperChange = (index: number) => {
   //   setCurrentImageIndex(index);
   // };
@@ -216,9 +229,10 @@ const SecondHandDetail: React.FC = () => {
           {item?.imageUrls && item?.imageUrls.length > 0 ? (
             <Swiper
               className="image-swiper"
-              autoplay={3000}
-              indicator={item.imageUrls.length > 1}
-              onChange={(current) => setCurrentImageIndex(current)}
+              lazyRender
+              autoplay={1000}
+              defaultValue={0}
+              onChange={handleSwiperChange}
             >
               {item.imageUrls.map((imageUrl, index) => (
                 <Swiper.Item key={index}>
@@ -226,7 +240,9 @@ const SecondHandDetail: React.FC = () => {
                     className="detail-image"
                     src={imageUrl}
                     mode="aspectFill"
+                    lazyLoad
                     onClick={() => handleImagePreview(index)}
+                    onError={() => console.warn("图片加载失败:", imageUrl)}
                   />
                 </Swiper.Item>
               ))}

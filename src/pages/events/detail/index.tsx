@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, Image, ScrollView, Video } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
-import { Swiper } from '@nutui/nutui-react-taro'
+import { Swiper } from '@taroify/core'
 import { eventsApi, Event } from '../../../services/events'
 import { useEventTypes } from '../../../hooks/useTypes'
 import './index.less'
+import '@taroify/core/swiper/style'
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=900&h=600&fit=crop'
 
@@ -38,6 +39,7 @@ const EventDetail: React.FC = () => {
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const images = useMemo(() => {
     if (!event) return [FALLBACK_IMAGE]
@@ -49,6 +51,10 @@ const EventDetail: React.FC = () => {
     }
     return [FALLBACK_IMAGE]
   }, [event])
+
+  useEffect(() => {
+    setActiveImageIndex(0)
+  }, [images])
 
   const loadEventDetail = async (eventId: number) => {
     try {
@@ -95,6 +101,17 @@ const EventDetail: React.FC = () => {
     })
   }
 
+  const handleSwiperChange = (value: number | { detail?: { current?: number } }) => {
+    if (typeof value === 'number') {
+      setActiveImageIndex(value)
+      return
+    }
+    const next = value?.detail?.current
+    if (typeof next === 'number') {
+      setActiveImageIndex(next)
+    }
+  }
+
   if (loading) {
     return (
       <View className='event-detail-page loading-state'>
@@ -120,9 +137,11 @@ const EventDetail: React.FC = () => {
           <View className='carousel-wrapper'>
             <Swiper
               circular
-              autoplay
-              indicator
+              indicator={images.length > 1}
+              autoplay={images.length > 1 ? 4000 : false}
+              defaultValue={0}
               style={{ height: '400rpx', width: '100%' }}
+              onChange={handleSwiperChange}
             >
               {images.map((imageUrl, index) => (
                 <Swiper.Item key={`${imageUrl}-${index}`}>
@@ -138,7 +157,7 @@ const EventDetail: React.FC = () => {
             </Swiper>
             <View className='image-count-badge'>
               <Text className='badge-icon'>📷</Text>
-              <Text className='badge-text'>{images.length}</Text>
+              <Text className='badge-text'>{activeImageIndex + 1}/{images.length}</Text>
             </View>
           </View>
 

@@ -323,7 +323,7 @@ const SecondHandPublish: React.FC = () => {
     <ScrollView className='publish-page' scrollY>
       {/* <Text className='publish-page__subtitle'>完善标题、描述与图片，能让好物更快找到买家</Text> */}
       <View className='publish-page__header'>
-        <Text className='publish-page__title'>{isEditMode ? '编辑二手商品' : '发布二手商品'}</Text>
+        <Text className='publish-page__title'>{isEditMode ? '编辑换换乐好物' : '发布换换乐好物'}</Text>
         <View className='publish-page__stats'>
           <View className='publish-page__stats-item'>
             <Text className='publish-page__stats-value'>{fileList.length}</Text>

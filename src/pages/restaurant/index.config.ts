@@ -1,5 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '美食餐厅',
+  navigationBarTitleText: '布村好吃榜',
   enablePullDownRefresh: true,
   onReachBottomDistance: 50
 }) 

@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '二手闲置'
+  navigationBarTitleText: '布村换换乐'
 }) 

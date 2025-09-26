@@ -158,18 +158,18 @@ const ContactInfo: React.FC = () => {
       <ScrollView className='content' scrollY>
         <View className='hero-block'>
           <Text className='hero-title'>联系信息</Text>
-          <Text className='hero-subtitle'>保持联系方式最新，便于我们与您保持联系</Text>
+          <Text className='hero-subtitle'>更新联系方式以便其他买家能更快的联系您</Text>
         </View>
 
         <View className='info-overview'>
           <View className='info-item'>
-            <Text className='info-label'>当前邮箱</Text>
+            <Text className='info-label'>邮箱</Text>
             <Text className={`info-value ${userInfo?.email ? '' : 'placeholder'}`}>
               {userInfo?.email || '未设置'}
             </Text>
           </View>
           <View className='info-item'>
-            <Text className='info-label'>当前手机号</Text>
+            <Text className='info-label'>手机号</Text>
             <Text className={`info-value ${userInfo?.phone ? '' : 'placeholder'}`}>
               {userInfo?.phone || '未设置'}
             </Text>
@@ -207,8 +207,8 @@ const ContactInfo: React.FC = () => {
 
           <View className='tips-block'>
             <Text className='tips-title'>小贴士</Text>
-            <Text className='tips-text'>• 邮箱将用于接收订单和活动通知</Text>
-            <Text className='tips-text'>• 手机号建议填写澳洲本地号码 04XXXXXXXX</Text>
+            <Text className='tips-text'>• 邮箱将用于接收通知</Text>
+            <Text className='tips-text'>• 手机号建议填写澳洲本地号码</Text>
             <Text className='tips-text'>• 信息仅用于账户安全与服务通知</Text>
           </View>
         </View>

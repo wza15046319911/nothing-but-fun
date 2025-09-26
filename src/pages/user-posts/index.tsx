@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty, Button, Dialog } from '@nutui/nutui-react-taro'
+import { PullToRefresh, Loading, Empty, Button, Dialog, Rate } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { useAuth } from '../../context/auth'
 import { secondhandApi, type SecondhandItem } from '../../services/secondhand'
+import { restaurantApi, type UserRestaurantRating } from '../../services/restaurant'
 import './index.less'
 
 const statusMap = {
@@ -35,8 +36,11 @@ const UserPosts: React.FC = () => {
   const { state } = useAuth()
   const { userInfo } = state
 
+  const [activeTab, setActiveTab] = useState(0)
   const [items, setItems] = useState<SecondhandItem[]>([])
+  const [restaurantRatings, setRestaurantRatings] = useState<UserRestaurantRating[]>([])
   const [loading, setLoading] = useState(true)
+  const [restaurantLoading, setRestaurantLoading] = useState(true)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedItem, setSelectedItem] = useState<SecondhandItem | null>(null)
 
@@ -60,12 +64,47 @@ const UserPosts: React.FC = () => {
     }
   }
 
+  const loadUserRatings = async (showLoading = true) => {
+    if (!userInfo?.openid) {
+      return
+    }
+
+    try {
+      if (showLoading) {
+        setRestaurantLoading(true)
+      }
+
+      const response = await restaurantApi.getUserRatings(userInfo.openid)
+      setRestaurantRatings(response || [])
+    } catch (error) {
+      console.error('加载用户餐厅评分失败:', error)
+      Taro.showToast({ title: '加载失败，请稍后重试', icon: 'error', duration: 2000 })
+    } finally {
+      setRestaurantLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadUserItems()
+    loadUserRatings()
   }, [userInfo?.openid])
 
   const handleRefresh = async () => {
-    await loadUserItems(false)
+    if (activeTab === 0) {
+      await loadUserItems()
+    } else {
+      await loadUserRatings()
+    }
+  }
+
+  const handleTabChange = async (tabIndex: number) => {
+    setActiveTab(tabIndex)
+    // 切换 tab 时重新加载数据以确保数据是最新的
+    if (tabIndex === 0) {
+      await loadUserItems()
+    } else {
+      await loadUserRatings()
+    }
   }
 
   const handleItemClick = (item: SecondhandItem) => {
@@ -121,6 +160,10 @@ const UserPosts: React.FC = () => {
     Taro.navigateTo({ url: '/pages/second-hand/publish/index' })
   }
 
+  const handleRestaurantRatingClick = (rating: UserRestaurantRating) => {
+    Taro.navigateTo({ url: `/pages/restaurant/detail/index?id=${rating.restaurantId}` })
+  }
+
   const handleViewRejectionReason = (item: SecondhandItem, e: any) => {
     e.stopPropagation()
     Taro.showModal({
@@ -148,7 +191,77 @@ const UserPosts: React.FC = () => {
     return date.toLocaleDateString()
   }
 
-  const renderContent = () => {
+  const renderRestaurantRatings = () => {
+    if (restaurantLoading) {
+      return (
+        <View className='loading-container'>
+          <Loading type='spinner' />
+          <Text className='loading-text'>加载中...</Text>
+        </View>
+      )
+    }
+
+    if (restaurantRatings.length === 0) {
+      return (
+        <View className='empty-container'>
+          <Empty description='您还没有对任何餐厅进行评分' imageSize={120} />
+          <Button className='empty-publish-button' type='primary' onClick={() => Taro.navigateTo({ url: '/pages/restaurant/index' })}>
+            🍽️ 去餐厅页面
+          </Button>
+        </View>
+      )
+    }
+
+    return (
+      <View className='ratings-list'>
+        {restaurantRatings.map(rating => (
+          <View key={rating.id} className='rating-card' onClick={() => handleRestaurantRatingClick(rating)}>
+            <View className='rating-image-container'>
+              <Image
+                className='rating-image'
+                src={rating.restaurantImageUrls && rating.restaurantImageUrls.length > 0
+                  ? rating.restaurantImageUrls[0]
+                  : (rating.restaurantImage || '')}
+                mode='aspectFill'
+                lazyLoad
+              />
+              <View className='overall-rating-badge'>
+                ⭐ {rating.overallRating}
+              </View>
+            </View>
+            <View className='rating-info'>
+              <Text className='restaurant-name'>{rating.restaurantName}</Text>
+              <View className='rating-details'>
+                <View className='rating-item'>
+                  <Text className='rating-label'>口味:</Text>
+                  <Rate value={rating.tasteRating} readOnly />
+                  <Text className='rating-value'>{rating.tasteRating}</Text>
+                </View>
+                <View className='rating-item'>
+                  <Text className='rating-label'>环境:</Text>
+                  <Rate value={rating.environmentRating} readOnly />
+                  <Text className='rating-value'>{rating.environmentRating}</Text>
+                </View>
+                <View className='rating-item'>
+                  <Text className='rating-label'>服务:</Text>
+                  <Rate value={rating.serviceRating} readOnly />
+                  <Text className='rating-value'>{rating.serviceRating}</Text>
+                </View>
+                <View className='rating-item'>
+                  <Text className='rating-label'>价格:</Text>
+                  <Rate value={rating.priceRating} readOnly />
+                  <Text className='rating-value'>{rating.priceRating}</Text>
+                </View>
+              </View>
+              <Text className='rating-time'>{formatTime(rating.createdAt)}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    )
+  }
+
+  const renderSecondhandContent = () => {
     if (loading) {
       return (
         <View className='loading-container'>
@@ -272,7 +385,22 @@ const UserPosts: React.FC = () => {
       <View className='header'>
         <View className='header-content'>
           <Text className='title'>我的发布</Text>
-          <Text className='subtitle'>管理您发布的二手商品信息</Text>
+          <Text className='subtitle'>管理您发布的闲置好物和餐厅点评</Text>
+        </View>
+      </View>
+
+      <View className='tabs'>
+        <View
+          className={`tab ${activeTab === 0 ? 'active' : ''}`}
+          onClick={() => handleTabChange(0)}
+        >
+          布村换换乐
+        </View>
+        <View
+          className={`tab ${activeTab === 1 ? 'active' : ''}`}
+          onClick={() => handleTabChange(1)}
+        >
+          布村好吃榜
         </View>
       </View>
 
@@ -284,7 +412,7 @@ const UserPosts: React.FC = () => {
         completeText='刷新完成'
       >
         <ScrollView className='content' scrollY>
-          {renderContent()}
+          {activeTab === 0 ? renderSecondhandContent() : renderRestaurantRatings()}
         </ScrollView>
       </PullToRefresh>
 

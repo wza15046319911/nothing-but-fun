@@ -24,7 +24,7 @@ const presetPriceRanges = [
   { label: "¥150+", from: 150 },
 ];
 
-type SortOptionKey = 'default' | 'priceLow' | 'priceHigh' | 'rating';
+type SortOptionKey = 'priceLow' | 'priceHigh' | 'ratingOverall' | 'ratingTaste' | 'ratingService' | 'ratingEnvironment' | 'ratingValue';
 
 const sortOptions: Array<{
   key: SortOptionKey;
@@ -34,31 +34,52 @@ const sortOptions: Array<{
   sortOrder: RestaurantFilters['sortOrder'];
 }> = [
   {
-    key: 'default',
-    label: '默认排序',
-    description: '按发布时间',
-    sortBy: 'createdAt',
-    sortOrder: 'asc',
-  },
-  {
     key: 'priceLow',
-    label: '最低价格优先',
-    description: '价格从低到高',
+    label: '价格从低到高',
+    description: '优先展示更实惠的餐厅',
     sortBy: 'priceLow',
     sortOrder: 'asc',
   },
   {
     key: 'priceHigh',
-    label: '最高价格优先',
-    description: '价格从高到低',
+    label: '价格从高到低',
+    description: '优先展示高端餐厅',
     sortBy: 'priceHigh',
     sortOrder: 'desc',
   },
   {
-    key: 'rating',
-    label: '评分优先',
-    description: '评分由高到低',
+    key: 'ratingOverall',
+    label: '综合评分',
+    description: '按综合评分由高到低',
     sortBy: 'rating',
+    sortOrder: 'desc',
+  },
+  {
+    key: 'ratingTaste',
+    label: '口味评分',
+    description: '按口味评分由高到低',
+    sortBy: 'ratingTaste',
+    sortOrder: 'desc',
+  },
+  {
+    key: 'ratingService',
+    label: '服务评分',
+    description: '按服务评分由高到低',
+    sortBy: 'ratingService',
+    sortOrder: 'desc',
+  },
+  {
+    key: 'ratingEnvironment',
+    label: '环境评分',
+    description: '按环境评分由高到低',
+    sortBy: 'ratingEnvironment',
+    sortOrder: 'desc',
+  },
+  {
+    key: 'ratingValue',
+    label: '性价比评分',
+    description: '按性价比评分由高到低',
+    sortBy: 'ratingValue',
     sortOrder: 'desc',
   },
 ];
@@ -77,9 +98,21 @@ const resolveSortKey = (
     return 'priceHigh';
   }
   if (sortBy === 'rating' && (sortOrder === undefined || sortOrder === 'desc')) {
-    return 'rating';
+    return 'ratingOverall';
   }
-  return 'default';
+  if (sortBy === 'ratingTaste' && (sortOrder === undefined || sortOrder === 'desc')) {
+    return 'ratingTaste';
+  }
+  if (sortBy === 'ratingService' && (sortOrder === undefined || sortOrder === 'desc')) {
+    return 'ratingService';
+  }
+  if (sortBy === 'ratingEnvironment' && (sortOrder === undefined || sortOrder === 'desc')) {
+    return 'ratingEnvironment';
+  }
+  if (sortBy === 'ratingValue' && (sortOrder === undefined || sortOrder === 'desc')) {
+    return 'ratingValue';
+  }
+  return 'priceLow';
 };
 
 const buildFilterPayload = (
@@ -179,7 +212,7 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState("");
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
   const [selectedSortKey, setSelectedSortKey] = useState<SortOptionKey>(
     resolveSortKey(initialFilters.sortBy, initialFilters.sortOrder)
   );
@@ -263,11 +296,11 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
     setPriceFrom("");
     setPriceTo("");
     setSelectedRestaurantTypeRid(undefined);
-    setSelectedSortKey('default');
-    setSortMenuOpen(false);
+    setSelectedSortKey('priceLow');
+    setShowSortOptions(false);
     setError("");
 
-    const defaultSort = getSortOption('default');
+    const defaultSort = getSortOption('priceLow');
     const payload = buildFilterPayload(
       initialFilters,
       "",
@@ -309,7 +342,7 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
 
   const handleSortSelect = (optionKey: SortOptionKey) => {
     setSelectedSortKey(optionKey);
-    setSortMenuOpen(false);
+    setShowSortOptions(false);
     applyFilters(
       keyword,
       selectedMinRating,
@@ -332,7 +365,7 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                 </View>
                 <Input
                   className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索餐厅名称或描述..."
+                  placeholder="搜索餐厅..."
                   value={keyword}
                   onInput={(event) => setKeyword(event.detail.value)}
                   onConfirm={handleKeywordConfirm}
@@ -372,46 +405,18 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                 )}
               </View>
 
-              <View className="relative">
-                <View
-                  className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                    sortMenuOpen
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                      : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                  }`}
-                  onClick={() => setSortMenuOpen((prev) => !prev)}
-                >
-                  <Text>排序</Text>
-                  <Text className="ml-2 text-xs text-slate-500">
-                    {getSortOption(selectedSortKey).label}
-                  </Text>
-                  <Text className="ml-2 text-xs text-slate-400">
-                    {sortMenuOpen ? '▲' : '▼'}
-                  </Text>
-                </View>
-
-                {sortMenuOpen && (
-                  <View className="absolute right-0 top-full z-10 mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl shadow-emerald-500/20">
-                    {sortOptions.map((option) => (
-                      <View
-                        key={option.key}
-                        className={`px-4 py-2 text-xs transition-colors ${
-                          option.key === selectedSortKey
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
-                        }`}
-                        onClick={() => handleSortSelect(option.key)}
-                      >
-                        <Text className="block text-sm font-medium">
-                          {option.label}
-                        </Text>
-                        <Text className="mt-1 text-[10px] text-slate-400">
-                          {option.description}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
+              <View
+                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
+                  showSortOptions
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                }`}
+                onClick={() => setShowSortOptions((prev) => !prev)}
+              >
+                <Text>{showSortOptions ? "收起排序" : "排序"}</Text>
+                <Text className="ml-2 text-xs text-slate-500">
+                  {getSortOption(selectedSortKey).label}
+                </Text>
               </View>
             </View>
           </View>
@@ -562,6 +567,116 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                     onClick={() => applyFilters()}
                   >
                     <Text>应用筛选</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {showSortOptions && (
+            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
+              <View className="flex flex-col gap-4">
+                {/* 排序选项 */}
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-semibold text-slate-700">
+                    排序方式
+                  </Text>
+                  
+                  {/* 第一行：价格 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按价格</Text>
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "priceHigh"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceHigh")}
+                      >
+                        <Text className="text-sm font-medium">从高到低</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "priceLow"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("priceLow")}
+                      >
+                        <Text className="text-sm font-medium">从低到高</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* 第二行：评分 */}
+                  <View className="flex flex-col gap-2">
+                    <Text className="text-xs font-medium text-slate-600">按评分（高到低）</Text>
+                    
+                    {/* 第一组：综合评分和口味评分 */}
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "ratingOverall"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("ratingOverall")}
+                      >
+                        <Text className="text-xs font-medium">综合评分</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "ratingTaste"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("ratingTaste")}
+                      >
+                        <Text className="text-xs font-medium">口味评分</Text>
+                      </View>
+                    </View>
+                    
+                    {/* 第二组：服务评分和环境评分 */}
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "ratingService"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("ratingService")}
+                      >
+                        <Text className="text-xs font-medium">服务评分</Text>
+                      </View>
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "ratingEnvironment"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("ratingEnvironment")}
+                      >
+                        <Text className="text-xs font-medium">环境评分</Text>
+                      </View>
+                    </View>
+                    
+                    {/* 第三组：性价比评分 */}
+                    <View className="flex gap-2">
+                      <View
+                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
+                          selectedSortKey === "ratingValue"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        }`}
+                        onClick={() => handleSortSelect("ratingValue")}
+                      >
+                        <Text className="text-xs font-medium">性价比评分</Text>
+                      </View>
+                      <View className="flex-1 opacity-0 pointer-events-none">
+                        {/* 占位元素，保持布局对称 */}
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>

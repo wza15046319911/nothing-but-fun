@@ -251,7 +251,7 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
                 </View>
                 <Input
                   className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  placeholder="搜索活动名称或描述..."
+                  placeholder="搜索活动..."
                   value={keyword}
                   onInput={(event) => setKeyword(event.detail.value)}
                   onConfirm={handleKeywordConfirm}

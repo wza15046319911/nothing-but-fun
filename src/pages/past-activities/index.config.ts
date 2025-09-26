@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '以往活动',
+  navigationBarTitleText: '精彩回放站',
 }) 

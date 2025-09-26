@@ -147,8 +147,8 @@ const RestaurantList: React.FC = () => {
         </View>
         <View className='header-content'>
           <View className='title-section'>
-            <Text className='main-title'>美食餐厅</Text>
-            <Text className='subtitle'>发现身边的美味</Text>
+            <Text className='main-title'>布村好吃榜</Text>
+            <Text className='subtitle'>真点评·布里斯班美食</Text>
             <View className='stats-row'>
               <View className='stat-item'>
                 <Text className='stat-number'>{restaurants.length}</Text>
@@ -172,7 +172,7 @@ const RestaurantList: React.FC = () => {
 
       {/* 餐厅列表 - 重新设计 */}
       <PullToRefresh onRefresh={handleRefresh}>
-        <ScrollView className='enhanced-content' scrollY>
+        <ScrollView className='enhanced-content -z-1' scrollY>
           {loading ? (
             <View className='enhanced-loading-container'>
               <View className='loading-animation'>

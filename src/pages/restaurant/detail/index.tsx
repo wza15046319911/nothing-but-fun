@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
+import { View, Text, Image, ScrollView } from '@tarojs/components'
 import { Rate, Button } from '@nutui/nutui-react-taro'
+import { Swiper } from '@taroify/core'
 import Taro, { useRouter, useDidShow, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { restaurantApi, Restaurant } from '../../../services/restaurant'
 import { useAuth } from '../../../context/auth'
 import './index.less'
+import '@taroify/core/swiper/style'
 
 const RestaurantDetail: React.FC = () => {
   const router = useRouter()
@@ -198,8 +200,17 @@ const RestaurantDetail: React.FC = () => {
   }
 
   // Handle swiper change
-  const handleSwiperChange = (e: any) => {
-    setCurrentImageIndex(e.detail.current)
+  const handleSwiperChange = (
+    value: number | { detail?: { current?: number } }
+  ) => {
+    if (typeof value === 'number') {
+      setCurrentImageIndex(value)
+      return
+    }
+    const next = value?.detail?.current
+    if (typeof next === 'number') {
+      setCurrentImageIndex(next)
+    }
   }
 
   // 获取餐厅类型标签
@@ -233,12 +244,12 @@ const RestaurantDetail: React.FC = () => {
   }, [])
 
   // 页面显示时确保加载（适配小程序返回后再次展示）
-  useDidShow(() => {
-    resolveAndSetRestaurantId()
-    if (restaurantId > 0) {
-      loadRestaurantDetail(restaurantId)
-    }
-  })
+  // useDidShow(() => {
+  //   resolveAndSetRestaurantId()
+  //   if (restaurantId > 0) {
+  //     loadRestaurantDetail(restaurantId)
+  //   }
+  // })
 
   // 当 restaurantId 变更时加载
   useEffect(() => {
@@ -287,6 +298,14 @@ const RestaurantDetail: React.FC = () => {
 
   const images = getAllImages()
 
+  const handleImagePreview = (index: number) => {
+    if (!images.length) return
+    Taro.previewImage({
+      current: images[Math.max(0, Math.min(index, images.length - 1))],
+      urls: images
+    })
+  }
+
   return (
     <View className='enhanced-restaurant-detail-container'>
       <ScrollView className='enhanced-content' scrollY>
@@ -294,39 +313,40 @@ const RestaurantDetail: React.FC = () => {
         {images.length > 0 && (
           <View className='enhanced-header-image-section'>
             <View className='image-hero-container'>
-              {images.length > 1 ? (
+              {images.length > 0 && (
                 <View className='enhanced-swiper-container'>
                   <Swiper
                     className='enhanced-image-swiper'
-                    indicatorDots
-                    indicatorColor='rgba(255, 255, 255, 0.4)'
-                    indicatorActiveColor='#fff'
-                    autoplay={false}
+                    autoplay={1000}
+                    lazyRender
+                    defaultValue={0}
                     onChange={handleSwiperChange}
                   >
                     {images.map((imageUrl, index) => (
-                      <SwiperItem key={index}>
+                      <Swiper.Item key={index}>
                         <View className='image-item-container'>
                           <Image
                             className='enhanced-restaurant-main-image'
                             src={imageUrl}
                             mode='aspectFill'
+                            lazyLoad
+                            onClick={() => handleImagePreview(index)}
                             onError={() => console.log('Image load failed:', imageUrl)}
                           />
-                          {/* <View className='image-overlay'></View> */}
                         </View>
-                      </SwiperItem>
+                      </Swiper.Item>
                     ))}
                   </Swiper>
-                </View>
-              ) : (
-                <View className='enhanced-single-image-container'>
-                  <Image
-                    className='enhanced-restaurant-main-image'
-                    src={images[0]}
-                    mode='aspectFill'
-                  />
-                  <View className='image-overlay'></View>
+                  {images.length > 1 && (
+                    <View className='enhanced-image-counter'>
+                      <View className='counter-badge'>
+                        <Text className='counter-icon'>📷</Text>
+                        <Text className='counter-text'>
+                          {currentImageIndex + 1}/{images.length}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
 

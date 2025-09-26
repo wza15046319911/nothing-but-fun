@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty } from '@nutui/nutui-react-taro'
+import { PullToRefresh } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { eventsApi, Event, EventFilters } from '../../services/events'
 import { Swiper } from '@nutui/nutui-react-taro'
@@ -156,8 +156,8 @@ const PastActivities: React.FC = () => {
         </View>
         <View className='header-content'>
           <View className='title-section'>
-            <Text className='enhanced-header-title'>往期活动</Text>
-            <Text className='enhanced-header-subtitle'>回顾我们的精彩时刻</Text>
+            <Text className='enhanced-header-title'>精彩回放站</Text>
+            <Text className='enhanced-header-subtitle'>高光瞬间随时重温</Text>
             <View className='stats-section'>
               <View className='stat-item'>
                 <Text className='stat-number'>{events.length}</Text>
@@ -194,7 +194,7 @@ const PastActivities: React.FC = () => {
                   <View className='dot dot-2'></View>
                   <View className='dot dot-3'></View>
                 </View>
-                <Text className='loading-text'>正在加载往期活动...</Text>
+                <Text className='loading-text'>正在加载精彩回放...</Text>
               </View>
             </View>
           ) : filteredEvents.length > 0 ? (
@@ -237,19 +237,6 @@ const PastActivities: React.FC = () => {
                         />
                       )}
                       <View className='image-overlay'></View>
-                    </View>
-
-                    {/* 增强的图片徽章 */}
-                    <View className='image-badges'>
-                      {event.imageUrls && event.imageUrls.length > 1 && (
-                        <View className='image-count-badge'>
-                          <Text className='badge-icon'>📷</Text>
-                          <Text className='badge-count'>{event.imageUrls.length}</Text>
-                        </View>
-                      )}
-                      <View className='status-badge'>
-                        <Text className='status-text'>已结束</Text>
-                      </View>
                     </View>
 
                     {/* 活动类型标签 */}
@@ -331,7 +318,7 @@ const PastActivities: React.FC = () => {
             <View className='enhanced-empty-container'>
               <View className='empty-animation'>
                 <Text className='empty-icon'>📅</Text>
-                <Text className='empty-title'>暂无往期活动</Text>
+                <Text className='empty-title'>暂无精彩回放</Text>
                 <Text className='empty-subtitle'>精彩活动即将到来，敬请期待</Text>
               </View>
             </View>
