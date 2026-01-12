@@ -1,5 +1,5 @@
 {
-  "miniprogramRoot": "dist/",
+  "miniprogramRoot": "dist",
   "projectname": "nothing-but-fun",
   "description": "nothing but fun",
   "appid": "wx1c155fcdf5e21e28",

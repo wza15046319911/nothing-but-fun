@@ -19,6 +19,7 @@ export interface UserInfo {
   createdAt?: string
   updatedAt?: string
   contact?: string | null
+  wechat_id?: string | null
 }
 
 // 微信登录请求类型
@@ -56,6 +57,7 @@ export interface UpdateProfileRequest {
   country?: string
   language?: string
   contact?: string | null
+  wechat_id?: string | null
 }
 
 // 更新用户资料响应类型

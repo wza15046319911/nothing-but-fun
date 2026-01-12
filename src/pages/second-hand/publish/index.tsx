@@ -219,6 +219,21 @@ const SecondHandPublish: React.FC = () => {
       return
     }
 
+    // Check wechat_id
+    if (!state.userInfo?.wechat_id) {
+      const res = await Taro.showModal({
+        title: '完善联系方式',
+        content: '您还未设置微信号，添加微信号可让买家更快联系您。是否现在添加？',
+        confirmText: '去添加',
+        cancelText: '暂不添加'
+      })
+
+      if (res.confirm) {
+        Taro.navigateTo({ url: '/pages/contact-info/index' })
+        return
+      }
+    }
+
     // 检查是否有图片
     if (fileList.length === 0) {
       Taro.showToast({

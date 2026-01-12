@@ -1,230 +1,203 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty } from '@nutui/nutui-react-taro'
-import Taro from '@tarojs/taro'
-import { rentalsApi, RentalItem, getRentalCategories, RentalCategory } from '../../services/rentals'
-import './index.less'
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, ScrollView } from "@tarojs/components";
+import Taro from "@tarojs/taro";
+import {
+  rentalApi,
+  RentalItem,
+  RentalCategory,
+  RentalFilters,
+} from "../../services/rental";
+import "./index.less";
 
-const Rental: React.FC = () => {
-  // 状态管理
-  const [items, setItems] = useState<RentalItem[]>([])
-  const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false)
+const RentalPage: React.FC = () => {
+  // State
+  const [items, setItems] = useState<RentalItem[]>([]);
+  const [categories, setCategories] = useState<RentalCategory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  // 分类数据
-  const categories = getRentalCategories()
-
-  // 加载租赁商品
-  const loadItems = async (showLoading = true) => {
+  // Data Fetching
+  const fetchItems = async (category?: string) => {
     try {
-      if (showLoading) {
-        setLoading(true)
+      setLoading(true);
+      const filters: RentalFilters = {
+        limit: 20,
+        page: 1,
+        sortOrder: "desc",
+        sortBy: "date_created",
+      };
+
+      if (category && category !== "all") {
+        filters.category = category;
       }
-      
-      let response: RentalItem[] = []
-      
-      if (showAvailableOnly) {
-        response = await rentalsApi.getAvailableItems()
-      } else if (selectedCategory) {
-        response = await rentalsApi.getItemsByCategory(selectedCategory)
-      } else {
-        response = await rentalsApi.getAllItems()
-      }
-      
-      setItems(response || [])
+
+      const response = await rentalApi.getAllItems(filters);
+      setItems(response.data);
     } catch (error) {
-      console.error('加载租赁商品失败:', error)
-      Taro.showToast({
-        title: '加载失败，请稍后重试',
-        icon: 'error',
-        duration: 2000
-      })
+      console.error("Failed to fetch rentals:", error);
+      Taro.showToast({ title: "加载失败", icon: "none" });
     } finally {
-      setLoading(false)
-      setRefreshing(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // 下拉刷新
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    await loadItems(false)
-  }
-
-  // 分类筛选
-  const handleCategoryFilter = (categoryId: number | null) => {
-    setSelectedCategory(categoryId)
-    setShowAvailableOnly(false)
-  }
-
-  // 可用商品筛选
-  const handleAvailableFilter = () => {
-    setShowAvailableOnly(!showAvailableOnly)
-    setSelectedCategory(null)
-  }
-
-  // 商品点击事件
-  const handleItemClick = (item: RentalItem) => {
-    Taro.navigateTo({
-      url: `/pages/rental/detail/index?id=${item.id}`
-    })
-  }
-
-  // 格式化租金显示
-  const formatRentalRate = (rate: string, period: string) => {
-    const periodMap = {
-      'hourly': '小时',
-      'daily': '天',
-      'weekly': '周',
-      'monthly': '月'
+  const fetchCategories = async () => {
+    try {
+      const data = await rentalApi.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
     }
-    return `¥${rate}/${periodMap[period] || '天'}`
-  }
+  };
 
-  // 格式化押金显示
-  const formatDeposit = (deposit: string) => {
-    return `押金¥${deposit}`
-  }
-
-  // 获取状态显示
-  const getStatusDisplay = (status: string) => {
-    const statusMap = {
-      'available': { text: '可租赁', color: '#52c41a' },
-      'rented_out': { text: '已租出', color: '#ff4d4f' },
-      'in_maintenance': { text: '维护中', color: '#faad14' }
-    }
-    return statusMap[status] || { text: '未知', color: '#999' }
-  }
-
-  // 组件挂载时加载数据
   useEffect(() => {
-    loadItems()
-  }, [selectedCategory, showAvailableOnly])
+    fetchCategories();
+    fetchItems();
+  }, []);
+
+  // Handlers
+  const handleCategoryChange = (slug: string) => {
+    setActiveCategory(slug);
+    fetchItems(slug);
+  };
+
+  const handleItemClick = (id: number) => {
+    Taro.navigateTo({
+      url: `/pages/rental/detail/index?id=${id}`,
+    });
+  };
+
+  // Render Helpers
+  const renderLoading = () => (
+    <View className="loading-state">
+      <View className="state-icon">🔄</View>
+      <Text className="state-text">正在寻找好物...</Text>
+    </View>
+  );
+
+  const renderEmpty = () => (
+    <View className="empty-state">
+      <View className="state-icon">🏝️</View>
+      <Text className="state-text">暂无相关租赁物品</Text>
+    </View>
+  );
 
   return (
-    <View className='rental-container'>
-      {/* 页面头部 */}
-      <View className='header'>
-        <View className='header-content'>
-          <Text className='title'>设备租赁</Text>
-          <Text className='subtitle'>专业设备，按需租赁</Text>
+    <View className="rental-container">
+      {/* Header Section */}
+      <View className="rental-header">
+        <View className="header-bg-elements">
+          <View className="circle-1"></View>
+          <View className="circle-2"></View>
+        </View>
+
+        <View className="header-content">
+          <Text className="header-title">布好玩租赁</Text>
+          <Text className="header-subtitle">精选房产、车辆与设备租赁</Text>
+
+          <View className="header-stats">
+            <View className="stat-item">
+              <Text className="stat-value">{items.length}</Text>
+              <Text className="stat-label">在租物品</Text>
+            </View>
+            <View className="stat-item">
+              <Text className="stat-value">{categories.length}</Text>
+              <Text className="stat-label">分类覆盖</Text>
+            </View>
+          </View>
         </View>
       </View>
 
-      {/* 筛选栏 */}
-      <View className='filter-section'>
-        {/* 分类筛选 */}
-        <ScrollView className='category-filter' scrollX>
-          <View className='category-list'>
-            <View 
-              className={`category-item ${selectedCategory === null && !showAvailableOnly ? 'active' : ''}`}
-              onClick={() => handleCategoryFilter(null)}
+      {/* Filters (Floating) */}
+      <View className="filter-section">
+        <ScrollView scrollX className="filter-scroll" showScrollbar={false}>
+          <View className="filter-options">
+            <View
+              className={`filter-chip ${
+                activeCategory === "all" ? "active" : ""
+              }`}
+              onClick={() => handleCategoryChange("all")}
             >
-              <Text className='category-icon'>🏠</Text>
-              <Text className='category-name'>全部</Text>
+              全部
             </View>
-            {categories.map(category => (
-              <View 
-                key={category.id}
-                className={`category-item ${selectedCategory === category.id ? 'active' : ''}`}
-                onClick={() => handleCategoryFilter(category.id)}
+            {categories.map((cat) => (
+              <View
+                key={cat.id}
+                className={`filter-chip ${
+                  activeCategory === cat.slug ? "active" : ""
+                }`}
+                onClick={() => handleCategoryChange(cat.slug)}
               >
-                <Text className='category-icon'>{category.icon}</Text>
-                <Text className='category-name'>{category.name}</Text>
+                {cat.name}
               </View>
             ))}
           </View>
         </ScrollView>
-
-        {/* 状态筛选 */}
-        <View className='status-filter'>
-          <View 
-            className={`filter-button ${showAvailableOnly ? 'active' : ''}`}
-            onClick={handleAvailableFilter}
-          >
-            <Text className='filter-text'>仅显示可租赁</Text>
-          </View>
-        </View>
       </View>
 
-      {/* 商品列表 */}
-      <PullToRefresh onRefresh={handleRefresh}>
-        <ScrollView className='content' scrollY>
-          {loading ? (
-            <View className='loading-container'>
-              <Loading type="spinner" />
-              <Text className='loading-text'>加载中...</Text>
-            </View>
-          ) : items.length === 0 ? (
-            <Empty 
-              description="暂无租赁商品"
-              imageSize={120}
-            />
-          ) : (
-            <View className='items-list'>
-              {items.map(item => (
-                <View 
-                  key={item.id} 
-                  className='item-card'
-                  onClick={() => handleItemClick(item)}
-                >
-                  {/* 商品图片 */}
-                  <View className='item-image-container'>
-                    <Image 
-                      className='item-image'
-                      src={item.imageUrl}
-                      mode='aspectFill'
-                      lazyLoad
-                    />
-                    {/* 状态标签 */}
-                    <View 
-                      className='status-badge'
-                      style={{ backgroundColor: getStatusDisplay(item.status).color }}
-                    >
-                      {getStatusDisplay(item.status).text}
-                    </View>
+      {/* Rental List */}
+      <View className="rental-list">
+        {loading ? (
+          renderLoading()
+        ) : items.length === 0 ? (
+          renderEmpty()
+        ) : (
+          <View className="rental-grid">
+            {items.map((item) => (
+              <View
+                key={item.id}
+                className="rental-card"
+                onClick={() => handleItemClick(item.id)}
+              >
+                <View className="card-image-wrapper">
+                  <Image
+                    className="card-image"
+                    src={
+                      item.imageUrls?.[0] ||
+                      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80"
+                    }
+                    mode="aspectFill"
+                    lazyLoad
+                  />
+                  <View className="category-tag">
+                    {categories.find((c) => c.slug === item.category)?.name ||
+                      item.category}
+                  </View>
+                  <View className={`status-badge ${item.status}`} />
+                </View>
+
+                <View className="card-content">
+                  <Text className="card-title">{item.title}</Text>
+
+                  <View className="card-price-row">
+                    <Text className="currency">$</Text>
+                    <Text className="price">{item.price}</Text>
+                    <Text className="period">
+                      /{" "}
+                      {item.period === "day"
+                        ? "天"
+                        : item.period === "week"
+                        ? "周"
+                        : "月"}
+                    </Text>
                   </View>
 
-                  {/* 商品信息 */}
-                  <View className='item-info'>
-                    <View className='item-header'>
-                      <Text className='item-name'>{item.name}</Text>
-                      <Text className='item-category'>{item.categoryName}</Text>
-                    </View>
-                    
-                    <Text className='item-description'>{item.description}</Text>
-                    
-                    {/* 价格信息 */}
-                    <View className='item-pricing'>
-                      <Text className='rental-rate'>{formatRentalRate(item.rentalRate, item.rentalPeriod)}</Text>
-                      <Text className='deposit'>{formatDeposit(item.deposit)}</Text>
-                    </View>
-
-                    {/* 操作按钮 */}
-                    <View className='item-actions'>
-                      <Text className='view-detail'>查看详情</Text>
-                      {item.status === 'available' && (
-                        <Text className='rent-now'>立即租赁</Text>
-                      )}
+                  <View className="card-footer">
+                    <View className="seller-info">
+                      <View className="seller-avatar" />
+                      <Text className="seller-name">
+                        {item.contact_info || "布好玩管家"}
+                      </Text>
                     </View>
                   </View>
                 </View>
-              ))}
-            </View>
-          )}
-
-          {/* 底部提示 */}
-          {!loading && items.length > 0 && (
-            <View className='footer-tip'>
-              <Text className='tip-text'>— 已显示全部商品 —</Text>
-            </View>
-          )}
-        </ScrollView>
-      </PullToRefresh>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
     </View>
-  )
-}
+  );
+};
 
-export default Rental 
+export default RentalPage;

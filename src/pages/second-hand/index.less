@@ -22,7 +22,7 @@
   // 增强的页面头部
   .enhanced-header {
     position: relative;
-    height: 400rpx;
+    height: 500rpx;
     overflow: hidden;
 
     .header-background {
@@ -117,8 +117,52 @@
           opacity: 0.9;
           margin-bottom: 40rpx;
           display: block;
+          display: block;
           animation: slideInUp 0.8s ease-out 0.2s both;
         }
+
+        .description-box {
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(8rpx);
+          padding: 16rpx 24rpx;
+          border-radius: 16rpx;
+          margin-bottom: 32rpx;
+          border: 1rpx solid rgba(255, 255, 255, 0.2);
+          animation: slideInUp 0.8s ease-out 0.3s both;
+          
+          .desc-text {
+            font-size: 24rpx;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 8rpx;
+            display: block;
+          }
+          
+          .contact-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8rpx 16rpx;
+            border-radius: 100rpx;
+            width: fit-content;
+            margin: 0 auto;
+            
+            .contact-label {
+              font-size: 22rpx;
+              color: rgba(255, 255, 255, 0.8);
+            }
+            .contact-value {
+              font-size: 24rpx;
+              font-weight: bold;
+              color: #fff;
+              margin: 0 8rpx;
+            }
+            .copy-icon {
+              font-size: 20rpx;
+            }
+          }
+        }
+
 
         .stats-section {
           display: flex;
@@ -715,35 +759,56 @@
   }
 }
 
-// 响应式设计
-@media (max-width: 750rpx) {
-  .enhanced-second-hand-container {
-    .enhanced-header {
-      height: 320rpx;
+    // 响应式设计
+    @media (max-width: 750rpx) {
+      .enhanced-second-hand-container {
+        .enhanced-header {
+          height: 460rpx;
+    
+          .header-content {
+          .title-section {
+            .enhanced-title {
+              font-size: 40rpx;
+            }
+  
+            .enhanced-subtitle {
+              font-size: 26rpx;
+            }
 
-      .header-content {
-        .title-section {
-          .enhanced-title {
-            font-size: 48rpx;
-          }
-
-          .enhanced-subtitle {
-            font-size: 28rpx;
-          }
-
-          .stats-section {
-            gap: 24rpx;
-
-            .stat-item {
-              .stat-number {
-                font-size: 36rpx;
-              }
-
-              .stat-label {
-                font-size: 22rpx;
+            .description-box {
+                padding: 12rpx 20rpx;
+                margin-bottom: 24rpx;
+    
+                .desc-text {
+                  font-size: 20rpx;
+                  margin-bottom: 6rpx;
+                }
+    
+                .contact-row {
+                  padding: 6rpx 12rpx;
+                  
+                  .contact-label {
+                    font-size: 20rpx;
+                  }
+                  .contact-value {
+                    font-size: 22rpx;
+                  }
+                }
+            }
+  
+            .stats-section {
+              gap: 24rpx;
+  
+              .stat-item {
+                .stat-number {
+                  font-size: 32rpx;
+                }
+  
+                .stat-label {
+                  font-size: 22rpx;
+                }
               }
             }
-          }
         }
       }
     }

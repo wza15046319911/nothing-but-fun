@@ -1,7 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '租赁详情',
-  // navigationBarBackgroundColor: '#667eea',
-  // navigationBarTextStyle: 'white',
+  navigationBarTitleText: "租赁详情",
   enableShareAppMessage: true,
-  enableShareTimeline: true
-}) 
+  enableShareTimeline: true,
+});

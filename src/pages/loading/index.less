@@ -1,131 +1,149 @@
-/* Fullscreen container */
-.launch-container {
-  // position: relative;
-  // width: 100vw;
-  height: 90vh;
+.loading-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: space-between;
-  padding: constant(safe-area-inset-top) 16px constant(safe-area-inset-bottom);
-  padding-top: calc(24px + constant(safe-area-inset-top));
-  padding-bottom: calc(24px + constant(safe-area-inset-bottom));
-  color: #ffffff;
+  padding: 0;
+  
+  // 装饰性背景圆
+  .decorative-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.6;
+    
+    &.c1 {
+      width: 400rpx;
+      height: 400rpx;
+      background: #4ecdc4;
+      top: -100rpx;
+      right: -100rpx;
+      animation: float 10s infinite ease-in-out;
+    }
+    
+    &.c2 {
+      width: 500rpx;
+      height: 500rpx;
+      background: #4a90e2;
+      bottom: -150rpx;
+      left: -150rpx;
+      animation: float 12s infinite ease-in-out reverse;
+    }
+  }
+
+  .content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    padding-bottom: 100rpx;
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 60rpx;
+      animation: fadeInDown 1s ease-out;
+
+      .logo-text-en {
+        font-family: 'Futura', sans-serif;
+        font-size: 64rpx;
+        font-weight: 900;
+        color: #1a1a1a;
+        letter-spacing: 4rpx;
+        margin-bottom: 16rpx;
+      }
+
+      .logo-text-zh {
+        font-size: 36rpx;
+        font-weight: 500;
+        color: #666;
+        letter-spacing: 12rpx;
+      }
+    }
+
+    .slogan-area {
+      animation: fadeInUp 1s ease-out 0.3s backwards;
+      
+      .slogan {
+        font-size: 28rpx;
+        color: #999;
+        font-weight: 400;
+        letter-spacing: 2rpx;
+        position: relative;
+        padding: 0 30rpx;
+        
+        &::before, &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          width: 20rpx;
+          height: 2rpx;
+          background: #ddd;
+        }
+        
+        &::before { left: 0; }
+        &::after { right: 0; }
+      }
+    }
+  }
+
+  .footer-area {
+    padding: 0 60rpx 80rpx;
+    z-index: 10;
+    width: 100%;
+    box-sizing: border-box;
+    animation: fadeIn 1s ease-out 0.6s backwards;
+
+    .progress-container {
+      width: 100%;
+      height: 4rpx;
+      background: #f0f0f0;
+      border-radius: 4rpx;
+      overflow: hidden;
+      margin-bottom: 24rpx;
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4ecdc4, #4a90e2);
+        border-radius: 4rpx;
+        transition: width 0.2s ease-out;
+      }
+    }
+
+    .version-text {
+      display: block;
+      text-align: center;
+      font-size: 20rpx;
+      color: #ccc;
+      font-family: monospace;
+    }
+  }
 }
 
-/* Animated gradient background */
-.launch-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, #1f7ae0, #6a5cff, #23c1a3);
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease infinite;
-  filter: saturate(1.1);
+@keyframes float {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(20px, 20px); }
+  100% { transform: translate(0, 0); }
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Brand area */
-.brand {
-  // position: relative;
-  width: 100%;
-  text-align: center;
-  margin-top: 8vh;
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.brand-title {
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
-.brand-subtitle {
-  display: block;
-  margin-top: 8px;
-  font-size: 16px;
-  opacity: 0.9;
-}
-
-/* Loader */
-.loader {
-  // position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.spinner {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.28);
-  border-top-color: #ffffff;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-  font-size: 14px;
-  opacity: 0.95;
-  max-width: 80vw;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Tips */
-.tips {
-  // position: relative;
-  width: 80%;
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  backdrop-filter: blur(6px);
-  margin-bottom: 60px;
-}
-
-.tips-label {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.tips-text {
-  display: block;
-  margin-top: 6px;
-  font-size: 14px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Variant: compact for short screens */
-.launch-container.compact {
-  padding-top: calc(12px + constant(safe-area-inset-top));
-  padding-bottom: calc(12px + constant(safe-area-inset-bottom));
-}
-.launch-container.compact .brand-title { font-size: 28px; }
-.launch-container.compact .brand-subtitle { font-size: 12px; margin-top: 4px; }
-.launch-container.compact .spinner { width: 44px; height: 44px; border-width: 3px; }
-.launch-container.compact .loading-text { font-size: 12px; }
-.launch-container.compact .tips { padding: 10px 12px; border-radius: 12px; }
-.launch-container.compact .tips-label { font-size: 11px; }
-.launch-container.compact .tips-text { font-size: 12px; }
-
-/* Variant: spacious for tall screens */
-.launch-container.spacious .brand-title { font-size: 46px; }
-.launch-container.spacious .brand-subtitle { font-size: 18px; }
-.launch-container.spacious .spinner { width: 72px; height: 72px; }
-.launch-container.spacious .loading-text { font-size: 16px; }

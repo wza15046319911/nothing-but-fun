@@ -169,6 +169,31 @@ const SecondHand: React.FC = () => {
           <View className="title-section">
             <Text className="enhanced-title">布村换换乐</Text>
             <Text className="enhanced-subtitle">闲置宝贝轻松上新</Text>
+
+            {/* 新增说明区域 */}
+            <View className="description-box">
+              <Text className="desc-text">
+                本平台支持发布租房信息、拼车信息、闲置物品交易及车辆买卖等相关内容
+              </Text>
+              <View
+                className="contact-row"
+                onClick={() => {
+                  Taro.setClipboardData({
+                    data: "Brisbane10000",
+                    success: () =>
+                      Taro.showToast({
+                        title: "已复制微信号",
+                        icon: "success",
+                      }),
+                  });
+                }}
+              >
+                <Text className="contact-label">点击复制微信号</Text>
+                {/* <Text className="contact-value">Brisbane10000</Text> */}
+                <Text className="copy-icon">📋</Text>
+              </View>
+            </View>
+
             <View className="stats-section">
               <View className="stat-item">
                 <Text className="stat-number">{items.length}</Text>
@@ -260,7 +285,6 @@ const SecondHand: React.FC = () => {
                       </Text>
                     </View>
                   </View>
-
 
                   <View className="info-footer">
                     <View className="price-section">

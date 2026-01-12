@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.less'
 
-const wechatContact = 'dorimifa_55'
+const wechatContact = 'Brisbane10000'
 
 const ContactUs: React.FC = () => {
   const handleCopyWechat = () => {
@@ -36,7 +36,7 @@ const ContactUs: React.FC = () => {
       <View className='quick-contact-section'>
         <View className='section-header'>
           <Text className='section-title'>快速联系</Text>
-          <Text className='section-subtitle'>添加微信 dorimifa_55，连接布玩小秘书</Text>
+          <Text className='section-subtitle'>添加微信 Brisbane10000，连接布玩小秘书</Text>
         </View>
         <View className='contact-cards'>
           <View className='contact-card wechat-card' onClick={handleCopyWechat}>

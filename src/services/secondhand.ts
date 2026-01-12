@@ -21,6 +21,7 @@ export interface SecondhandItem {
   sellerName?: string | null
   sellerContact?: string | null
   sellerEmail?: string | null
+  sellerWechatId?: string | null
   sellerAvatar?: string | null
   categoryName?: string | null
   categoryRid?: number  // 分类ID

@@ -1,282 +1,301 @@
+
+
 .rental-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
-  .header {
-    padding: 40px 20px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-align: center;
-    
-    .header-content {
-      .title {
-        font-size: 28px;
-        font-weight: bold;
-        display: block;
-        margin-bottom: 8px;
-      }
-      
-      .subtitle {
-        font-size: 16px;
-        opacity: 0.9;
-        display: block;
-      }
+  background-color: #f8f9fa;
+  padding-bottom: 40rpx;
+  box-sizing: border-box;
+}
+
+// 顶部头部设计
+.rental-header {
+  position: relative;
+  height: 500rpx;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom-left-radius: 32rpx;
+  border-bottom-right-radius: 32rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 30rpx rgba(15, 23, 42, 0.2);
+  z-index: 10;
+
+  .header-bg-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+
+    .circle-1 {
+      position: absolute;
+      top: -50rpx;
+      right: -50rpx;
+      width: 200rpx;
+      height: 200rpx;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(99, 102, 241, 0.2) 0%,
+        rgba(99, 102, 241, 0) 70%
+      );
+      filter: blur(20rpx);
+    }
+
+    .circle-2 {
+      position: absolute;
+      bottom: 50rpx;
+      left: -30rpx;
+      width: 150rpx;
+      height: 150rpx;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(236, 72, 153, 0.15) 0%,
+        rgba(236, 72, 153, 0) 70%
+      );
+      filter: blur(20rpx);
     }
   }
-  
-  .filter-section {
-    background: white;
-    padding: 15px 0;
-    border-radius: 20px 20px 0 0;
-    margin-top: -20px;
+
+  .header-content {
     position: relative;
-    z-index: 1;
-    
-    .category-filter {
-      padding: 0 15px;
-      margin-bottom: 15px;
-      
-      .category-list {
-        display: flex;
-        white-space: nowrap;
-        
-        .category-item {
-          display: inline-flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 10px 15px;
-          margin-right: 15px;
-          border-radius: 12px;
-          background: #f8f9fa;
-          border: 2px solid transparent;
-          transition: all 0.3s ease;
-          min-width: 70px;
-          
-          &.active {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            
-            .category-name {
-              color: #2196f3;
-              font-weight: 600;
-            }
-          }
-          
-          .category-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-            display: block;
-          }
-          
-          .category-name {
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-            display: block;
-          }
-        }
-      }
+    padding: 100rpx 40rpx 0;
+    z-index: 2;
+
+    .header-title {
+      font-size: 40rpx;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 16rpx;
+      letter-spacing: -1rpx;
+      text-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+      display: block;
     }
-    
-    .status-filter {
-      padding: 0 15px;
-      
-      .filter-button {
-        display: inline-flex;
-        align-items: center;
-        padding: 8px 16px;
-        border-radius: 20px;
-        background: #f0f0f0;
-        border: 1px solid #ddd;
-        transition: all 0.3s ease;
-        
-        &.active {
-          background: #52c41a;
-          border-color: #52c41a;
-          
-          .filter-text {
-            color: white;
-          }
+
+    .header-subtitle {
+      font-size: 26rpx;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+      display: block;
+      margin-bottom: 40rpx;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 40rpx;
+
+      .stat-item {
+        .stat-value {
+          font-size: 32rpx;
+          font-weight: 700;
+          color: #fff;
+          display: block;
         }
-        
-        .filter-text {
-          font-size: 14px;
-          color: #666;
+        .stat-label {
+          font-size: 22rpx;
+          color: rgba(255, 255, 255, 0.6);
+          display: block;
+          margin-top: 6rpx;
         }
       }
     }
   }
-  
-  .content {
-    background: white;
-    min-height: calc(100vh - 200px);
-    
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 20px;
-      
-      .loading-text {
-        margin-top: 15px;
-        color: #999;
-        font-size: 14px;
+}
+
+// 筛选器样式
+.filter-section {
+  position: relative;
+  margin-top: -80rpx;
+  padding: 0 30rpx;
+  z-index: 20;
+
+  .filter-options {
+    display: flex;
+    overflow-x: auto;
+    gap: 20rpx;
+    padding-bottom: 20rpx;
+
+    /* 隐藏滚动条 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-chip {
+      padding: 16rpx 32rpx;
+      background: #ffffff;
+      border-radius: 100rpx;
+      font-size: 26rpx;
+      color: #64748b;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+
+      &.active {
+        background: #0f172a;
+        color: #ffffff;
+        box-shadow: 0 8rpx 20rpx rgba(15, 23, 42, 0.25);
+        transform: translateY(-2rpx);
       }
     }
-    
-    .items-list {
-      padding: 15px;
-      
-      .item-card {
-        background: white;
-        border-radius: 16px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: all 0.3s ease;
-        
-        &:active {
-          transform: scale(0.98);
+  }
+}
+
+// 商品列表
+.rental-list {
+  padding: 20rpx 30rpx;
+
+  // 瀑布流布局
+  .rental-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .rental-card {
+      width: 48%;
+      background: #ffffff;
+      border-radius: 24rpx;
+      overflow: hidden;
+      margin-bottom: 30rpx;
+      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      .card-image-wrapper {
+        position: relative;
+        height: 340rpx;
+        background: #f1f5f9;
+
+        .card-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
-        
-        .item-image-container {
-          position: relative;
-          height: 200px;
-          
-          .item-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+
+        .category-tag {
+          position: absolute;
+          top: 20rpx;
+          left: 20rpx;
+          padding: 8rpx 16rpx;
+          background: rgba(15, 23, 42, 0.8);
+          backdrop-filter: blur(4rpx);
+          border-radius: 8rpx;
+          color: #fff;
+          font-size: 20rpx;
+          font-weight: 500;
+        }
+
+        .status-badge {
+          position: absolute;
+          top: 20rpx;
+          right: 20rpx;
+          width: 16rpx;
+          height: 16rpx;
+          border-radius: 50%;
+          border: 2rpx solid #fff;
+
+          &.available {
+            background-color: #10b981;
           }
-          
-          .status-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            color: white;
-            font-size: 12px;
-            font-weight: 500;
+
+          &.rented {
+            background-color: #94a3b8;
           }
         }
-        
-        .item-info {
-          padding: 16px;
-          
-          .item-header {
+      }
+
+      .card-content {
+        padding: 24rpx;
+
+        .card-title {
+          font-size: 28rpx;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 12rpx;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
+          line-height: 1.4;
+        }
+
+        .card-price-row {
+          display: flex;
+          align-items: baseline;
+          margin-bottom: 16rpx;
+
+          .currency {
+            font-size: 24rpx;
+            font-weight: 600;
+            color: #ef4444;
+          }
+
+          .price {
+            font-size: 32rpx;
+            font-weight: 800;
+            color: #ef4444;
+            margin: 0 4rpx;
+            font-family: "DIN Alternate", sans-serif;
+          }
+
+          .period {
+            font-size: 22rpx;
+            color: #94a3b8;
+          }
+        }
+
+        .card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-top: 1rpx solid #f1f5f9;
+          padding-top: 16rpx;
+
+          .seller-info {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-            
-            .item-name {
-              font-size: 18px;
-              font-weight: 600;
-              color: #333;
-              flex: 1;
-              margin-right: 10px;
+            align-items: center;
+
+            .seller-avatar {
+              width: 40rpx;
+              height: 40rpx;
+              border-radius: 50%;
+              background: #e2e8f0;
+              margin-right: 12rpx;
             }
-            
-            .item-category {
-              font-size: 12px;
-              color: #999;
-              background: #f5f5f5;
-              padding: 4px 8px;
-              border-radius: 8px;
+
+            .seller-name {
+              font-size: 22rpx;
+              color: #64748b;
+              max-width: 120rpx;
+              overflow: hidden;
+              text-overflow: ellipsis;
               white-space: nowrap;
             }
           }
-          
-          .item-description {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-          
-          .item-pricing {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            
-            .rental-rate {
-              font-size: 20px;
-              font-weight: bold;
-              color: #ff6b35;
-            }
-            
-            .deposit {
-              font-size: 14px;
-              color: #999;
-            }
-          }
-          
-          .item-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            
-            .view-detail {
-              font-size: 14px;
-              color: #666;
-              padding: 8px 0;
-            }
-            
-            .rent-now {
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              padding: 8px 20px;
-              border-radius: 20px;
-              font-size: 14px;
-              font-weight: 500;
-            }
-          }
-        }
-      }
-    }
-    
-    .footer-tip {
-      text-align: center;
-      padding: 30px 20px;
-      
-      .tip-text {
-        color: #ccc;
-        font-size: 14px;
-      }
-    }
-  }
-}
-
-// 响应式设计
-@media (min-width: 768px) {
-  .rental-container {
-    .content {
-      .items-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        
-        .item-card {
-          margin-bottom: 0;
         }
       }
     }
   }
 }
 
-@media (min-width: 1024px) {
-  .rental-container {
-    .content {
-      .items-list {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
+// 占位图和加载状态
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+
+  .state-icon {
+    font-size: 80rpx;
+    margin-bottom: 30rpx;
+    opacity: 0.5;
   }
-} 
+
+  .state-text {
+    font-size: 28rpx;
+    color: #94a3b8;
+  }
+}

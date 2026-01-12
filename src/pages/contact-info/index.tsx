@@ -6,7 +6,7 @@ import { useAuth } from '../../context/auth'
 import type { UserInfo } from '../../services/auth'
 import './index.less'
 
-type FormKeys = 'email' | 'phone'
+type FormKeys = 'email' | 'phone' | 'wechat_id'
 
 type FormState = Record<FormKeys, string>
 
@@ -18,7 +18,8 @@ const ContactInfo: React.FC = () => {
 
   const [formData, setFormData] = useState<FormState>({
     email: userInfo?.email || '',
-    phone: userInfo?.phone || ''
+    phone: userInfo?.phone || '',
+    wechat_id: userInfo?.wechat_id || ''
   })
   const [errors, setErrors] = useState<ErrorState>({})
   const [loading, setLoading] = useState(false)
@@ -28,9 +29,10 @@ const ContactInfo: React.FC = () => {
   useEffect(() => {
     setFormData({
       email: userInfo?.email || '',
-      phone: userInfo?.phone || ''
+      phone: userInfo?.phone || '',
+      wechat_id: userInfo?.wechat_id || ''
     })
-  }, [userInfo?.email, userInfo?.phone])
+  }, [userInfo?.email, userInfo?.phone, userInfo?.wechat_id])
 
   const normalizeInputValue = (val: unknown): string => {
     if (typeof val === 'string') return val
@@ -75,6 +77,7 @@ const ContactInfo: React.FC = () => {
 
     const email = formData.email.trim()
     const phone = formData.phone.trim()
+    const wechat_id = formData.wechat_id.trim()
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       nextErrors.email = '请输入有效的邮箱地址'
@@ -82,6 +85,10 @@ const ContactInfo: React.FC = () => {
 
     if (phone && !/^04\d{8}$/.test(phone)) {
       nextErrors.phone = '请输入有效的澳洲手机号（例如 04XXXXXXXX）'
+    }
+
+    if (wechat_id && !/^[a-zA-Z][a-zA-Z0-9_-]{5,19}$/.test(wechat_id)) {
+      nextErrors.wechat_id = '微信号需以字母开头，6-20位字符'
     }
 
     setErrors(nextErrors)
@@ -96,12 +103,16 @@ const ContactInfo: React.FC = () => {
 
     const trimmedEmail = formData.email.trim()
     const trimmedPhone = formData.phone.trim()
+    const trimmedWechatId = formData.wechat_id.trim()
+    
     const originalEmail = (userInfo?.email || '').trim()
     const originalPhone = (userInfo?.phone || '').trim()
+    const originalWechatId = (userInfo?.wechat_id || '').trim()
 
     const hasChanges =
       trimmedEmail !== originalEmail ||
-      trimmedPhone !== originalPhone
+      trimmedPhone !== originalPhone ||
+      trimmedWechatId !== originalWechatId
 
     if (!hasChanges) {
       triggerToast('没有检测到任何更改')
@@ -119,6 +130,10 @@ const ContactInfo: React.FC = () => {
 
       if (trimmedPhone !== originalPhone) {
         updatePayload.phone = trimmedPhone || null
+      }
+      
+      if (trimmedWechatId !== originalWechatId) {
+        updatePayload.wechat_id = trimmedWechatId || null
       }
 
       if (openid || userInfo?.openid) {
@@ -149,9 +164,12 @@ const ContactInfo: React.FC = () => {
 
   const trimmedEmail = formData.email.trim()
   const trimmedPhone = formData.phone.trim()
+  const trimmedWechatId = formData.wechat_id.trim()
+  
   const hasChanges =
     trimmedEmail !== (userInfo?.email || '').trim() ||
-    trimmedPhone !== (userInfo?.phone || '').trim()
+    trimmedPhone !== (userInfo?.phone || '').trim() ||
+    trimmedWechatId !== (userInfo?.wechat_id || '').trim()
 
   return (
     <View className='contact-info-container'>
@@ -174,6 +192,12 @@ const ContactInfo: React.FC = () => {
               {userInfo?.phone || '未设置'}
             </Text>
           </View>
+          <View className='info-item'>
+            <Text className='info-label'>微信号</Text>
+            <Text className={`info-value ${userInfo?.wechat_id ? '' : 'placeholder'}`}>
+              {userInfo?.wechat_id || '未设置'}
+            </Text>
+          </View>
         </View>
 
         <View className='form-card'>
@@ -191,6 +215,18 @@ const ContactInfo: React.FC = () => {
             />
             {errors.email && <Text className='error-text'>{errors.email}</Text>}
           </View>
+          <View className={`input-group ${errors.wechat_id ? 'has-error' : ''}`}>
+            <Text className='input-label'>微信号</Text>
+            <Input
+              type='text'
+              placeholder='用于二手交易中买家联系您'
+              value={formData.wechat_id}
+              onChange={(value) => handleFieldChange('wechat_id', value)}
+              clearable
+              disabled={loading}
+            />
+            {errors.wechat_id && <Text className='error-text'>{errors.wechat_id}</Text>}
+          </View>
 
           <View className={`input-group ${errors.phone ? 'has-error' : ''}`}>
             <Text className='input-label'>手机号码</Text>
@@ -204,14 +240,19 @@ const ContactInfo: React.FC = () => {
             />
             {errors.phone && <Text className='error-text'>{errors.phone}</Text>}
           </View>
+          
+          
 
           <View className='tips-block'>
             <Text className='tips-title'>小贴士</Text>
             <Text className='tips-text'>• 邮箱将用于接收通知</Text>
             <Text className='tips-text'>• 手机号建议填写澳洲本地号码</Text>
+            <Text className='tips-text'>• 微信号方便买家添加您沟通</Text>
             <Text className='tips-text'>• 信息仅用于账户安全与服务通知</Text>
           </View>
         </View>
+
+        <View className='safe-area-spacer' style={{ height: '40rpx' }} />
       </ScrollView>
 
       <View className='action-bar'>

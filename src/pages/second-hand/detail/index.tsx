@@ -89,6 +89,11 @@ const SecondHandDetail: React.FC = () => {
   const handleContactSeller = () => {
     if (!item) return;
     const contactChunks: string[] = []
+    
+    // 优先显示微信号
+    if (item.sellerWechatId) {
+      contactChunks.push(`微信号：${item.sellerWechatId}`)
+    }
     if (item.sellerContact) {
       contactChunks.push(`联系方式：${item.sellerContact}`)
     }

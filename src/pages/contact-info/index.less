@@ -6,17 +6,17 @@
 
   .content {
     flex: 1;
-    padding: 32rpx 32rpx 200rpx;
+    padding: 32rpx 32rpx 340rpx;
     box-sizing: border-box;
   }
 
   .hero-block {
-    background: linear-gradient(135deg, #6f7bf7 0%, #8d91ff 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     border-radius: 24rpx;
     padding: 40rpx 36rpx;
     margin-top: 48rpx;
     color: #fff;
-    box-shadow: 0 16rpx 40rpx rgba(111, 123, 247, 0.25);
+    box-shadow: 0 16rpx 40rpx rgba(15, 23, 42, 0.25);
 
     .hero-title {
       font-size: 36rpx;
@@ -71,6 +71,7 @@
     background: #fff;
     border-radius: 24rpx;
     margin-top: 40rpx;
+    margin-bottom: 200rpx;
     padding: 40rpx 36rpx 32rpx;
     box-shadow: 0 12rpx 32rpx rgba(15, 23, 42, 0.08);
 
@@ -151,11 +152,11 @@
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 100;
     display: flex;
     gap: 24rpx;
     padding: 28rpx 32rpx env(safe-area-inset-bottom, 32rpx);
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(18rpx);
+    background: #fff;
     border-top: 1rpx solid rgba(226, 232, 240, 0.8);
 
     .cancel-button,
@@ -178,12 +179,12 @@
     }
 
     .submit-button {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      background: #0f172a;
       border: none;
       color: #fff;
 
       &:disabled {
-        background: #cbd5f5;
+        background: #94a3b8;
         color: #e2e8f0;
       }
     }

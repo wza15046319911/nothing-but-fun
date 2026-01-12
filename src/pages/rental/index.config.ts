@@ -1,7 +1,5 @@
 export default definePageConfig({
-  navigationBarTitleText: '设备租赁',
-  // navigationBarBackgroundColor: '#667eea',
-  // navigationBarTextStyle: 'white',
+  navigationBarTitleText: "布好玩租赁",
   enablePullDownRefresh: true,
-  onReachBottomDistance: 50
-}) 
+  backgroundTextStyle: "dark",
+});
