@@ -2,7 +2,7 @@ import Taro from '@tarojs/taro'
 
 // API基础配置
 
-const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://192.168.15.95:3000/api' : 'https://nothing-but-fun-backend-production.up.railway.app/api'
+const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://192.168.0.249:3000/api' : 'https://nothing-but-fun-backend-production.up.railway.app/api'
 // const API_BASE_URL = "https://nothing-but-fun-backend-production.up.railway.app/api";
 // 请求拦截器
 const requestInterceptor = (params) => {

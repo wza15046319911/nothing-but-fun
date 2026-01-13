@@ -259,7 +259,7 @@ const UserLogin: React.FC = () => {
             </View>
              <View className='menu-item' onClick={() => handleMenuClick('contact')}>
                 <Text className='menu-icon'>📧</Text>
-                <Text className='menu-text'>联系我们</Text>
+                <Text className='menu-text'>联系我</Text>
                 <Text className='menu-arrow'>›</Text>
             </View>
         </View>

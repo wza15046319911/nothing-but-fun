@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Image, ScrollView, Video } from "@tarojs/components";
-import Taro, { useRouter, useShareAppMessage, useShareTimeline } from "@tarojs/taro";
-import { Swiper, SwiperItem } from "@tarojs/components"; // Standard swiper
+import { View, Text, Image, Video } from "@tarojs/components";
+import Taro, { useRouter, useShareAppMessage } from "@tarojs/taro";
+import { Swiper, SwiperItem } from "@tarojs/components";
 import { eventsApi, Event } from "../../../services/events";
 import { useEventTypes } from "../../../hooks/useTypes";
 import "./index.less";
@@ -125,7 +125,7 @@ const EventDetail: React.FC = () => {
 
   return (
     <View className="event-detail-page">
-      <ScrollView className="event-detail-scroll" scrollY>
+      <View className="event-detail-scroll">
         {/* Immersive Header */}
         <View className="media-section">
              <View className="carousel-wrapper">
@@ -203,6 +203,7 @@ const EventDetail: React.FC = () => {
                         src={getVideoSrc(event.video)}
                         controls
                         objectFit="contain"
+                        enableProgressGesture={false}
                     />
                 </View>
             )}
@@ -215,7 +216,7 @@ const EventDetail: React.FC = () => {
                 </Text>
             </View>
         </View>
-      </ScrollView>
+      </View>
 
       {/* Floating Action Bar */}
       <View className="floating-action-bar">
