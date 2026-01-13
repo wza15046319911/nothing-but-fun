@@ -1,372 +1,171 @@
-// 联系我们页面样式
+// Fresh Nature Theme - Contact Us
+@glass-bg: rgba(255, 255, 255, 0.7);
+@glass-border: rgba(255, 255, 255, 0.6);
+@glass-blur: 24px;
+@primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+@accent-color: #059669;
+@text-primary: #0f172a;
+@text-secondary: #64748b;
+@bg-base: #f0fdf4;
+@card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
+
 .contact-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  background: @bg-base;
   position: relative;
-}
+  overflow-x: hidden;
 
-// Hero Section
-.hero-section {
-  position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  padding: 60px 20px 80px;
-  text-align: center;
-  color: white;
-  overflow: hidden;
-  
-  .hero-content {
-    position: relative;
-    z-index: 2;
-  }
-  
-  .hero-title {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    display: block;
-    letter-spacing: -0.5px;
-  }
-  
-  .hero-subtitle {
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 8px;
-    display: block;
-    opacity: 0.9;
-  }
-  
-  .hero-description {
-    font-size: 14px;
-    opacity: 0.8;
-    line-height: 1.6;
-    display: block;
-    max-width: 280px;
-    margin: 0 auto;
-  }
-  
-  .hero-decoration {
+  // Background Mesh Gradients
+  &::before {
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    
-    .decoration-circle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      
-      &.circle-1 {
-        width: 120px;
-        height: 120px;
-        top: -60px;
-        right: -60px;
-        animation: float 6s ease-in-out infinite;
-      }
-      
-      &.circle-2 {
-        width: 80px;
-        height: 80px;
-        bottom: -40px;
-        left: -40px;
-        animation: float 4s ease-in-out infinite reverse;
-      }
-      
-      &.circle-3 {
-        width: 60px;
-        height: 60px;
-        top: 50%;
-        left: -30px;
-        animation: float 5s ease-in-out infinite;
-      }
-    }
+    top: -10vh;
+    left: -10vw;
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 25s infinite alternate ease-in-out;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10vh;
+    right: -20vw;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
 }
 
-// Section Headers
-.section-header {
+// Enhanced Header (Immersive)
+.enhanced-header {
+  position: relative;
+  z-index: 10;
+  padding: 120rpx 0 60rpx;
   text-align: center;
-  margin-bottom: 32px;
-  
-  .section-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 8px;
-    display: block;
-  }
-  
-  .section-subtitle {
-    font-size: 14px;
-    color: #718096;
-    line-height: 1.5;
-    display: block;
+  animation: slideDown 0.6s ease-out;
+
+  .header-content {
+    .header-title {
+      font-size: 60rpx;
+      font-weight: 800;
+      background: @primary-gradient;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: 16rpx;
+      letter-spacing: -1rpx;
+    }
+
+    .header-subtitle {
+      font-size: 28rpx;
+      color: @text-secondary;
+      font-weight: 500;
+      margin-bottom: 8rpx;
+      display: block;
+    }
+
+    .header-description {
+      font-size: 24rpx;
+      color: rgba(100, 116, 139, 0.7);
+      display: block;
+    }
   }
 }
 
 // Quick Contact Section
 .quick-contact-section {
-  padding: 40px 20px;
-  
-  .contact-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-top: 24px;
-  }
-  
-  .contact-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px 20px;
+  position: relative;
+  z-index: 2;
+  padding: 0 32rpx 40rpx;
+  animation: fadeInUp 0.6s ease-out 0.1s backwards;
+
+  .section-header {
+    margin-bottom: 32rpx;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
+
+    .section-title {
+      font-size: 32rpx;
+      font-weight: 700;
+      color: @text-primary;
+      display: block;
+      margin-bottom: 8rpx;
     }
-    
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      
-      &::before {
-        opacity: 1;
-      }
+
+    .section-subtitle {
+      font-size: 24rpx;
+      color: @text-secondary;
+      display: block;
     }
-    
+  }
+
+  .contact-cards {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .contact-card {
+    width: 100%;
+    background: @glass-bg;
+    backdrop-filter: blur(@glass-blur);
+    border: 1px solid @glass-border;
+    border-radius: 32rpx;
+    padding: 40rpx 32rpx;
+    text-align: center;
+    box-shadow: @card-shadow;
+    transition: transform 0.2s;
+
     &:active {
-      transform: translateY(-2px);
+      transform: scale(0.98);
     }
-    
+
     .card-icon {
-      margin-bottom: 16px;
-      
-      .icon-emoji {
-        font-size: 32px;
-        display: block;
-      }
+      font-size: 48rpx;
+      margin-bottom: 24rpx;
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.5);
+      width: 80rpx;
+      height: 80rpx;
+      line-height: 80rpx;
+      border-radius: 50%;
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
     }
-    
+
     .card-content {
       .card-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 4px;
+        font-size: 28rpx;
+        font-weight: 700;
+        color: @text-primary;
         display: block;
+        margin-bottom: 12rpx;
       }
-      
-      .card-subtitle {
-        font-size: 13px;
-        color: #4a5568;
-        margin-bottom: 8px;
-        display: block;
-        word-break: break-all;
-      }
-      
-      .card-hint {
-        font-size: 11px;
-        color: #a0aec0;
-        font-weight: 500;
-        display: block;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-    }
-    
-    // 特定卡片样式
-    &.phone-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      
-      .card-title, .card-subtitle {
-        color: white;
-      }
-      
-      .card-hint {
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-    
-    &.email-card {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-      
-      .card-title, .card-subtitle {
-        color: white;
-      }
-      
-      .card-hint {
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-    
-    &.location-card {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      
-      .card-title, .card-subtitle {
-        color: white;
-      }
-      
-      .card-hint {
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-    
-    &.wechat-card {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: white;
-      
-      .card-title, .card-subtitle {
-        color: white;
-      }
-      
-      .card-hint {
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-  }
-}
 
-// Contact Form Section
-.contact-form-section {
-  padding: 0 20px 40px;
-  
-  .form-container {
-    background: white;
-    border-radius: 20px;
-    padding: 32px 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .form-row {
-    margin-bottom: 24px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .form-group {
-    .form-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 8px;
-      display: block;
-    }
-    
-    .form-input,
-    .form-textarea {
-      width: 100%;
-      padding: 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 14px;
-      color: #2d3748;
-      background: #f8fafc;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-      
-      &:focus {
-        border-color: #667eea;
-        background: white;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        outline: none;
+      .card-subtitle {
+        font-size: 24rpx;
+        color: @accent-color;
+        margin-bottom: 12rpx;
+        display: block;
+        font-family: monospace;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 4rpx 12rpx;
+        border-radius: 8rpx;
+        display: inline-block;
       }
-      
-      &::placeholder {
-        color: #a0aec0;
-      }
-    }
-    
-    .form-textarea {
-      min-height: 120px;
-      resize: vertical;
-      font-family: inherit;
-    }
-    
-    .char-count {
-      font-size: 12px;
-      color: #a0aec0;
-      text-align: right;
-      margin-top: 6px;
-      display: block;
-    }
-  }
-  
-  .form-actions {
-    margin-top: 32px;
-    
-    .submit-btn {
-      width: 100%;
-      height: 56px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-      }
-      
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        
-        &::before {
-          left: 100%;
-        }
-      }
-      
-      &:active {
-        transform: translateY(0);
-      }
-      
-      &.submitting {
-        background: #a0aec0;
-        cursor: not-allowed;
-        transform: none !important;
-        box-shadow: none !important;
-        
-        &::before {
-          display: none;
-        }
-      }
-      
-      &:disabled {
-        background: #a0aec0;
-        cursor: not-allowed;
+
+      .card-hint {
+        font-size: 20rpx;
+        color: @text-secondary;
+        display: block;
+        opacity: 0.7;
       }
     }
   }
@@ -374,213 +173,106 @@
 
 // Features Section
 .features-section {
-  padding: 40px 20px;
-  background: white;
-  
+  position: relative;
+  z-index: 2;
+  padding: 0 32rpx 60rpx;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+
+  .section-header {
+    margin-bottom: 32rpx;
+    text-align: center;
+
+    .section-title {
+      font-size: 30rpx;
+      font-weight: 700;
+      color: @text-primary;
+      display: block;
+      margin-bottom: 8rpx;
+    }
+
+    .section-subtitle {
+      font-size: 24rpx;
+      color: @text-secondary;
+    }
+  }
+
   .features-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 24px;
+    gap: 24rpx;
   }
-  
+
   .feature-card {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 24px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 24rpx;
+    padding: 32rpx 24rpx;
     text-align: center;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background: white;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-    
+
     .feature-icon {
-      font-size: 32px;
-      margin-bottom: 16px;
+      font-size: 40rpx;
+      margin-bottom: 20rpx;
       display: block;
     }
-    
+
     .feature-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 8px;
+      font-size: 26rpx;
+      font-weight: 700;
+      color: @text-primary;
+      margin-bottom: 12rpx;
       display: block;
     }
-    
+
     .feature-desc {
-      font-size: 13px;
-      color: #718096;
+      font-size: 22rpx;
+      color: @text-secondary;
       line-height: 1.5;
       display: block;
     }
   }
 }
 
-// Business Hours Section
-.hours-section {
-  padding: 40px 20px;
-  
-  .hours-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .hours-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid #e2e8f0;
-    
-    &:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    
-    .day {
-      font-size: 14px;
-      font-weight: 500;
-      color: #2d3748;
-    }
-    
-    .time {
-      font-size: 14px;
-      color: #667eea;
-      font-weight: 600;
-    }
-  }
-  
-  .hours-note {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e2e8f0;
-    
-    .note-text {
-      font-size: 12px;
-      color: #a0aec0;
-      line-height: 1.4;
-      text-align: center;
-      display: block;
-    }
-  }
-}
-
 // Animations
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+@keyframes float-bg {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
-  50% {
-    transform: translateY(-10px);
+
+  100% {
+    transform: translate(20px, 40px) scale(1.1);
   }
 }
 
-@keyframes slideUp {
+@keyframes float-bg-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(-30px, -20px) scale(0.9);
+  }
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-// 为所有主要区块添加入场动画
-.quick-contact-section,
-.contact-form-section,
-.features-section,
-.hours-section {
-  animation: slideUp 0.6s ease-out;
-}
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 
-// 卡片动画延迟
-.contact-card {
-  animation: slideUp 0.6s ease-out;
-  
-  &:nth-child(1) { animation-delay: 0.1s; }
-  &:nth-child(2) { animation-delay: 0.2s; }
-  &:nth-child(3) { animation-delay: 0.3s; }
-  &:nth-child(4) { animation-delay: 0.4s; }
-}
-
-.feature-card {
-  animation: slideUp 0.6s ease-out;
-  
-  &:nth-child(1) { animation-delay: 0.1s; }
-  &:nth-child(2) { animation-delay: 0.2s; }
-  &:nth-child(3) { animation-delay: 0.3s; }
-  &:nth-child(4) { animation-delay: 0.4s; }
-}
-
-// 响应式设计
-@media (max-width: 375px) {
-  .hero-section {
-    padding: 50px 16px 70px;
-    
-    .hero-title {
-      font-size: 28px;
-    }
-    
-    .hero-subtitle {
-      font-size: 16px;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .quick-contact-section,
-  .contact-form-section,
-  .features-section,
-  .hours-section {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  
-  .contact-cards {
-    gap: 12px;
-  }
-  
-  .contact-card {
-    padding: 20px 16px;
-  }
-  
-  .form-container {
-    padding: 24px 20px;
-  }
-  
-  .features-grid {
-    gap: 16px;
-  }
-  
-  .feature-card {
-    padding: 20px 16px;
-  }
-}
-
-// 大屏幕优化
-@media (min-width: 768px) {
-  .contact-page {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .contact-cards {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  .features-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-// Toast 样式覆盖
-.nut-toast {
-  z-index: 9999;
 }

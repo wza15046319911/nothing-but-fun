@@ -1,729 +1,377 @@
-// Variables (matching peripheral items theme)
-@primary-color: #10b981; // emerald-500
-@secondary-color: #f6f6f6;
-@text-color: #333;
-@text-secondary: #666;
-@text-light: #999;
-@border-color: #eee;
-@success-color: #4cd964;
-@warning-color: #ff9500;
-@danger-color: #ff3b30;
-@spacing-sm: 16rpx;
-@spacing-md: 24rpx;
-@spacing-lg: 32rpx;
-@border-radius: 16rpx;
-@card-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+// Premium Glassmorphism Variables - Fresh Nature Theme (Gift/Artifacts)
+@glass-bg: rgba(255, 255, 255, 0.7);
+@glass-border: rgba(255, 255, 255, 0.6);
+@glass-blur: 24px;
+// Sage Green to Forest Gradient
+@primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+@accent-color: #059669;
+@text-primary: #0f172a; // Dark Slate
+@text-secondary: #64748b; // Slate Grey
+@bg-base: #f0fdf4; // Mint Cream
+@card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
-// 增强的周边商品容器
 .enhanced-peripheral-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  height: 100vh;
+  background: @bg-base;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
 
-  .peripheral-sort-menu {
-    z-index: 1200;
+  // Background Mesh Gradients
+  &::before {
+    content: '';
+    position: absolute;
+    top: -15vh;
+    right: -10vw;
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    // Soft Mint & Warm Sun
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 25s infinite alternate ease-in-out;
   }
 
-  // 增强的页面头部
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10vh;
+    left: -20vw;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 50%;
+    // Soft Blue-Green & White
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
+    filter: blur(70px);
+    z-index: 0;
+    animation: float-bg-reverse 30s infinite alternate ease-in-out;
+  }
+
+  // Header
   .enhanced-header {
     position: relative;
-    height: 400rpx;
-    overflow: hidden;
-
-    .header-background {
-      position: relative;
-      width: 100%;
-      height: 100%;
-
-      .floating-shapes {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: none;
-
-        .shape {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          animation: float 8s ease-in-out infinite;
-
-          &.shape-1 {
-            width: 100rpx;
-            height: 100rpx;
-            top: 15%;
-            right: 15%;
-            animation-delay: 0s;
-          }
-
-          &.shape-2 {
-            width: 60rpx;
-            height: 60rpx;
-            top: 45%;
-            right: 70%;
-            animation-delay: 2s;
-          }
-
-          &.shape-3 {
-            width: 80rpx;
-            height: 80rpx;
-            top: 70%;
-            left: 20%;
-            animation-delay: 4s;
-          }
-
-          &.shape-4 {
-            width: 40rpx;
-            height: 40rpx;
-            top: 25%;
-            left: 10%;
-            animation-delay: 6s;
-          }
-        }
-      }
-
-      .header-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      }
-    }
+    z-index: 10;
+    padding: 120rpx 40rpx 40rpx; // Increased top padding for immersive feel
+    flex-shrink: 0;
 
     .header-content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
       z-index: 2;
 
       .title-section {
-        text-align: center;
-        color: white;
-
         .enhanced-title {
           font-size: 56rpx;
-          font-weight: bold;
-          margin-bottom: 16rpx;
+          font-weight: 800;
+          background: @primary-gradient;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           display: block;
-          text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.3);
-          animation: slideInUp 0.8s ease-out;
+          margin-bottom: 16rpx;
+          letter-spacing: -1rpx;
+          animation: slideDown 0.6s ease-out;
         }
 
         .enhanced-subtitle {
-          font-size: 32rpx;
-          opacity: 0.9;
-          margin-bottom: 40rpx;
+          font-size: 28rpx;
+          color: @text-secondary;
+          font-weight: 500;
           display: block;
-          animation: slideInUp 0.8s ease-out 0.2s both;
+          margin-bottom: 40rpx;
+          animation: slideDown 0.6s ease-out 0.1s backwards;
         }
 
         .stats-section {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 32rpx;
-          animation: slideInUp 0.8s ease-out 0.4s both;
+          display: inline-flex;
+          background: rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(@glass-blur);
+          padding: 12rpx 32rpx;
+          border-radius: 100rpx;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+          animation: fadeIn 0.8s ease-out 0.2s backwards;
+          gap: 40rpx;
 
           .stat-item {
-            text-align: center;
+            display: flex;
+            align-items: baseline;
+            gap: 8rpx;
 
             .stat-number {
-              font-size: 40rpx;
-              font-weight: bold;
-              display: block;
-              margin-bottom: 8rpx;
+              font-size: 32rpx;
+              font-weight: 700;
+              color: @accent-color;
             }
 
             .stat-label {
               font-size: 24rpx;
-              opacity: 0.8;
+              color: @text-secondary;
             }
           }
 
           .stat-divider {
-            width: 2rpx;
-            height: 40rpx;
-            background: rgba(255, 255, 255, 0.3);
+            width: 1px;
+            height: 24rpx;
+            background: rgba(0, 0, 0, 0.1);
+            align-self: center;
           }
         }
       }
     }
   }
 
-  // 增强的内容区域
-  .enhanced-content {
-    min-height: calc(100vh - 400rpx);
-    background: transparent;
-    padding: 20rpx 0;
+  // Filters (Floating & Minimal) - Handled by reusable component but container needs adjust
+  // Assuming PeripheralFiltersComponent structure is clean, we might need to style it via global overrides or pass styles.
+  // For now, let's assume it renders standard elements we can target if needed,
+  // OR we can wrap it. The component itself might have its own styles.
+  // Given the plan to "redesign", we should probably update the component usage or wrapping here.
+
+  // Custom Filter Wrapper if needed
+  .filter-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 20rpx 40rpx;
+    margin-bottom: 20rpx;
   }
 
-  // 增强的加载状态
-  .enhanced-loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
+  // Content
+  .enhanced-content {
+    z-index: 1;
+    padding: 0 32rpx;
+    box-sizing: border-box;
+    width: 100%;
+    flex: 1;
+    height: 0;
 
-    .loading-animation {
-      text-align: center;
+    .enhanced-items-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 30rpx;
+      width: 100%;
+      box-sizing: border-box;
 
-      .loading-dots {
-        display: flex;
-        justify-content: center;
-        gap: 12rpx;
-        margin-bottom: 32rpx;
+      .enhanced-item-card {
+        width: calc(50% - 16rpx); // 2 columns with safe gap calculation
+        background: @glass-bg;
+        backdrop-filter: blur(@glass-blur);
+        border-radius: 32rpx;
+        border: 1px solid @glass-border;
+        overflow: hidden;
+        // margin-bottom: 30rpx; // handled by gap
+        box-shadow: @card-shadow;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        animation: fadeInUp 0.6s ease-out backwards;
+        box-sizing: border-box;
+        margin: 0; // Reset existing margins
 
-        .dot {
-          width: 16rpx;
-          height: 16rpx;
-          border-radius: 50%;
-          background: #10b981;
-          animation: bounce 1.4s ease-in-out infinite both;
-
-          &.dot-1 { animation-delay: -0.32s; }
-          &.dot-2 { animation-delay: -0.16s; }
-          &.dot-3 { animation-delay: 0s; }
+        &:nth-child(even) {
+          animation-delay: 0.1s;
         }
-      }
 
-      .loading-text {
-        font-size: 28rpx;
-        color: #666;
+        &:nth-child(odd) {
+          animation-delay: 0s;
+        }
+
+        &:active {
+          transform: scale(0.97);
+        }
+
+        .enhanced-item-image-container {
+          position: relative;
+          height: 340rpx;
+          background: #e2e8f0;
+
+          .image-wrapper {
+            width: 100%;
+            height: 100%;
+          }
+
+          .enhanced-item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .image-overlay {
+            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.3));
+          }
+
+          .stock-status-badge {
+            position: absolute;
+            top: 20rpx;
+            right: 20rpx;
+            padding: 6rpx 16rpx;
+            border-radius: 100rpx;
+            font-size: 20rpx;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            color: #fff;
+
+            &.sufficient {
+              background: #10b981;
+            }
+
+            &.low {
+              background: #f59e0b;
+            }
+
+            &.out {
+              background: #ef4444;
+            }
+          }
+        }
+
+        .enhanced-item-info {
+          padding: 24rpx;
+
+          .info-header {
+            margin-bottom: 12rpx;
+
+            .enhanced-item-name {
+              font-size: 28rpx;
+              font-weight: 700;
+              color: @text-primary;
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 2;
+              overflow: hidden;
+              line-height: 1.4;
+            }
+          }
+
+          .item-meta {
+            display: flex;
+            gap: 8rpx;
+            margin-bottom: 16rpx;
+
+            .meta-category {
+              font-size: 20rpx;
+              color: @accent-color;
+              background: rgba(16, 185, 129, 0.1);
+              padding: 4rpx 10rpx;
+              border-radius: 8rpx;
+            }
+
+            .meta-time {
+              font-size: 20rpx;
+              color: @text-secondary;
+            }
+          }
+
+          .info-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding-top: 16rpx;
+
+            .enhanced-item-price {
+              font-size: 32rpx;
+              font-weight: 800;
+              color: @accent-color;
+              font-family: "DIN Alternate", sans-serif;
+            }
+
+            .action-button {
+              background: @primary-gradient;
+              padding: 8rpx 20rpx;
+              border-radius: 100rpx;
+              box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.3);
+
+              .action-text {
+                font-size: 22rpx;
+                color: #fff;
+                font-weight: 600;
+              }
+            }
+          }
+        }
       }
     }
   }
 
-  // 增强的空状态
+  // Loading & Empty States
+  .enhanced-loading-container,
   .enhanced-empty-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
-
-    .empty-animation {
-      text-align: center;
-      animation: fadeInUp 0.6s ease-out;
-
-      .empty-icon {
-        font-size: 120rpx;
-        margin-bottom: 32rpx;
-        display: block;
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      .empty-title {
-        font-size: 32rpx;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 16rpx;
-        display: block;
-      }
-
-      .empty-subtitle {
-        font-size: 26rpx;
-        color: #666;
-      }
-    }
-  }
-
-  // 增强的商品列表
-  .enhanced-items-grid {
-    display: flex;
     flex-direction: column;
-    gap: 32rpx;
-    padding: 20rpx 0;
-  }
-
-  // 增强的商品卡片
-  .enhanced-item-card {
-    background: white;
-    border-radius: 24rpx;
-    overflow: hidden;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation: slideInUp 0.6s ease-out both;
-    position: relative;
-    margin: 0 20rpx;
-    box-sizing: border-box;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    }
-
-    &:active {
-      transform: translateY(-8rpx) scale(0.98);
-      box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.15);
-
-      &::before {
-        opacity: 1;
-      }
-    }
-
-    // 左右交替动画
-    &.card-left {
-      animation-name: slideInLeft;
-    }
-
-    &.card-right {
-      animation-name: slideInRight;
-    }
-
-    // 增强的图片容器
-    .enhanced-item-image-container {
-      position: relative;
-      height: 240rpx;
-      overflow: hidden;
-
-      .image-wrapper {
-        width: 100%;
-        height: 100%;
-        position: relative;
-
-        .enhanced-item-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.6s ease;
-        }
-
-        .image-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.1) 0%,
-            transparent 30%,
-            transparent 70%,
-            rgba(0, 0, 0, 0.3) 100%
-          );
-          pointer-events: none;
-        }
-      }
-
-      .price-badge-floating {
-        position: absolute;
-        bottom: 16rpx;
-        left: 16rpx;
-        background: rgba(255, 255, 255, 0.95);
-        color: #10b981;
-        padding: 8rpx 16rpx;
-        border-radius: 20rpx;
-        display: flex;
-        align-items: center;
-        gap: 4rpx;
-        backdrop-filter: blur(10rpx);
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-
-        .price-symbol {
-          font-size: 20rpx;
-          font-weight: 600;
-        }
-
-        .price-amount {
-          font-size: 24rpx;
-          font-weight: bold;
-        }
-      }
-
-      .stock-status-badge {
-        position: absolute;
-        bottom: 16rpx;
-        right: 16rpx;
-        padding: 6rpx 12rpx;
-        border-radius: 16rpx;
-        backdrop-filter: blur(10rpx);
-        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
-        color: white;
-        font-size: 20rpx;
-        font-weight: 600;
-
-        &.sufficient {
-          background: rgba(82, 196, 26, 0.9);
-        }
-
-        &.low {
-          background: rgba(250, 173, 20, 0.9);
-        }
-
-        &.out {
-          background: rgba(255, 77, 79, 0.9);
-        }
-
-        .stock-text {
-          font-size: 20rpx;
-          font-weight: 600;
-        }
-      }
-    }
-
-    // 增强的商品信息
-    .enhanced-item-info {
-      padding: 24rpx;
-      position: relative;
-      z-index: 2;
-
-      .info-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 16rpx;
-
-        .enhanced-item-name {
-          font-size: 28rpx;
-          font-weight: bold;
-          color: #333;
-          line-height: 1.3;
-          flex: 1;
-          margin-right: 12rpx;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .item-meta {
-          .meta-time {
-            font-size: 20rpx;
-            color: #999;
-            background: #f8f9fa;
-            padding: 4rpx 8rpx;
-            border-radius: 8rpx;
-          }
-
-          .meta-category {
-            font-size: 20rpx;
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 4rpx 8rpx;
-            border-radius: 8rpx;
-            margin-left: 8rpx;
-          }
-        }
-      }
-
-      .info-content {
-        margin-bottom: 20rpx;
-
-        .enhanced-item-description {
-          font-size: 24rpx;
-          color: #666;
-          line-height: 1.5;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      }
-
-      .info-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .price-section {
-          .price-label {
-            font-size: 20rpx;
-            color: #999;
-            margin-bottom: 4rpx;
-            display: block;
-          }
-
-          .enhanced-item-price {
-            font-size: 32rpx;
-            font-weight: bold;
-            color: #10b981;
-          }
-        }
-
-        .action-section {
-          .action-button {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 8rpx 16rpx;
-            border-radius: 20rpx;
-            display: flex;
-            align-items: center;
-            gap: 6rpx;
-            box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.3);
-            transition: all 0.3s ease;
-
-            &:active {
-              transform: scale(0.95);
-              box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.4);
-            }
-
-            .action-text {
-              font-size: 22rpx;
-              font-weight: 600;
-            }
-
-            .action-arrow {
-              font-size: 18rpx;
-              font-weight: bold;
-            }
-          }
-        }
-      }
-    }
-
-    // 鼠标悬停效果
-    &:hover {
-      .enhanced-item-image-container {
-        .image-wrapper {
-          .enhanced-item-image {
-            transform: scale(1.05);
-          }
-        }
-      }
-    }
-  }
-
-  // 增强的分页包装
-  .enhanced-pagination-wrapper {
-    background: white;
-    margin: 40rpx 20rpx 20rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-    padding: 20rpx;
-  }
-
-  // 增强的底部提示
-  .enhanced-footer-tip {
-    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 60rpx 20rpx;
+    padding: 100rpx 0;
+    opacity: 0.7;
 
-    .tip-content {
-      text-align: center;
-      animation: fadeInUp 0.6s ease-out;
+    .loading-text,
+    .empty-title,
+    .empty-subtitle {
+      color: @text-secondary;
+    }
 
-      .tip-icon {
-        font-size: 48rpx;
-        margin-bottom: 16rpx;
-        display: block;
-        animation: bounce 2s ease-in-out infinite;
-      }
+    .empty-icon {
+      font-size: 80rpx;
+      margin-bottom: 24rpx;
+    }
 
-      .tip-text {
-        font-size: 28rpx;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 8rpx;
-        display: block;
-      }
-
-      .tip-subtext {
-        font-size: 24rpx;
-        color: #666;
-      }
+    .dot {
+      background: @accent-color !important;
     }
   }
 }
 
-// 动画关键帧
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+// Keyframes
+@keyframes float-bg {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
-  50% {
-    transform: translateY(-20rpx);
+
+  100% {
+    transform: translate(20px, 40px) scale(1.1);
   }
 }
 
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translateY(0);
+@keyframes float-bg-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
-  40%, 43% {
-    transform: translateY(-8rpx);
-  }
-  70% {
-    transform: translateY(-4rpx);
-  }
-  90% {
-    transform: translateY(-2rpx);
+
+  100% {
+    transform: translate(-30px, -20px) scale(0.9);
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes slideInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(40rpx);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40rpx);
-  }
   to {
     opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(40rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20rpx);
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-// 响应式设计
-@media (max-width: 750rpx) {
-  .enhanced-peripheral-container {
-    .enhanced-header {
-      height: 320rpx;
-
-      .header-content {
-        .title-section {
-          .enhanced-title {
-            font-size: 48rpx;
-          }
-
-          .enhanced-subtitle {
-            font-size: 28rpx;
-          }
-
-          .stats-section {
-            gap: 24rpx;
-
-            .stat-item {
-              .stat-number {
-                font-size: 36rpx;
-              }
-
-              .stat-label {
-                font-size: 22rpx;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .enhanced-content {
-      padding: 16rpx 0;
-    }
-
-    .enhanced-items-grid {
-      gap: 20rpx;
-    }
-
-    .enhanced-item-card {
-      margin: 0 16rpx;
-
-      .enhanced-item-image-container {
-        height: 200rpx;
-      }
-
-      .enhanced-item-info {
-        padding: 20rpx;
-
-        .info-header {
-          .enhanced-item-name {
-            font-size: 26rpx;
-          }
-        }
-
-        .info-content {
-          .enhanced-item-description {
-            font-size: 22rpx;
-          }
-        }
-
-        .info-footer {
-          .price-section {
-            .enhanced-item-price {
-              font-size: 28rpx;
-            }
-          }
-
-          .action-section {
-            .action-button {
-              padding: 6rpx 12rpx;
-
-              .action-text {
-                font-size: 20rpx;
-              }
-            }
-          }
-        }
-      }
-    }
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-}
 
-// 平板和桌面端优化
-@media (min-width: 750rpx) {
-  .enhanced-peripheral-container {
-    .enhanced-content {
-      max-width: 1200rpx;
-      margin: 0 auto;
-      padding: 40rpx;
-
-      .enhanced-items-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 32rpx;
-      }
-    }
-  }
-}
-
-@media (min-width: 1200rpx) {
-  .enhanced-peripheral-container {
-    .enhanced-content {
-      .enhanced-items-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

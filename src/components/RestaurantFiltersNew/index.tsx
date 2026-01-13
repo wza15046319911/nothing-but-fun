@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Input } from "@tarojs/components";
+import { View, Text, Input, ScrollView } from "@tarojs/components";
 import { RestaurantFilters } from "../../services/restaurant";
 import { useRestaurantTypes } from "../../hooks/useTypes";
 
@@ -354,101 +354,164 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
   };
 
   return (
-    <View className="px-4 mt-4">
-      <View className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-500/10 via-white to-white shadow-[0_12px_28px_-18px_rgba(16,185,129,0.45)] backdrop-blur-sm">
-        <View className="p-5 space-y-4">
-          <View className="flex flex-col gap-3">
-            <View className="flex flex-nowrap items-center gap-3">
-              <View className="relative flex-1 min-w-0">
-                <View className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
-                  <Text className="text-gray-400 text-lg">🔍</Text>
-                </View>
-                <Input
-                  className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索餐厅..."
-                  value={keyword}
-                  onInput={(event) => setKeyword(event.detail.value)}
-                  onConfirm={handleKeywordConfirm}
-                />
-                {keyword.trim() !== "" && (
-                  <View
-                    className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200/80 text-xs text-gray-500 shadow-sm"
-                    onClick={handleKeywordClear}
-                  >
-                    <Text>✕</Text>
-                  </View>
-                )}
-              </View>
+    <View className="flex flex-col gap-4 px-4 mt-2 mb-2 sticky top-[100px] z-[99]">
+      {/* 1. Floating Capsule Search Bar */}
+      <View className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-[0_8px_20px_-6px_rgba(31,38,135,0.15)] rounded-full p-2 border border-white/60 transition-all hover:shadow-[0_8px_24px_-4px_rgba(99,102,241,0.2)]">
+        <View className="flex-1 flex items-center pl-4 bg-transparent">
+          <Text className="text-emerald-400 mr-2 text-lg">🔍</Text>
+          <Input
+             className="flex-1 bg-transparent text-slate-700 h-10 text-base placeholder-slate-400"
+             placeholder="搜索无限美味..."
+             placeholderStyle="color: #94a3b8;"
+             value={keyword}
+             onInput={(event) => setKeyword(event.detail.value)}
+             onConfirm={handleKeywordConfirm}
+          />
+           {keyword.trim() !== "" && (
+             <View className="p-2" onClick={handleKeywordClear}>
+               <View className="bg-slate-200/80 rounded-full w-5 h-5 flex items-center justify-center">
+                 <Text className="text-gray-500 text-xs">×</Text>
+               </View>
+             </View>
+           )}
+        </View>
+        <View 
+          className="bg-emerald-600 h-10 px-6 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform"
+          onClick={() => applyFilters()}
+        >
+          <Text className="text-white font-semibold text-sm">搜索</Text>
+        </View>
+      </View>
 
-              <View
-                className="flex h-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 active:scale-95 active:shadow-md"
-                onClick={() => applyFilters()}
-              >
-                <Text>搜索</Text>
-              </View>
+      {/* 2. Horizontal Scrollable Chips */}
+      <View className="whitespace-nowrap overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide flex gap-2 items-center flex-nowrap">
+         {/* Filter Toggle Chip */}
+         <View 
+            className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-full border transition-all ${
+               showAdvanced || hasActiveRatingFilter || hasActivePriceFilter || hasActiveTypeFilter
+               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+            onClick={() => {
+                setShowAdvanced(prev => !prev);
+                setShowSortOptions(false);
+            }}
+         >  
+            <Text className="text-sm font-medium">筛选</Text>
+            {(hasActiveRatingFilter || hasActivePriceFilter || hasActiveTypeFilter) && <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1" />}
+         </View>
+
+         {/* Sort Toggle Chip */}
+         <View 
+            className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-full border transition-all ${
+               showSortOptions
+               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+            onClick={() => {
+                setShowSortOptions(prev => !prev);
+                setShowAdvanced(false);
+            }}
+         >  
+            <Text className="text-sm font-medium">排序</Text>
+            <Text className="text-xs opacity-70 ml-1">{getSortOption(selectedSortKey).label}</Text>
+         </View>
+
+         {/* All Types Chip */}
+         <View 
+            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+               selectedRestaurantTypeRid === undefined 
+               ? 'bg-slate-800 text-white border-slate-800' 
+               : 'bg-white/60 text-slate-600 border-white/60'
+            }`}
+            onClick={() => {
+               setSelectedRestaurantTypeRid(undefined);
+               applyFilters(keyword, selectedMinRating, priceFrom, priceTo, undefined, selectedSortKey);
+            }}
+         >
+            <Text className="text-sm font-medium">全部美食</Text>
+         </View>
+         
+         {allRestaurantTypes.slice(0, 6).map(type => (
+            <View 
+               key={type.id}
+               className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+                  selectedRestaurantTypeRid === type.id.toString()
+                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20' 
+                  : 'bg-white/60 text-slate-600 border-white/60'
+               }`}
+               onClick={() => {
+                  if (selectedRestaurantTypeRid === type.id.toString()) {
+                     setSelectedRestaurantTypeRid(undefined);
+                     applyFilters(keyword, selectedMinRating, priceFrom, priceTo, undefined, selectedSortKey);
+                  } else {
+                     setSelectedRestaurantTypeRid(type.id.toString());
+                     applyFilters(keyword, selectedMinRating, priceFrom, priceTo, type.id.toString(), selectedSortKey);
+                  }
+               }}
+            >
+               <Text className="text-sm font-medium">{type.name}</Text>
             </View>
+         ))}
+      </View>
 
-            <View className="flex items-center gap-3">
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showAdvanced
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                }`}
-                onClick={() => setShowAdvanced((prev) => !prev)}
-              >
-                <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
-                {(hasActiveRatingFilter || hasActivePriceFilter || hasActiveTypeFilter) && (
-                  <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
-                    <Text>ON</Text>
-                  </View>
-                )}
-              </View>
-
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showSortOptions
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                }`}
-                onClick={() => setShowSortOptions((prev) => !prev)}
-              >
-                <Text>{showSortOptions ? "收起排序" : "排序"}</Text>
-                <Text className="ml-2 text-xs text-slate-500">
-                  {getSortOption(selectedSortKey).label}
-                </Text>
-              </View>
-            </View>
+      {/* Filter Popup Modal */}
+      <View 
+        className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} 
+        catchMove
+      >
+        {/* Backdrop */}
+        <View 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
+          onClick={() => setShowAdvanced(false)}
+        />
+        
+        {/* Bottom Sheet Content */}
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl animate-slideUp">
+          {/* Header handle */}
+          <View className="flex items-center justify-center pt-3 pb-1">
+             <View className="w-10 h-1 rounded-full bg-slate-200" />
+          </View>
+          
+          {/* Title Bar */}
+          <View className="px-5 pb-4 flex flex-row justify-between items-center border-b border-slate-100/50">
+             <Text className="text-lg font-bold text-slate-800">筛选</Text>
+             <View className="p-1" onClick={() => setShowAdvanced(false)}>
+                 <Text className="text-slate-400 text-xl">✕</Text>
+             </View>
           </View>
 
-          {error && (
-            <Text className="block text-xs font-medium text-rose-500">
-              {error}
-            </Text>
-          )}
-
-          {showAdvanced && (
-            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
-              <View className="flex flex-col gap-4">
-                {/* 餐厅类型筛选 */}
+          {/* Scrollable Form */}
+          <ScrollView scrollY className="flex-1 w-full overflow-y-auto">
+             <View className="flex flex-col gap-6 p-5 pb-10">
+                
+                {/* Type Filter */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    餐厅类型
-                  </Text>
+                  <Text className="text-sm font-bold text-slate-800">餐厅类型</Text>
                   <View className="flex flex-wrap gap-2">
-                    {restaurantTypes.map((type) => (
+                    <View
+                      className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
+                        selectedRestaurantTypeRid === undefined
+                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                      onClick={() => {
+                        setSelectedRestaurantTypeRid(undefined);
+                      }}
+                    >
+                      <Text>全部</Text>
+                    </View>
+                    {allRestaurantTypes.map((type) => (
                       <View
                         key={type.id}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                          (selectedRestaurantTypeRid === undefined && type.id === 0) ||
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                           selectedRestaurantTypeRid === type.id.toString()
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                             ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                             : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={() => {
-                          const newValue = type.id === 0 ? undefined : type.id.toString();
-                          setSelectedRestaurantTypeRid(newValue);
-                          applyFilters(keyword, selectedMinRating, priceFrom, priceTo, newValue);
+                           const newVal = type.id.toString();
+                           setSelectedRestaurantTypeRid(selectedRestaurantTypeRid === newVal ? undefined : newVal);
                         }}
                       >
                         <Text>{type.name}</Text>
@@ -457,95 +520,84 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                   </View>
                 </View>
 
-                {/* 价格区间筛选 */}
+                {/* Price Filter */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    价格区间
-                  </Text>
-                  <View className="flex flex-wrap gap-2">
-                    {presetPriceRanges.map((range) => {
-                      const isActive =
-                        (range.from !== undefined ? priceFrom === `${range.from}` : priceFrom === "") &&
-                        (range.to !== undefined ? priceTo === `${range.to}` : priceTo === "");
-
-                      return (
-                        <View
-                          key={range.label}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                            isActive
-                              ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                          }`}
-                          onClick={() => {
-                            handleQuickRange(range.from, range.to);
-                          }}
-                        >
-                          <Text>{range.label}</Text>
-                        </View>
-                      );
-                    })}
+                  <Text className="text-sm font-bold text-slate-800">价格范围</Text>
+                  <Text className="text-xs text-slate-400 -mt-2">支持输入单边范围</Text>
+                  
+                  <View className="flex items-center gap-3">
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+                      <Input
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最低价"
+                        placeholderStyle="color:#cbd5e1"
+                        type="number"
+                        value={priceFrom}
+                        onInput={(event) => setPriceFrom(event.detail.value)}
+                      />
+                    </View>
+                    <Text className="text-slate-300">-</Text>
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+                      <Input
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最高价"
+                        placeholderStyle="color:#cbd5e1"
+                        type="number"
+                        value={priceTo}
+                        onInput={(event) => setPriceTo(event.detail.value)}
+                      />
+                    </View>
                   </View>
-                  <View className="flex flex-wrap items-center gap-2">
-                    <Input
-                      className="w-24 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-600 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                      type="number"
-                      placeholder="最低价"
-                      value={priceFrom}
-                      onInput={(event) => setPriceFrom(event.detail.value)}
-                    />
-                    <Text className="text-slate-400">—</Text>
-                    <Input
-                      className="w-24 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-600 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                      type="number"
-                      placeholder="最高价"
-                      value={priceTo}
-                      onInput={(event) => setPriceTo(event.detail.value)}
-                    />
-                    {(priceFrom.trim() !== "" || priceTo.trim() !== "") && (
-                      <View
-                        className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        onClick={() => {
-                          setPriceFrom("");
-                          setPriceTo("");
-                          applyFilters(keyword, selectedMinRating, "", "", selectedRestaurantTypeRid);
-                        }}
-                      >
-                        <Text>清除</Text>
-                      </View>
-                    )}
+
+                  <View className="flex flex-wrap gap-2">
+                    {presetPriceRanges.map((range, index) => {
+                       const isActive =
+                            (range.from !== undefined ? priceFrom === `${range.from}` : priceFrom === "") &&
+                            (range.to !== undefined ? priceTo === `${range.to}` : priceTo === "");
+                       
+                       return (
+                          <View
+                            key={index}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                              isActive
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                : "bg-slate-50 text-slate-500 border border-transparent"
+                            }`}
+                            onClick={() => handleQuickRange(range.from, range.to)}
+                          >
+                            <Text>{range.label}</Text>
+                          </View>
+                       )
+                    })}
                   </View>
                 </View>
 
-                {/* 评分筛选 */}
+                {/* Rating Filter */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    最低评分
-                  </Text>
+                  <Text className="text-sm font-bold text-slate-800">最低评分</Text>
                   <View className="flex flex-wrap gap-2">
                     <View
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                      className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                         selectedMinRating === undefined
-                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                          : "bg-slate-100 text-slate-600"
                       }`}
                       onClick={() => {
                         setSelectedMinRating(undefined);
-                        applyFilters(keyword, undefined, priceFrom, priceTo, selectedRestaurantTypeRid);
                       }}
                     >
-                      <Text>全部</Text>
+                      <Text>不限</Text>
                     </View>
                     {presetRatings.map((item) => (
                       <View
                         key={item.rating}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                           selectedMinRating === item.rating
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                            ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={() => {
                           setSelectedMinRating(item.rating);
-                          applyFilters(keyword, item.rating, priceFrom, priceTo, selectedRestaurantTypeRid);
                         }}
                       >
                         <Text>{item.label}</Text>
@@ -553,135 +605,83 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
                     ))}
                   </View>
                 </View>
+             </View>
+          </ScrollView>
 
-                <View className="flex items-center justify-between pt-2">
-                  <View
-                    className="rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                    onClick={handleReset}
-                  >
-                    <Text>重置</Text>
-                  </View>
-
-                  <View
-                    className="rounded-2xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 active:scale-95"
-                    onClick={() => applyFilters()}
-                  >
-                    <Text>应用筛选</Text>
-                  </View>
+          {/* Footer Actions */}
+          <View className="p-4 border-t border-slate-100 bg-white safe-area-bottom">
+             <View className="flex items-center gap-3">
+                <View
+                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={handleReset}
+                >
+                  <Text className="text-sm font-semibold text-slate-600">重置</Text>
                 </View>
-              </View>
-            </View>
-          )}
 
-          {showSortOptions && (
-            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
-              <View className="flex flex-col gap-4">
-                {/* 排序选项 */}
-                <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    排序方式
-                  </Text>
-                  
-                  {/* 第一行：价格 */}
-                  <View className="flex flex-col gap-2">
-                    <Text className="text-xs font-medium text-slate-600">按价格</Text>
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "priceHigh"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("priceHigh")}
-                      >
-                        <Text className="text-sm font-medium">从高到低</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "priceLow"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("priceLow")}
-                      >
-                        <Text className="text-sm font-medium">从低到高</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* 第二行：评分 */}
-                  <View className="flex flex-col gap-2">
-                    <Text className="text-xs font-medium text-slate-600">按评分（高到低）</Text>
-                    
-                    {/* 第一组：综合评分和口味评分 */}
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "ratingOverall"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("ratingOverall")}
-                      >
-                        <Text className="text-xs font-medium">综合评分</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "ratingTaste"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("ratingTaste")}
-                      >
-                        <Text className="text-xs font-medium">口味评分</Text>
-                      </View>
-                    </View>
-                    
-                    {/* 第二组：服务评分和环境评分 */}
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "ratingService"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("ratingService")}
-                      >
-                        <Text className="text-xs font-medium">服务评分</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "ratingEnvironment"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("ratingEnvironment")}
-                      >
-                        <Text className="text-xs font-medium">环境评分</Text>
-                      </View>
-                    </View>
-                    
-                    {/* 第三组：性价比评分 */}
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          selectedSortKey === "ratingValue"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("ratingValue")}
-                      >
-                        <Text className="text-xs font-medium">性价比评分</Text>
-                      </View>
-                      <View className="flex-1 opacity-0 pointer-events-none">
-                        {/* 占位元素，保持布局对称 */}
-                      </View>
-                    </View>
-                  </View>
+                <View
+                  className="flex-[2] py-3.5 rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={() => {
+                      applyFilters(keyword, selectedMinRating, priceFrom, priceTo, selectedRestaurantTypeRid, selectedSortKey);
+                      setShowAdvanced(false);
+                  }}
+                >
+                  <Text className="text-sm font-bold text-white">确认筛选</Text>
                 </View>
-              </View>
-            </View>
-          )}
+             </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Sort Popup Modal */}
+      <View 
+        className={`fixed inset-0 z-[1000] ${showSortOptions ? 'visible' : 'hidden'}`} 
+        catchMove
+      >
+        <View 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
+          onClick={() => setShowSortOptions(false)}
+        />
+        
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[70vh] flex flex-col shadow-2xl animate-slideUp">
+           <View className="flex items-center justify-center pt-3 pb-1">
+             <View className="w-10 h-1 rounded-full bg-slate-200" />
+           </View>
+           
+           <View className="px-5 pb-4 flex flex-row justify-between items-center border-b border-slate-100/50">
+             <Text className="text-lg font-bold text-slate-800">排序方式</Text>
+             <View className="p-1" onClick={() => setShowSortOptions(false)}>
+                 <Text className="text-slate-400 text-xl">✕</Text>
+             </View>
+           </View>
+
+            <ScrollView scrollY className="flex-1 w-full overflow-y-auto">
+                <View className="flex flex-col gap-2 p-5 pb-10">
+                  {sortOptions.map(option => (
+                      <View 
+                        key={option.key}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                            selectedSortKey === option.key
+                            ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                            : 'bg-white border-slate-100'
+                        }`}
+                        onClick={() => {
+                            handleSortSelect(option.key);
+                            setShowSortOptions(false);
+                        }}
+                      >
+                            <View className="flex flex-col items-start gap-1">
+                                <Text className={`text-sm font-bold ${selectedSortKey === option.key ? 'text-emerald-700' : 'text-slate-700'}`}>{option.label}</Text>
+                                <Text className="text-xs text-slate-400">{option.description}</Text>
+                            </View>
+                            {selectedSortKey === option.key && (
+                                <View className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <Text className="text-white text-xs">✓</Text>
+                                </View>
+                            )}
+                      </View>
+                  ))}
+                </View>
+            </ScrollView>
         </View>
       </View>
     </View>

@@ -1,3 +1,4 @@
 export default definePageConfig({
-  navigationBarTitleText: '我的发布'
+  navigationBarTitleText: '我的发布',
+  enablePullDownRefresh: true
 }) 

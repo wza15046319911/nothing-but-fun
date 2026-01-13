@@ -10,9 +10,9 @@ import "@taroify/core/swiper/style";
 
 // Status display mapping
 const statusMap = {
-  available: { text: "可购买", color: "#52c41a" },
-  sold: { text: "已售出", color: "#ff4d4f" },
-  reserved: { text: "已预订", color: "#faad14" },
+  available: { text: "可购买", color: "rgba(52, 199, 89, 0.85)" },
+  sold: { text: "已售出", color: "rgba(255, 59, 48, 0.85)" },
+  reserved: { text: "已预订", color: "rgba(250, 173, 20, 0.85)" },
 };
 
 const SecondHandDetail: React.FC = () => {
@@ -131,7 +131,6 @@ const SecondHandDetail: React.FC = () => {
   };
 
 
-
   // Confirm delete
   const confirmDelete = async () => {
     if (!item) return;
@@ -149,7 +148,7 @@ const SecondHandDetail: React.FC = () => {
     setShowDeleteDialog(false);
   };
 
-  // Format time display - 更新以支持新的字段名
+  // Format time display
   const formatTime = (dateString: string) => {
     if (!dateString) return "—";
     const date = new Date(dateString);
@@ -194,10 +193,6 @@ const SecondHandDetail: React.FC = () => {
     }
   };
 
-  // const handleSwiperChange = (index: number) => {
-  //   setCurrentImageIndex(index);
-  // };
-
   useEffect(() => {
     loadItemDetail();
   }, [id]);
@@ -229,13 +224,13 @@ const SecondHandDetail: React.FC = () => {
   return (
     <View className="detail-container">
       <ScrollView className="detail-content" scrollY>
-        {/* 图片展示区域 */}
+        {/* Immersive Image Section */}
         <View className="image-section">
           {item?.imageUrls && item?.imageUrls.length > 0 ? (
             <Swiper
               className="image-swiper"
               lazyRender
-              autoplay={1000}
+              autoplay={3000}
               defaultValue={0}
               onChange={handleSwiperChange}
             >
@@ -258,7 +253,7 @@ const SecondHandDetail: React.FC = () => {
             </View>
           )}
 
-          {/* 图片计数器 */}
+          {/* Image Counter */}
           {item?.imageUrls && item.imageUrls.length > 1 && (
             <View className="image-counter">
               {currentImageIndex + 1} / {item.imageUrls.length}
@@ -266,11 +261,10 @@ const SecondHandDetail: React.FC = () => {
           )}
         </View>
 
-        {/* 商品基本信息 */}
+        {/* Glass Info Card */}
         <View className="info-card">
           <View className="title-section">
-            <Text className="item-title">{item.title}</Text>
-            <View className="price-status-row">
+            <View className="price-row">
               <Text className="item-price">¥{item.price}</Text>
               <View
                 className="status-tag"
@@ -281,9 +275,12 @@ const SecondHandDetail: React.FC = () => {
                 </Text>
               </View>
             </View>
+            <Text className="item-title">{item.title}</Text>
           </View>
 
-          {/* 商品详细信息 */}
+          <View className="divider" />
+
+          {/* Detail Info Grid */}
           <View className="detail-info">
             {item.productStatusName && (
               <View className="info-row">
@@ -319,16 +316,16 @@ const SecondHandDetail: React.FC = () => {
             )}
           </View>
 
-          {/* 商品描述 */}
+          {/* Description */}
           {item.description && (
             <View className="description-section">
-              <Text className="description-title">商品描述</Text>
+              <Text className="description-title">商品详情</Text>
               <Text className="description-text">{item.description}</Text>
             </View>
           )}
         </View>
 
-        {/* 操作按钮区域 */}
+        {/* Action Bar */}
         {!isOwner() && (
           <View className="action-section">
             <Button
@@ -341,20 +338,16 @@ const SecondHandDetail: React.FC = () => {
           </View>
         )}
 
-        {/* 卖家操作 */}
+        {/* Owner Floating Actions */}
         {isOwner() && (
           <View className="owner-actions">
-            <Button
-              className="delete-btn"
-              onClick={() => setShowDeleteDialog(true)}
-              block
-            >
-              删除商品
-            </Button>
+            <View className="delete-btn" onClick={() => setShowDeleteDialog(true)}>
+              删除
+            </View>
           </View>
         )}
 
-        {/* 删除确认对话框 */}
+        {/* Delete Dialog */}
         <Dialog
           visible={showDeleteDialog}
           title="确认删除"
@@ -363,7 +356,7 @@ const SecondHandDetail: React.FC = () => {
           onCancel={() => setShowDeleteDialog(false)}
         />
 
-        {/* Toast提示 */}
+        {/* Toast */}
         <Toast
           content={toastMessage}
           visible={showToast}

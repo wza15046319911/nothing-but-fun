@@ -174,8 +174,6 @@ const CourseReviews: React.FC = () => {
             <Rate
               value={parseFloat(stats.averageRating)}
               readOnly={true}
-              // size={16}
-              // activeColor='#faad14'
             />
             <Text className='total-reviews'>共 {stats.totalReviews} 条评价</Text>
           </View>

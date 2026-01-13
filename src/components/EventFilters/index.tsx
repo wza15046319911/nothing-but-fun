@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Input } from "@tarojs/components";
+import { View, Text, Input, ScrollView } from "@tarojs/components";
 
 // 活动类型接口
 export interface EventType {
@@ -240,83 +240,148 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
   };
 
   return (
-    <View className="px-4 mt-4">
-      <View className="rounded-3xl border border-purple-100 bg-gradient-to-br from-purple-500/10 via-white to-white shadow-[0_12px_28px_-18px_rgba(147,51,234,0.45)] backdrop-blur-sm">
-        <View className="p-5 space-y-4">
-          <View className="flex flex-col gap-3">
-            <View className="flex flex-nowrap items-center gap-3">
-              <View className="relative flex-1 min-w-0">
-                <View className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
-                  <Text className="text-gray-400 text-lg">🔍</Text>
-                </View>
-                <Input
-                  className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  placeholder="搜索活动..."
-                  value={keyword}
-                  onInput={(event) => setKeyword(event.detail.value)}
-                  onConfirm={handleKeywordConfirm}
-                />
-                {keyword.trim() !== "" && (
-                  <View
-                    className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200/80 text-xs text-gray-500 shadow-sm"
-                    onClick={handleKeywordClear}
-                  >
-                    <Text>✕</Text>
-                  </View>
-                )}
-              </View>
+    <View className="flex flex-col gap-4 px-4 mt-2 mb-2 sticky top-[100px] z-[99]">
+      {/* 1. Floating Capsule Search Bar */}
+      <View className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-[0_8px_20px_-6px_rgba(31,38,135,0.15)] rounded-full p-2 border border-white/60 transition-all hover:shadow-[0_8px_24px_-4px_rgba(99,102,241,0.2)]">
+        <View className="flex-1 flex items-center pl-4 bg-transparent">
+          <Text className="text-emerald-400 mr-2 text-lg">🔍</Text>
+          <Input
+             className="flex-1 bg-transparent text-slate-700 h-10 text-base placeholder-slate-400"
+             placeholder="搜索精彩回顾..."
+             placeholderStyle="color: #94a3b8;"
+             value={keyword}
+             onInput={(event) => setKeyword(event.detail.value)}
+             onConfirm={handleKeywordConfirm}
+          />
+           {keyword.trim() !== "" && (
+             <View className="p-2" onClick={handleKeywordClear}>
+               <View className="bg-slate-200/80 rounded-full w-5 h-5 flex items-center justify-center">
+                 <Text className="text-gray-500 text-xs">×</Text>
+               </View>
+             </View>
+           )}
+        </View>
+        <View 
+          className="bg-emerald-600 h-10 px-6 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform"
+          onClick={() => applyFilters()}
+        >
+          <Text className="text-white font-semibold text-sm">搜索</Text>
+        </View>
+      </View>
 
-              <View
-                className="flex h-12 flex-shrink-0 items-center justify-center rounded-2xl bg-purple-500 px-5 text-sm font-semibold text-white shadow-lg shadow-purple-500/30 active:scale-95 active:shadow-md"
-                onClick={() => applyFilters()}
-              >
-                <Text>搜索</Text>
-              </View>
-            </View>
+      {/* 2. Horizontal Scrollable Chips */}
+      <View className="whitespace-nowrap overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide flex gap-2 items-center flex-nowrap">
+         {/* Filter Toggle Chip */}
+         <View 
+            className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-full border transition-all ${
+               showAdvanced || hasActivePriceFilter || hasActiveEventTypeFilter
+               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+            onClick={() => setShowAdvanced(prev => !prev)}
+         >  
+            <Text className="text-sm font-medium">筛选</Text>
+            {(hasActivePriceFilter || hasActiveEventTypeFilter) && <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1" />}
+         </View>
 
-            <View className="flex items-center gap-3">
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showAdvanced
-                    ? "border-purple-300 bg-purple-50 text-purple-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-purple-200 hover:text-purple-500"
-                }`}
-                onClick={() => setShowAdvanced((prev) => !prev)}
-              >
-                <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
-                {(hasActivePriceFilter || hasActiveEventTypeFilter) && (
-                  <View className="ml-2 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-semibold text-white">
-                    <Text>ON</Text>
-                  </View>
-                )}
-              </View>
+         {/* Quick Event Types */}
+         <View 
+            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+               selectedEventTypeRid === undefined 
+               ? 'bg-slate-800 text-white border-slate-800' 
+               : 'bg-white/60 text-slate-600 border-white/60'
+            }`}
+            onClick={() => {
+               setSelectedEventTypeRid(undefined);
+               applyFilters(keyword, priceFrom, priceTo, isFree, undefined);
+            }}
+         >
+            <Text className="text-sm font-medium">全部</Text>
+         </View>
+         
+         {eventTypes.slice(0, 5).map(eventType => (
+            <View 
+               key={eventType.id}
+               className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+                  selectedEventTypeRid === eventType.id
+                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20' 
+                  : 'bg-white/60 text-slate-600 border-white/60'
+               }`}
+               onClick={() => {
+                  if (selectedEventTypeRid === eventType.id) {
+                     setSelectedEventTypeRid(undefined);
+                     applyFilters(keyword, priceFrom, priceTo, isFree, undefined);
+                  } else {
+                     setSelectedEventTypeRid(eventType.id);
+                     applyFilters(keyword, priceFrom, priceTo, isFree, eventType.id);
+                  }
+               }}
+            >
+               <Text className="text-sm font-medium">{eventType.name}</Text>
             </View>
+         ))}
+
+         {/* Free Chip */}
+         <View 
+            className={`flex-shrink-0 px-4 py-2 rounded-full border transition-all ${
+               isFree
+               ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20' 
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+             onClick={handleFreeToggle}
+         >
+            <Text className="text-sm font-medium">免费活动</Text>
+         </View>
+      </View>
+
+      {error && (
+        <Text className="block text-xs font-medium text-rose-500 px-2">
+          {error}
+        </Text>
+      )}
+
+      {/* Filter Popup Modal */}
+      <View 
+        className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} 
+        catchMove
+      >
+        {/* Backdrop */}
+        <View 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
+          onClick={() => setShowAdvanced(false)}
+        />
+        
+        {/* Bottom Sheet Content */}
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl animate-slideUp">
+          {/* Header handle */}
+          <View className="flex items-center justify-center pt-3 pb-1">
+             <View className="w-10 h-1 rounded-full bg-slate-200" />
+          </View>
+          
+          {/* Title Bar */}
+          <View className="px-5 pb-4 flex flex-row justify-between items-center border-b border-slate-100/50">
+             <Text className="text-lg font-bold text-slate-800">筛选</Text>
+             <View className="p-1" onClick={() => setShowAdvanced(false)}>
+                 <Text className="text-slate-400 text-xl">✕</Text>
+             </View>
           </View>
 
-          {error && (
-            <Text className="block text-xs font-medium text-rose-500">
-              {error}
-            </Text>
-          )}
-
-          {showAdvanced && (
-            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
-              <View className="flex flex-col gap-4">
-                {/* 活动类型筛选 */}
+          {/* Scrollable Form */}
+          <ScrollView scrollY className="flex-1 w-full overflow-y-auto">
+             <View className="flex flex-col gap-6 p-5 pb-10">
+                
+                {/* Event Types Grid */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    活动类型
-                  </Text>
+                  <Text className="text-sm font-bold text-slate-800">活动类型</Text>
                   <View className="flex flex-wrap gap-2">
                     <View
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                      className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                         selectedEventTypeRid === undefined
-                          ? "border-purple-400 bg-purple-500 text-white shadow-md shadow-purple-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-purple-200 hover:text-purple-500"
+                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                          : "bg-slate-100 text-slate-600"
                       }`}
                       onClick={() => {
                         setSelectedEventTypeRid(undefined);
-                        applyFilters(keyword, priceFrom, priceTo, isFree, undefined);
                       }}
                     >
                       <Text>全部</Text>
@@ -324,14 +389,13 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
                     {eventTypes.map((eventType) => (
                       <View
                         key={eventType.id}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                           selectedEventTypeRid === eventType.id
-                            ? "border-purple-400 bg-purple-500 text-white shadow-md shadow-purple-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-purple-200 hover:text-purple-500"
+                            ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={() => {
-                          setSelectedEventTypeRid(eventType.id);
-                          applyFilters(keyword, priceFrom, priceTo, isFree, eventType.id);
+                          setSelectedEventTypeRid(selectedEventTypeRid === eventType.id ? undefined : eventType.id);
                         }}
                       >
                         <Text>{eventType.name}</Text>
@@ -340,75 +404,49 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
                   </View>
                 </View>
 
-                {/* 价格筛选 */}
-                <View className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    价格筛选
-                  </Text>
-                  <Text className="text-xs text-slate-400">
-                    选择免费活动或设置价格范围
-                  </Text>
-                </View>
-
-                {/* 免费切换 */}
-                <View className="flex items-center gap-3">
-                  <View
-                    className={`flex h-10 items-center rounded-xl border px-3 text-sm font-medium transition-all ${
-                      isFree
-                        ? "border-purple-400 bg-purple-500 text-white shadow-md shadow-purple-400/40"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-purple-200 hover:text-purple-500"
-                    }`}
-                    onClick={handleFreeToggle}
-                  >
-                    <Text>{isFree ? "✓ 免费活动" : "免费活动"}</Text>
-                  </View>
-                </View>
-
-                {/* 价格范围输入（仅在非免费时显示） */}
-                {!isFree && (
-                  <View className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-purple-300">
-                      <Text className="pointer-events-none text-xs text-slate-400">
-                        最低价格
-                      </Text>
+                {/* Price Filter */}
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-bold text-slate-800">价格范围</Text>
+                  <Text className="text-xs text-slate-400 -mt-2">支持输入单边范围</Text>
+                  
+                  <View className="flex items-center gap-3">
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
                       <Input
-                        className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-slate-700 focus:outline-none"
-                        placeholder="0"
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最低价"
+                        placeholderStyle="color:#cbd5e1"
                         type="number"
                         value={priceFrom}
                         onInput={(event) => setPriceFrom(event.detail.value)}
+                        onConfirm={handleKeywordConfirm}
+                        disabled={isFree}
                       />
                     </View>
-
-                    <View className="flex-shrink-0 text-slate-400">
-                      <Text>—</Text>
-                    </View>
-
-                    <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-purple-300">
-                      <Text className="pointer-events-none text-xs text-slate-400">
-                        最高价格
-                      </Text>
+                    <Text className="text-slate-300">-</Text>
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
                       <Input
-                        className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-slate-700 focus:outline-none"
-                        placeholder="不限"
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最高价"
+                        placeholderStyle="color:#cbd5e1"
                         type="number"
                         value={priceTo}
                         onInput={(event) => setPriceTo(event.detail.value)}
+                        onConfirm={handleKeywordConfirm}
+                        disabled={isFree}
                       />
                     </View>
                   </View>
-                )}
 
-                {/* 快速价格选择 */}
-                <View className="flex flex-col gap-2">
-                  <Text className="text-sm font-medium text-slate-600">
-                    快速选择
-                  </Text>
                   <View className="flex flex-wrap gap-2">
                     {presetPriceRanges.map((range, index) => (
                       <View
                         key={index}
-                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm hover:border-purple-200 hover:text-purple-500 active:scale-95"
+                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          (range.isFree && isFree) || 
+                          (!isFree && priceFrom === `${range.from}` && (range.to === undefined ? priceTo === "" : priceTo === `${range.to}`))
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : "bg-slate-50 text-slate-500 border border-transparent"
+                        }`}
                         onClick={() => handleQuickRange(range)}
                       >
                         <Text>{range.label}</Text>
@@ -416,29 +454,35 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
                     ))}
                   </View>
                 </View>
+             </View>
+          </ScrollView>
 
-                <View className="flex items-center justify-between pt-2">
-                  <View
-                    className="rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:border-purple-200 hover:text-purple-500"
-                    onClick={handleReset}
-                  >
-                    <Text>重置</Text>
-                  </View>
-
-                  <View
-                    className="rounded-2xl bg-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-purple-500/30 active:scale-95"
-                    onClick={() => applyFilters()}
-                  >
-                    <Text>应用筛选</Text>
-                  </View>
+          {/* Footer Actions */}
+          <View className="p-4 border-t border-slate-100 bg-white safe-area-bottom">
+             <View className="flex items-center gap-3">
+                <View
+                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={handleReset}
+                >
+                  <Text className="text-sm font-semibold text-slate-600">重置</Text>
                 </View>
-              </View>
-            </View>
-          )}
+
+                <View
+                  className="flex-[2] py-3.5 rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={() => {
+                      applyFilters(keyword, priceFrom, priceTo, isFree, selectedEventTypeRid);
+                      setShowAdvanced(false);
+                  }}
+                >
+                  <Text className="text-sm font-bold text-white">确认筛选</Text>
+                </View>
+             </View>
+          </View>
         </View>
       </View>
     </View>
   );
 };
+
 
 export default EventFiltersComponent;

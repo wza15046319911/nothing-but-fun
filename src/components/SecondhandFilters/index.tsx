@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Input } from "@tarojs/components";
+import { View, Text, Input, ScrollView } from "@tarojs/components";
 import { SecondhandFilters, SecondhandCategory, SecondhandProductStatus, secondhandApi } from "../../services/secondhand";
 
 interface SecondhandFiltersProps {
@@ -129,7 +129,9 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [error, setError] = useState("");
-  const sortBy: SecondhandFilters['sortBy'] = 'dateCreated';
+  const [sortBy, setSortBy] = useState<SecondhandFilters['sortBy']>(
+    initialFilters.sortBy ?? 'dateCreated'
+  );
 
   // Reflect upstream filter changes (e.g. external reset/pagination updates)
   useEffect(() => {
@@ -166,11 +168,18 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setSelectedListingStatus(initialFilters.status);
   }, [initialFilters.status]);
 
+
   useEffect(() => {
     if (initialFilters.sortOrder) {
       setSortOrder(initialFilters.sortOrder);
     }
   }, [initialFilters.sortOrder]);
+
+  useEffect(() => {
+    if (initialFilters.sortBy) {
+      setSortBy(initialFilters.sortBy);
+    }
+  }, [initialFilters.sortBy]);
 
   // 加载分类数据
   useEffect(() => {
@@ -325,6 +334,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setSelectedCategoryId(undefined);
     setSelectedSubCategoryId(undefined);
     setSelectedProductStatusId(undefined);
+    setSelectedProductStatusId(undefined);
+    setSortBy('dateCreated');
     setSortOrder('desc');
     setError("");
 
@@ -337,7 +348,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       undefined,
       undefined,
       undefined,
-      sortBy,
+      undefined,
+      'dateCreated',
       'desc'
     );
     if (payload) {
@@ -427,6 +439,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
 
   const handleSortSelect = (optionKey: SortOptionKey) => {
     const option = getSortOption(optionKey);
+    setSortBy(option.sortBy);
     setSortOrder(option.sortOrder);
     setShowSortOptions(false);
     applyFilters(
@@ -440,6 +453,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       option.sortBy,
       option.sortOrder
     );
+
   };
 
   const handleKeywordClear = () => {
@@ -452,98 +466,149 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   };
 
   return (
-    <View className="px-4 mt-4">
-      <View className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-500/10 via-white to-white shadow-[0_12px_28px_-18px_rgba(16,185,129,0.45)] backdrop-blur-sm">
-        <View className="p-5 space-y-4">
-          <View className="flex flex-col gap-3">
-            <View className="flex flex-nowrap items-center gap-3">
-              <View className="relative flex-1 min-w-0">
-                <View className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
-                  <Text className="text-gray-400 text-lg">🔍</Text>
-                </View>
-                <Input
-                  className="w-1/2 rounded-2xl border border-transparent bg-white/90 pl-12 pr-16 py-3 text-sm text-gray-700 shadow-inner focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-                  placeholder="搜索商品..."
-                  value={keyword}
-                  onInput={(event) => setKeyword(event.detail.value)}
-                  onConfirm={handleKeywordConfirm}
-                />
-                {keyword.trim() !== "" && (
-                  <View
-                    className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200/80 text-xs text-gray-500 shadow-sm"
-                    onClick={handleKeywordClear}
-                  >
-                    <Text>✕</Text>
-                  </View>
-                )}
-              </View>
+    <View className="flex flex-col gap-4 px-4 mt-2 mb-2 sticky top-[100px] z-[99]">
+      {/* 1. Floating Capsule Search Bar */}
+      <View className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-[0_8px_20px_-6px_rgba(31,38,135,0.15)] rounded-full p-2 border border-white/60 transition-all hover:shadow-[0_8px_24px_-4px_rgba(99,102,241,0.2)]">
+        <View className="flex-1 flex items-center pl-4 bg-transparent">
+          <Text className="text-emerald-400 mr-2 text-lg">🔍</Text>
+          <Input
+             className="flex-1 bg-transparent text-slate-700 h-10 text-base placeholder-slate-400"
+             placeholder="搜索好物..."
+             placeholderStyle="color: #94a3b8;"
+             value={keyword}
+             onInput={(event) => setKeyword(event.detail.value)}
+             onConfirm={handleKeywordConfirm}
+          />
+           {keyword.trim() !== "" && (
+             <View className="p-2" onClick={handleKeywordClear}>
+               <View className="bg-slate-200/80 rounded-full w-5 h-5 flex items-center justify-center">
+                 <Text className="text-gray-500 text-xs">×</Text>
+               </View>
+             </View>
+           )}
+        </View>
+        <View 
+          className="bg-emerald-600 h-10 px-6 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform"
+          onClick={() => applyFilters()}
+        >
+          <Text className="text-white font-semibold text-sm">搜索</Text>
+        </View>
+      </View>
 
-              <View
-                className="flex h-12 flex-shrink-0 items-center justify-center rounded-2xl bg-emerald-500 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 active:scale-95 active:shadow-md"
-                onClick={() => applyFilters()}
-              >
-                <Text>搜索</Text>
-              </View>
+      {/* 2. Horizontal Scrollable Chips */}
+      <View className="whitespace-nowrap overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide flex gap-2 items-center flex-nowrap">
+         {/* Filter Toggle Chip */}
+         <View 
+            className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-full border transition-all ${
+               showAdvanced || hasActiveAdvancedFilter
+               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+            onClick={() => setShowAdvanced(prev => !prev)}
+         >  
+            <Text className="text-sm font-medium">筛选</Text>
+            {hasActiveAdvancedFilter && <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1" />}
+         </View>
+
+         {/* Sort Toggle Chip */}
+         <View 
+            className={`flex-shrink-0 flex items-center gap-1 px-4 py-2 rounded-full border transition-all ${
+               showSortOptions
+               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+               : 'bg-white/60 border-white/60 text-slate-600 backdrop-blur-sm'
+            }`}
+            onClick={() => setShowSortOptions(prev => !prev)}
+         >  
+            <Text className="text-sm font-medium">排序</Text>
+            <Text className="text-xs opacity-60 ml-1 truncate max-w-[80px]">
+               {getSortOption(getCurrentSortKey()).label}
+            </Text>
+         </View>
+
+         {/* Quick Categories (Demo) */}
+         <View 
+            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+               selectedCategoryId === undefined && selectedSubCategoryId === undefined 
+               ? 'bg-slate-800 text-white border-slate-800' 
+               : 'bg-white/60 text-slate-600 border-white/60'
+            }`}
+            onClick={() => {
+               setSelectedSubCategoryId(undefined);
+               setSelectedCategoryId(undefined);
+               applyFilters(keyword, priceFrom, priceTo, undefined, undefined, selectedProductStatusId, selectedListingStatus);
+            }}
+         >
+            <Text className="text-sm font-medium">全部</Text>
+         </View>
+         
+         {/* Render top 3 categories as quick chips if available */}
+         {categories.slice(0, 3).map(cat => (
+            <View 
+               key={cat.id}
+               className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
+                  selectedCategoryId === cat.id 
+                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20' 
+                  : 'bg-white/60 text-slate-600 border-white/60'
+               }`}
+               onClick={() => {
+                  if (selectedCategoryId === cat.id) {
+                     setSelectedCategoryId(undefined);
+                     applyFilters(keyword, priceFrom, priceTo, undefined, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
+                  } else {
+                     setSelectedCategoryId(cat.id);
+                     applyFilters(keyword, priceFrom, priceTo, cat.id, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
+                  }
+               }}
+            >
+               <Text className="text-sm font-medium">{cat.name}</Text>
             </View>
+         ))}
+      </View>
 
-            <View className="flex items-center gap-3">
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showAdvanced
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                }`}
-                onClick={() => setShowAdvanced((prev) => !prev)}
-              >
-                <Text>{showAdvanced ? "收起筛选" : "筛选"}</Text>
-                {hasActiveAdvancedFilter && (
-                  <View className="ml-2 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
-                    <Text>ON</Text>
-                  </View>
-                )}
-              </View>
-
-              <View
-                className={`flex h-12 items-center rounded-2xl border px-4 text-sm font-medium transition-colors ${
-                  showSortOptions
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                    : "border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                }`}
-                onClick={() => setShowSortOptions((prev) => !prev)}
-              >
-                <Text>{showSortOptions ? "收起排序" : "排序"}</Text>
-                <Text className="ml-2 text-xs text-slate-500">
-                  {getSortOption(getCurrentSortKey()).label}
-                </Text>
-              </View>
-            </View>
+      {/* Filter Popup Modal */}
+      <View 
+        className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} 
+        catchMove
+      >
+        {/* Backdrop */}
+        <View 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
+          onClick={() => setShowAdvanced(false)}
+        />
+        
+        {/* Bottom Sheet Content */}
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl animate-slideUp">
+          {/* Header handle */}
+          <View className="flex items-center justify-center pt-3 pb-1">
+             <View className="w-10 h-1 rounded-full bg-slate-200" />
+          </View>
+          
+          {/* Title Bar */}
+          <View className="px-5 pb-4 flex flex-row justify-between items-center border-b border-slate-100/50">
+             <Text className="text-lg font-bold text-slate-800">筛选</Text>
+             <View className="p-1" onClick={() => setShowAdvanced(false)}>
+                 <Text className="text-slate-400 text-xl">✕</Text>
+             </View>
           </View>
 
-          {error && (
-            <Text className="block text-xs font-medium text-rose-500">
-              {error}
-            </Text>
-          )}
-
-          {showAdvanced && (
-            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
-              <View className="flex flex-col gap-4">
+          {/* Scrollable Form */}
+          <ScrollView scrollY className="flex-1 w-full overflow-y-auto">
+             <View className="flex flex-col gap-6 p-5 pb-10">
+                
+                {/* Sub Categories (Big Category) */}
                 {subCategories.length > 0 && (
                   <View className="flex flex-col gap-3">
-                    <Text className="text-sm font-semibold text-slate-700">
-                      商品大类
-                    </Text>
+                    <Text className="text-sm font-bold text-slate-800">商品大类</Text>
                     <View className="flex flex-wrap gap-2">
-                      <View
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                       <View
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                           selectedSubCategoryId === undefined
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                            ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={async () => {
                           setSelectedSubCategoryId(undefined);
                           setSelectedCategoryId(undefined);
-                          // 加载所有分类数据
                           try {
                             const categoryData = await secondhandApi.getAllCategories();
                             setCategories(categoryData);
@@ -558,10 +623,10 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                       {subCategories.map((subCategory) => (
                         <View
                           key={subCategory.id}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                          className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                             selectedSubCategoryId === subCategory.id
-                              ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                              ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                              : "bg-slate-100 text-slate-600"
                           }`}
                           onClick={async () => {
                             setSelectedSubCategoryId(subCategory.id);
@@ -577,17 +642,15 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                   </View>
                 )}
 
-                {/* 分类筛选 */}
+                {/* Categories (Sub Category) */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    商品细分类
-                  </Text>
+                  <Text className="text-sm font-bold text-slate-800">商品细分类</Text>
                   <View className="flex flex-wrap gap-2">
                     <View
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                      className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                         selectedCategoryId === undefined
-                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                          : "bg-slate-100 text-slate-600"
                       }`}
                       onClick={() => {
                         setSelectedCategoryId(undefined);
@@ -599,10 +662,10 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                     {filteredCategories.map((category) => (
                       <View
                         key={category.id}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                           selectedCategoryId === category.id
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                            ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={() => {
                           setSelectedCategoryId(category.id);
@@ -613,23 +676,21 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                       </View>
                     ))}
                   </View>
-                  {selectedSubCategoryId && filteredCategories.length === 0 && (
+                   {selectedSubCategoryId && filteredCategories.length === 0 && (
                     <Text className="text-xs text-slate-400">该大类下暂无细分分类</Text>
                   )}
                 </View>
 
-                {/* 商品状况筛选 */}
+                {/* Condition */}
                 {productStatuses.length > 0 && (
-                  <View className="flex flex-col gap-3">
-                    <Text className="text-sm font-semibold text-slate-700">
-                      商品状况
-                    </Text>
+                   <View className="flex flex-col gap-3">
+                    <Text className="text-sm font-bold text-slate-800">商品状况</Text>
                     <View className="flex flex-wrap gap-2">
                       <View
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                          selectedProductStatusId === undefined
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
+                            selectedProductStatusId === undefined
+                            ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                         onClick={() => {
                           setSelectedProductStatusId(undefined);
@@ -641,10 +702,10 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                       {productStatuses.map((status) => (
                         <View
                           key={status.id}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                          className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
                             selectedProductStatusId === status.id
-                              ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                              ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                              : "bg-slate-100 text-slate-600"
                           }`}
                           onClick={() => {
                             setSelectedProductStatusId(status.id);
@@ -658,216 +719,170 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                   </View>
                 )}
 
+                {/* Status */}
                 <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    上架状态
-                  </Text>
-                  <View className="flex flex-wrap gap-2">
-                    <View
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                        selectedListingStatus === undefined
-                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                      }`}
-                      onClick={() => {
-                        setSelectedListingStatus(undefined);
-                        applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, undefined);
-                      }}
-                    >
-                      <Text>全部</Text>
+                   <Text className="text-sm font-bold text-slate-800">上架状态</Text>
+                   <View className="flex flex-wrap gap-2">
+                        <View
+                          className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
+                            selectedListingStatus === undefined
+                              ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                          onClick={() => {
+                            setSelectedListingStatus(undefined);
+                            applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, undefined);
+                          }}
+                        >
+                          <Text>全部</Text>
+                        </View>
+                        {listingStatusOptions.map((status) => (
+                          <View
+                            key={status.value}
+                            className={`rounded-full px-5 py-2 text-xs font-medium transition-all ${
+                              selectedListingStatus === status.value
+                                ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                            onClick={() => {
+                              setSelectedListingStatus(status.value as any);
+                              applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, status.value as any);
+                            }}
+                          >
+                            <Text>{status.label}</Text>
+                          </View>
+                        ))}
+                   </View>
+                </View>
+
+                {/* Price Filter */}
+                <View className="flex flex-col gap-3">
+                  <Text className="text-sm font-bold text-slate-800">价格范围</Text>
+                  <Text className="text-xs text-slate-400 -mt-2">支持输入单边范围</Text>
+                  
+                  <View className="flex items-center gap-3">
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+                      <Input
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最低价"
+                        placeholderStyle="color:#cbd5e1"
+                        type="number"
+                        value={priceFrom}
+                        onInput={(event) => setPriceFrom(event.detail.value)}
+                      />
                     </View>
-                    {listingStatusOptions.map((status) => (
+                    <Text className="text-slate-300">-</Text>
+                    <View className="flex-1 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+                      <Input
+                        className="text-sm text-slate-800 text-center h-5"
+                        placeholder="最高价"
+                        placeholderStyle="color:#cbd5e1"
+                        type="number"
+                        value={priceTo}
+                        onInput={(event) => setPriceTo(event.detail.value)}
+                      />
+                    </View>
+                  </View>
+
+                  <View className="flex flex-wrap gap-2">
+                    {presetRanges.map((range) => (
                       <View
-                        key={status.value}
-                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                          selectedListingStatus === status.value
-                            ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
+                        key={range.label}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          priceFrom === `${range.from}` &&
+                          (range.to === undefined
+                            ? priceTo === ""
+                            : priceTo === `${range.to}`)
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : "bg-slate-50 text-slate-500 border border-transparent"
                         }`}
-                        onClick={() => {
-                          setSelectedListingStatus(status.value);
-                          applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, status.value);
-                        }}
+                        onClick={() => handleQuickRange(range.from, range.to)}
                       >
-                        <Text>{status.label}</Text>
+                        <Text>{range.label}</Text>
                       </View>
                     ))}
                   </View>
                 </View>
+             </View>
+          </ScrollView>
 
-                {/* 价格范围筛选 */}
-                <View className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    价格范围
-                  </Text>
-                  <Text className="text-xs text-slate-400">
-                    支持输入单边范围，只填写最低价或最高价即可
-                  </Text>
+          {/* Footer Actions */}
+          <View className="p-4 border-t border-slate-100 bg-white safe-area-bottom">
+             <View className="flex items-center gap-3">
+                <View
+                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={handleReset}
+                >
+                  <Text className="text-sm font-semibold text-slate-600">重置</Text>
                 </View>
 
-                <View className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-emerald-300">
-                    <Text className="pointer-events-none text-xs text-slate-400">
-                      最低价
-                    </Text>
-                    <Input
-                      className="mt-1 w-full text-sm text-gray-700 focus:outline-none"
-                      placeholder="¥0"
-                      type="number"
-                      value={priceFrom}
-                      onInput={(event) => setPriceFrom(event.detail.value)}
-                      onConfirm={handleKeywordConfirm}
-                    />
-                  </View>
-
-                  <Text className="text-center text-slate-400 sm:w-10">-</Text>
-
-                  <View className="relative flex-1 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm focus-within:border-emerald-300">
-                    <Text className="pointer-events-none text-xs text-slate-400">
-                      最高价
-                    </Text>
-                    <Input
-                      className="mt-1 w-full text-sm text-gray-700 focus:outline-none"
-                      placeholder="不限"
-                      type="number"
-                      value={priceTo}
-                      onInput={(event) => setPriceTo(event.detail.value)}
-                      onConfirm={handleKeywordConfirm}
-                    />
-                  </View>
+                <View
+                  className="flex-[2] py-3.5 rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform flex items-center justify-center"
+                  onClick={() => {
+                      applyFilters(keyword, priceFrom, priceTo, selectedCategoryId, selectedSubCategoryId, selectedProductStatusId, selectedListingStatus);
+                      setShowAdvanced(false);
+                  }}
+                >
+                  <Text className="text-sm font-bold text-white">确认筛选</Text>
                 </View>
+             </View>
+          </View>
+        </View>
+      </View>
 
-                <View className="flex flex-wrap gap-2 pt-1">
-                  {presetRanges.map((range) => (
-                    <View
-                      key={range.label}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                        priceFrom === `${range.from}` &&
-                        (range.to === undefined
-                          ? priceTo === ""
-                          : priceTo === `${range.to}`)
-                          ? "border-emerald-400 bg-emerald-500 text-white shadow-md shadow-emerald-400/40"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                      }`}
-                      onClick={() => handleQuickRange(range.from, range.to)}
-                    >
-                      <Text>{range.label}</Text>
-                    </View>
-                  ))}
+      {/* Sort Popup Modal */}
+      <View 
+        className={`fixed inset-0 z-[1000] ${showSortOptions ? 'visible' : 'hidden'}`} 
+        catchMove
+      >
+        <View 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
+          onClick={() => setShowSortOptions(false)}
+        />
+        
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[70vh] flex flex-col shadow-2xl animate-slideUp">
+           <View className="flex items-center justify-center pt-3 pb-1">
+             <View className="w-10 h-1 rounded-full bg-slate-200" />
+           </View>
+           
+           <View className="px-5 pb-4 flex flex-row justify-between items-center border-b border-slate-100/50">
+             <Text className="text-lg font-bold text-slate-800">排序方式</Text>
+             <View className="p-1" onClick={() => setShowSortOptions(false)}>
+                 <Text className="text-slate-400 text-xl">✕</Text>
+             </View>
+           </View>
+
+            <ScrollView scrollY className="flex-1 w-full overflow-y-auto">
+                <View className="flex flex-col gap-2 p-5 pb-10">
+                  {sortOptions.map(option => {
+                      const isSelected = sortBy === option.sortBy && sortOrder === option.sortOrder;
+                      return (
+                      <View 
+                        key={option.key}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                            isSelected
+                            ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                            : 'bg-white border-slate-100'
+                        }`}
+                        onClick={() => {
+                            handleSortSelect(option.key);
+                            setShowSortOptions(false);
+                        }}
+                      >
+                            <View className="flex flex-col items-start gap-1">
+                                <Text className={`text-sm font-bold ${isSelected ? 'text-emerald-700' : 'text-slate-700'}`}>{option.label}</Text>
+                                <Text className="text-xs text-slate-400">{option.description}</Text>
+                            </View>
+                            {isSelected && (
+                                <View className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <Text className="text-white text-xs">✓</Text>
+                                </View>
+                            )}
+                      </View>
+                      )
+                  })}
                 </View>
-
-                <View className="flex items-center justify-between pt-2">
-                  <View
-                    className="rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                    onClick={handleReset}
-                  >
-                    <Text>重置</Text>
-                  </View>
-
-                  <View
-                    className="rounded-2xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 active:scale-95"
-                    onClick={() => applyFilters()}
-                  >
-                    <Text>应用价格筛选</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {showSortOptions && (
-            <View className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-inner shadow-slate-200/60">
-              <View className="flex flex-col gap-4">
-                {/* 排序选项 */}
-                <View className="flex flex-col gap-3">
-                  <Text className="text-sm font-semibold text-slate-700">
-                    排序方式
-                  </Text>
-                  
-                  {/* 第一行：时间 */}
-                  <View className="flex flex-col gap-2">
-                    <Text className="text-xs font-medium text-slate-600">按时间</Text>
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "latest"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("latest")}
-                      >
-                        <Text className="text-sm font-medium">最新</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "oldest"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("oldest")}
-                      >
-                        <Text className="text-sm font-medium">最早</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* 第二行：价格 */}
-                  <View className="flex flex-col gap-2">
-                    <Text className="text-xs font-medium text-slate-600">按价格</Text>
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "priceHigh"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("priceHigh")}
-                      >
-                        <Text className="text-sm font-medium">从高到低</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "priceLow"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("priceLow")}
-                      >
-                        <Text className="text-sm font-medium">从低到高</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* 第三行：使用状况 */}
-                  <View className="flex flex-col gap-2">
-                    <Text className="text-xs font-medium text-slate-600">按使用状况</Text>
-                    <View className="flex gap-2">
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "conditionNew"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("conditionNew")}
-                      >
-                        <Text className="text-sm font-medium">从新到旧</Text>
-                      </View>
-                      <View
-                        className={`flex-1 rounded-xl border px-3 py-2 text-center transition-all ${
-                          getCurrentSortKey() === "conditionOld"
-                            ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:text-emerald-500"
-                        }`}
-                        onClick={() => handleSortSelect("conditionOld")}
-                      >
-                        <Text className="text-sm font-medium">从旧到新</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            </View>
-          )}
+            </ScrollView>
         </View>
       </View>
     </View>

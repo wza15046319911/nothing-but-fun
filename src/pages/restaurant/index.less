@@ -1,59 +1,61 @@
-.restaurant-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+// Fresh Nature Theme - Restaurant List
+@glass-bg: rgba(255, 255, 255, 0.7);
+@glass-border: rgba(255, 255, 255, 0.6);
+@glass-blur: 24px;
+@primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+@accent-color: #059669;
+@text-primary: #0f172a;
+@text-secondary: #64748b;
+@bg-base: #f0fdf4;
+@card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
-  // 增强的页面头部
+.restaurant-container {
+  height: 100vh;
+  background: @bg-base;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+
+  // Background Mesh Gradients
+  &::before {
+    content: '';
+    position: absolute;
+    top: -15vh;
+    left: -10vw;
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 25s infinite alternate ease-in-out;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10vh;
+    right: -20vw;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
+    filter: blur(70px);
+    z-index: 0;
+    animation: float-bg-reverse 30s infinite alternate ease-in-out;
+  }
+
+  // Header
+  // Note: Assuming we want to adopt the "enhanced-header" class name to match other pages for consistency,
+  // even if the original file used 'enhanced-header' inside.
   .enhanced-header {
     position: relative;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    padding: 60rpx 40rpx 80rpx;
-    color: white;
-    overflow: hidden;
-
-    .header-background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-
-      .floating-shapes {
-        position: relative;
-        width: 100%;
-        height: 100%;
-
-        .shape {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          animation: float 6s ease-in-out infinite;
-
-          &.shape-1 {
-            width: 120rpx;
-            height: 120rpx;
-            top: 20%;
-            right: 10%;
-            animation-delay: 0s;
-          }
-
-          &.shape-2 {
-            width: 80rpx;
-            height: 80rpx;
-            top: 60%;
-            right: 70%;
-            animation-delay: 2s;
-          }
-
-          &.shape-3 {
-            width: 60rpx;
-            height: 60rpx;
-            top: 30%;
-            left: 15%;
-            animation-delay: 4s;
-          }
-        }
-      }
-    }
+    z-index: 10;
+    padding: 120rpx 40rpx 40rpx;
+    flex-shrink: 0;
+    background: transparent; // Remove old gradient
 
     .header-content {
       position: relative;
@@ -62,620 +64,330 @@
       .title-section {
         .main-title {
           font-size: 56rpx;
-          font-weight: bold;
+          font-weight: 800;
+          background: @primary-gradient;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           display: block;
           margin-bottom: 16rpx;
-          text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+          letter-spacing: -1rpx;
+          animation: slideDown 0.6s ease-out;
+          text-shadow: none; // Remove old shadow
         }
 
         .subtitle {
-          font-size: 32rpx;
-          opacity: 0.9;
+          font-size: 28rpx;
+          color: @text-secondary;
+          font-weight: 500;
           display: block;
           margin-bottom: 40rpx;
+          animation: slideDown 0.6s ease-out 0.1s backwards;
         }
 
         .stats-row {
-          display: flex;
-          align-items: center;
-          gap: 32rpx;
+          display: inline-flex;
+          background: rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(@glass-blur);
+          padding: 12rpx 32rpx;
+          border-radius: 100rpx;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+          animation: fadeIn 0.8s ease-out 0.2s backwards;
+          gap: 40rpx;
 
           .stat-item {
-            text-align: center;
+            display: flex;
+            align-items: baseline;
+            gap: 8rpx;
 
             .stat-number {
-              font-size: 36rpx;
-              font-weight: bold;
-              display: block;
-              margin-bottom: 8rpx;
+              font-size: 32rpx;
+              font-weight: 700;
+              color: @accent-color;
             }
 
             .stat-label {
               font-size: 24rpx;
-              opacity: 0.8;
+              color: @text-secondary;
             }
           }
 
           .stat-divider {
-            width: 2rpx;
-            height: 40rpx;
-            background: rgba(255, 255, 255, 0.3);
+            width: 1px;
+            height: 24rpx;
+            background: rgba(0, 0, 0, 0.1);
+            align-self: center;
           }
         }
       }
     }
   }
 
-  // 筛选器包装
-  .filters-wrapper {
-    background: white;
-    margin: -40rpx 20rpx 20rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 3;
-  }
+  // Filters (Floating)
+  // Reusing the component, ensure wrapper is clean
+  // Using generic class or existing passed component class
 
-  // 增强的内容区域
+  // Content
   .enhanced-content {
-    // 只做上下内边距，左右留白交给卡片自身的 margin
-    padding: 20rpx 0;
+    position: relative;
+    z-index: 1;
+    padding: 0 32rpx;
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  // 增强的加载状态
-  .enhanced-loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
-
-    .loading-animation {
-      text-align: center;
-
-      .loading-dots {
-        display: flex;
-        justify-content: center;
-        gap: 12rpx;
-        margin-bottom: 32rpx;
-
-        .dot {
-          width: 16rpx;
-          height: 16rpx;
-          border-radius: 50%;
-          background: #ff6b6b;
-          animation: bounce 1.4s ease-in-out infinite both;
-
-          &.dot-1 {
-            animation-delay: -0.32s;
-          }
-
-          &.dot-2 {
-            animation-delay: -0.16s;
-          }
-
-          &.dot-3 {
-            animation-delay: 0s;
-          }
-        }
-      }
-
-      .loading-text {
-        font-size: 28rpx;
-        color: #666;
-      }
-    }
-  }
-
-  // 增强的空状态
-  .enhanced-empty-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
-
-    .empty-animation {
-      text-align: center;
-      animation: fadeInUp 0.6s ease-out;
-
-      .empty-icon {
-        font-size: 120rpx;
-        margin-bottom: 32rpx;
-        display: block;
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      .empty-title {
-        font-size: 32rpx;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 16rpx;
-        display: block;
-      }
-
-      .empty-subtitle {
-        font-size: 26rpx;
-        color: #666;
-      }
-    }
-  }
-
-  // 增强的餐厅列表
+  // Restaurant Cards - Glass
   .enhanced-restaurants-list {
     display: flex;
     flex-direction: column;
     gap: 32rpx;
-    padding: 0; // 由卡片自身左右margin控制与屏幕边距的一致性
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  // 增强的餐厅卡片
   .enhanced-restaurant-card {
-    background: white;
-    border-radius: 24rpx;
+    background: #ffffff;
+    border-radius: 32rpx;
     overflow: hidden;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation: slideInUp 0.6s ease-out both;
+    box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.04);
+    animation: fadeInUp 0.6s ease-out backwards;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    margin: 0;
+    width: 100%;
     position: relative;
-    // 保证左右留白一致
-    margin: 0 30rpx;
-    width: auto;
-    box-sizing: border-box;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(255, 107, 107, 0.05) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-      pointer-events: none;
-    }
+    border: 1px solid rgba(0, 0, 0, 0.02);
 
     &:active {
-      transform: translateY(-8rpx) scale(0.98);
-      box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.15);
-
-      &::before {
-        opacity: 1;
-      }
+      transform: scale(0.98);
+      box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.02);
     }
 
-    // 左右交替动画
-    &.card-left {
-      animation-name: slideInLeft;
-    }
-
-    &.card-right {
-      animation-name: slideInRight;
-    }
-
-    // 增强的图片区域
-    .enhanced-image-section {
+    .card-image-wrapper {
       position: relative;
-      height: 240rpx;
-      overflow: hidden;
+      height: 380rpx;
+      width: 100%;
+      background: #f0f0f0;
 
-      .image-container {
-        position: relative;
+      .card-image {
         width: 100%;
         height: 100%;
-
-        .swiper-container,
-        .single-image-container {
-          width: 100%;
-          height: 100%;
-          position: relative;
-        }
-
-        .enhanced-restaurant-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.6s ease;
-        }
-
-        .image-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(180deg,
-              rgba(0, 0, 0, 0.1) 0%,
-              transparent 30%,
-              transparent 70%,
-              rgba(0, 0, 0, 0.3) 100%);
-          pointer-events: none;
-
-          .image-count-badge {
-            position: absolute;
-            top: 16rpx;
-            right: 16rpx;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 8rpx 16rpx;
-            border-radius: 20rpx;
-            display: flex;
-            align-items: center;
-            gap: 8rpx;
-            backdrop-filter: blur(10rpx);
-
-            .badge-icon {
-              font-size: 20rpx;
-            }
-
-            .badge-count {
-              font-size: 22rpx;
-              font-weight: 600;
-            }
-          }
-        }
-
-        .floating-badges {
-          position: absolute;
-          bottom: 16rpx;
-          left: 16rpx;
-          right: 16rpx;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-
-          .type-badge-enhanced {
-            background: rgba(255, 255, 255, 0.95);
-            color: #333;
-            padding: 8rpx 16rpx;
-            border-radius: 20rpx;
-            backdrop-filter: blur(10rpx);
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-
-            .type-text {
-              font-size: 22rpx;
-              font-weight: 600;
-            }
-          }
-
-          .rating-badge-enhanced {
-            background: rgba(255, 107, 107, 0.95);
-            color: white;
-            padding: 8rpx 16rpx;
-            border-radius: 20rpx;
-            display: flex;
-            align-items: center;
-            gap: 6rpx;
-            backdrop-filter: blur(10rpx);
-            box-shadow: 0 4rpx 16rpx rgba(255, 107, 107, 0.3);
-
-            .rating-star {
-              font-size: 20rpx;
-            }
-
-            .rating-number {
-              font-size: 22rpx;
-              font-weight: 600;
-            }
-          }
-        }
-      }
-    }
-
-    // 增强的餐厅信息
-    .enhanced-restaurant-info {
-      padding: 32rpx;
-      position: relative;
-      z-index: 2;
-
-      .info-header {
-        margin-bottom: 24rpx;
-
-        .name-section {
-          .enhanced-restaurant-name {
-            font-size: 36rpx;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 16rpx;
-            display: block;
-            line-height: 1.3;
-          }
-
-          .quick-stats {
-            display: flex;
-            gap: 12rpx;
-
-            .stat-chip {
-              background: #f8f9fa;
-              padding: 8rpx 16rpx;
-              border-radius: 20rpx;
-              display: flex;
-              align-items: center;
-              gap: 6rpx;
-              transition: all 0.3s ease;
-              border: 2rpx solid transparent;
-
-              &:active {
-                transform: scale(0.95);
-                background: #e9ecef;
-              }
-
-              .chip-icon {
-                font-size: 20rpx;
-                transition: transform 0.3s ease;
-              }
-
-              .chip-text {
-                font-size: 22rpx;
-                font-weight: 600;
-                color: #666;
-              }
-
-              &.price-chip {
-                background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-                border-color: rgba(245, 124, 0, 0.2);
-
-                .chip-text {
-                  color: #f57c00;
-                }
-
-                &:active {
-                  background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
-
-                  .chip-icon {
-                    transform: scale(1.2);
-                  }
-                }
-              }
-            }
-          }
-        }
+        object-fit: cover;
+        display: block;
       }
 
-      .location-section {
-        margin-bottom: 24rpx;
-
-        .location-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 12rpx;
-
-          .location-icon {
-            font-size: 24rpx;
-            margin-top: 4rpx;
-          }
-
-          .location-details {
-            flex: 1;
-
-            .street-address {
-              font-size: 26rpx;
-              color: #333;
-              font-weight: 500;
-              margin-bottom: 6rpx;
-              display: block;
-            }
-
-            .suburb-state {
-              font-size: 24rpx;
-              color: #666;
-            }
-          }
-        }
+      .card-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: #eee;
       }
 
-      .description-section {
-        margin-bottom: 32rpx;
-
-        .enhanced-description {
-          font-size: 26rpx;
-          color: #666;
-          line-height: 1.6;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
+      .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 30%, transparent 70%, rgba(0, 0, 0, 0.05) 100%);
+        pointer-events: none;
       }
 
-      .action-section {
+      .card-badges {
+        position: absolute;
+        top: 24rpx;
+        left: 24rpx;
+        right: 24rpx;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        pointer-events: none;
 
-        .rating-display {
+        .badge {
+          height: 52rpx;
+          padding: 0 20rpx;
+          border-radius: 26rpx;
           display: flex;
           align-items: center;
-          gap: 12rpx;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(8px);
+          box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 
-          .rating-text {
-            font-size: 26rpx;
-            font-weight: 600;
-            text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
+          text {
+            font-size: 24rpx;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.5px;
           }
 
-          // 星级评分动画
-          .nut-rate {
-            .nut-rate-item {
-              transition: transform 0.2s ease;
+          &.type-badge {
+            // Specific styles if needed
+          }
 
-              &:hover {
-                transform: scale(1.1);
-              }
+          &.rating-badge {
+            background: rgba(40, 40, 40, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+
+            text {
+              color: #fff;
+            }
+
+            .star {
+              font-size: 22rpx;
+              margin-right: 6rpx;
+            }
+
+            .score {
+              font-size: 26rpx;
+              font-weight: 700;
+              color: #fbbf24;
             }
           }
         }
-
-        .action-button {
-          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-          color: white;
-          padding: 12rpx 24rpx;
-          border-radius: 24rpx;
-          display: flex;
-          align-items: center;
-          gap: 8rpx;
-          box-shadow: 0 4rpx 16rpx rgba(255, 107, 107, 0.3);
-          transition: all 0.3s ease;
-
-          &:active {
-            transform: scale(0.95);
-            box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.4);
-          }
-
-          .action-text {
-            font-size: 24rpx;
-            font-weight: 600;
-          }
-
-          .action-arrow {
-            font-size: 20rpx;
-            font-weight: bold;
-          }
-        }
       }
     }
 
-    // 鼠标悬停效果（在支持的设备上）
-    &:hover {
-      .enhanced-image-section {
-        .enhanced-restaurant-image {
-          transform: scale(1.05);
-        }
-      }
-    }
-  }
+    .card-content {
+      padding: 24rpx 32rpx 32rpx;
+      background: #fff;
 
-  // 增强的分页包装
-  .enhanced-pagination-wrapper {
-    background: white;
-    margin: 40rpx 20rpx 20rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-    padding: 20rpx;
-  }
-
-  // 增强的底部提示
-  .enhanced-bottom-tip {
-    display: flex;
-    justify-content: center;
-    padding: 60rpx 20rpx;
-
-    .tip-content {
-      text-align: center;
-      animation: fadeInUp 0.6s ease-out;
-
-      .tip-icon {
-        font-size: 48rpx;
-        margin-bottom: 16rpx;
-        display: block;
-        animation: bounce 2s ease-in-out infinite;
-      }
-
-      .tip-text {
-        font-size: 28rpx;
-        font-weight: 600;
-        color: #333;
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         margin-bottom: 8rpx;
-        display: block;
+
+        .restaurant-name {
+          flex: 1;
+          font-size: 34rpx;
+          font-weight: 800;
+          color: #1a1a1a;
+          line-height: 1.3;
+          margin-right: 16rpx;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .restaurant-price {
+          font-size: 28rpx;
+          font-weight: 600;
+          color: @text-secondary;
+          letter-spacing: 1px;
+        }
       }
 
-      .tip-subtext {
-        font-size: 24rpx;
-        color: #666;
+      .card-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24rpx;
+
+        .meta-text {
+          font-size: 24rpx;
+          color: #888;
+          font-weight: 500;
+        }
+
+        .meta-dot {
+          margin: 0 8rpx;
+          font-size: 20rpx;
+          color: #ccc;
+        }
+      }
+
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .review-stat {
+          display: inline-flex;
+          align-items: center;
+          background: rgba(16, 185, 129, 0.08);
+          padding: 8rpx 16rpx;
+          border-radius: 8rpx;
+
+          .icon {
+            font-size: 22rpx;
+            margin-right: 8rpx;
+          }
+
+          .count {
+            font-size: 22rpx;
+            font-weight: 600;
+            color: @accent-color;
+          }
+        }
       }
     }
   }
 }
 
-// 动画关键帧
-@keyframes float {
+.enhanced-content {
+  flex: 1;
+  height: 0;
+  width: 100%;
+}
 
-  0%,
-  100% {
-    transform: translateY(0px);
+.filter-section {
+  padding: 0 32rpx;
+  margin-bottom: 20rpx;
+  flex-shrink: 0;
+}
+
+// Loading
+.enhanced-loading-container,
+.enhanced-empty-container {
+  padding: 100rpx 0;
+  text-align: center;
+  color: @text-secondary;
+
+  .empty-icon {
+    font-size: 80rpx;
+    display: block;
+    margin-bottom: 20rpx;
   }
 
-  50% {
-    transform: translateY(-20rpx);
+  .dot {
+    background: @accent-color;
   }
 }
 
-@keyframes bounce {
+// Animation Keyframes
+@keyframes float-bg {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
 
-  0%,
-  20%,
-  53%,
-  80%,
   100% {
-    transform: translateY(0);
-  }
-
-  40%,
-  43% {
-    transform: translateY(-8rpx);
-  }
-
-  70% {
-    transform: translateY(-4rpx);
-  }
-
-  90% {
-    transform: translateY(-2rpx);
+    transform: translate(20px, 40px) scale(1.1);
   }
 }
 
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
+@keyframes float-bg-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
 
-  50% {
-    transform: scale(1.05);
+  100% {
+    transform: translate(-30px, -20px) scale(0.9);
   }
 }
 
-@keyframes slideInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(40rpx);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40rpx);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(40rpx);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20rpx);
+    transform: translateY(20px);
   }
 
   to {
@@ -684,409 +396,14 @@
   }
 }
 
-// 响应式设计
-@media (max-width: 750rpx) {
-  .restaurant-container {
-    .enhanced-header {
-      padding: 50rpx 30rpx 60rpx;
-
-      .header-content {
-        .title-section {
-          .main-title {
-            font-size: 48rpx;
-          }
-
-          .subtitle {
-            font-size: 28rpx;
-          }
-
-          .stats-row {
-            gap: 24rpx;
-
-            .stat-item {
-              .stat-number {
-                font-size: 32rpx;
-              }
-
-              .stat-label {
-                font-size: 22rpx;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .filters-wrapper {
-      margin: -30rpx 16rpx 16rpx;
-    }
-
-    .enhanced-content {
-      padding: 16rpx;
-    }
-
-    .enhanced-restaurants-list {
-      gap: 24rpx;
-    }
-
-    .enhanced-restaurant-card {
-      .enhanced-image-section {
-        height: 200rpx;
-      }
-
-      .enhanced-restaurant-info {
-        padding: 24rpx;
-
-        .info-header {
-          .name-section {
-            .enhanced-restaurant-name {
-              font-size: 32rpx;
-            }
-          }
-        }
-
-        .action-section {
-          .action-button {
-            padding: 10rpx 20rpx;
-
-            .action-text {
-              font-size: 22rpx;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// 筛选区域
-.filter-section {
-  background: white;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #eee;
-
-  .suburb-filter,
-  .sort-filter,
-  .type-filter,
-  .price-filter {
-    margin-bottom: 20rpx;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 
-  .filter-list {
-    display: flex;
-    padding: 0 30rpx;
-    white-space: nowrap;
-
-    .filter-item {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16rpx 24rpx;
-      margin-right: 20rpx;
-      background: #f8f9fa;
-      border-radius: 40rpx;
-      border: 2rpx solid transparent;
-      transition: all 0.3s ease;
-
-      &.active {
-        background: #ff6b6b;
-        border-color: #ff6b6b;
-
-        .filter-text {
-          color: white;
-        }
-      }
-
-      .filter-text {
-        font-size: 28rpx;
-        color: #666;
-        white-space: nowrap;
-      }
-    }
-  }
-}
-
-// 内容区域
-.content {
-  flex: 1;
-}
-
-// 加载状态
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 100rpx 0;
-
-  .loading-text {
-    margin-top: 20rpx;
-    font-size: 28rpx;
-    color: #999;
-  }
-}
-
-// 餐厅列表
-.restaurants-list {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  .restaurant-card {
-    background: white;
-    border-radius: 20rpx;
-    margin-bottom: 30rpx;
-    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    // max-width: 92%;
-    box-sizing: border-box;
-
-    &:active {
-      transform: translateY(2rpx);
-      box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-    }
-
-    // 餐厅图片
-    .restaurant-image-container {
-      position: relative;
-      height: 400rpx;
-
-      .restaurant-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      // 为Swiper组件设置样式
-      .nut-swiper {
-        height: 100%;
-        width: 100%;
-
-        .nut-swiper-pagination {
-          bottom: 12px;
-
-          .nut-swiper-pagination-bullet {
-            background-color: rgba(255, 255, 255, 0.5);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            margin: 0 3px;
-
-            &.nut-swiper-pagination-bullet-active {
-              background-color: #fff;
-            }
-          }
-        }
-
-        // 确保轮播项占满容器
-        .nut-swiper-item {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-      }
-
-      // 图片计数器样式
-      .image-count-badge {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: rgba(0, 0, 0, 0.6);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-        z-index: 10;
-      }
-
-      .type-badge {
-        position: absolute;
-        top: 20rpx;
-        left: 20rpx;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 8rpx 16rpx;
-        border-radius: 20rpx;
-        font-size: 24rpx;
-        z-index: 10;
-      }
-    }
-
-    // 餐厅信息
-    .restaurant-info {
-      padding: 30rpx;
-      width: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
-
-      .restaurant-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 20rpx;
-        gap: 20rpx;
-
-        .restaurant-name {
-          flex: 1;
-          font-size: 32rpx;
-          font-weight: bold;
-          color: #333;
-          line-height: 1.4;
-          min-width: 0; // 允许文本缩减
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        }
-
-        .rating-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          flex-shrink: 0; // 防止评分区域被压缩
-          min-width: 120rpx;
-
-          .rating-score {
-            font-size: 28rpx;
-            font-weight: bold;
-            margin-top: 8rpx;
-            white-space: nowrap;
-          }
-        }
-      }
-
-      .restaurant-location {
-        margin-bottom: 20rpx;
-
-        .location-text {
-          font-size: 28rpx;
-          color: #666;
-          margin-bottom: 8rpx;
-          display: block;
-        }
-
-        .suburb-text {
-          font-size: 26rpx;
-          color: #999;
-          display: block;
-        }
-      }
-
-      .restaurant-description {
-        font-size: 28rpx;
-        color: #666;
-        line-height: 1.5;
-        margin-bottom: 30rpx;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        width: 100%;
-        box-sizing: border-box;
-      }
-
-      // 价格信息
-      .pricing-info {
-        margin-bottom: 20rpx;
-
-        .pricing-text {
-          font-size: 26rpx;
-          color: #ff6b6b;
-          font-weight: 600;
-          background: #fff5f5;
-          padding: 8rpx 12rpx;
-          border-radius: 8rpx;
-          display: inline-block;
-        }
-      }
-
-      // 底部信息
-      .restaurant-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 20rpx;
-        border-top: 1rpx solid #f0f0f0;
-
-        .review-info {
-          .review-count {
-            font-size: 26rpx;
-            color: #666;
-          }
-        }
-
-        .action-hint {
-          .hint-text {
-            font-size: 24rpx;
-            color: #ff6b6b;
-          }
-        }
-      }
-    }
-  }
-}
-
-
-// 响应式适配
-@media screen and (max-width: 750rpx) {
-  .restaurant-container {
-    .header {
-      padding: 30rpx 20rpx 20rpx;
-
-      .header-content {
-        .title {
-          font-size: 42rpx;
-        }
-
-        .subtitle {
-          font-size: 26rpx;
-        }
-      }
-    }
-
-    .filter-section {
-      .filter-list {
-        padding: 0 20rpx;
-
-        .filter-item {
-          padding: 14rpx 20rpx;
-          margin-right: 16rpx;
-
-          .filter-text {
-            font-size: 26rpx;
-          }
-        }
-      }
-    }
-
-    .content {
-      padding: 20rpx;
-    }
-
-    .restaurants-list {
-      .restaurant-card {
-        .restaurant-info {
-          padding: 24rpx;
-
-          .restaurant-header {
-            .restaurant-name {
-              font-size: 30rpx;
-            }
-          }
-
-          .restaurant-description {
-            font-size: 26rpx;
-          }
-        }
-      }
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

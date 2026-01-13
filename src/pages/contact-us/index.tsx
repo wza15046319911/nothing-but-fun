@@ -7,28 +7,21 @@ const wechatContact = 'Brisbane10000'
 
 const ContactUs: React.FC = () => {
   const handleCopyWechat = () => {
-    Taro.setClipboardData({ data: `微信号：${wechatContact}` })
+    Taro.setClipboardData({ data: wechatContact })
       .then(() => {
         Taro.showToast({ title: '微信号已复制', icon: 'success', duration: 1500 })
       })
       .catch(() => {
-        Taro.showToast({ title: '复制失败，请稍后重试', icon: 'none', duration: 1500 })
+        Taro.showToast({ title: '复制失败', icon: 'none' })
       })
   }
 
   return (
     <ScrollView className='contact-page' scrollY>
-      {/* Hero Section */}
-      <View className='hero-section'>
-        <View className='hero-content'>
-          <Text className='hero-title'>布玩小秘书</Text>
-          <Text className='hero-subtitle'>贴心客服随时待命</Text>
-          <Text className='hero-description'>活动报名、问题反馈，一条消息搞定</Text>
-        </View>
-        <View className='hero-decoration'>
-          <View className='decoration-circle circle-1'></View>
-          <View className='decoration-circle circle-2'></View>
-          <View className='decoration-circle circle-3'></View>
+      {/* Immersive Header */}
+      <View className='enhanced-header'>
+        <View className='header-content'>
+            <Text className='header-title'>布玩小秘书</Text>
         </View>
       </View>
 
@@ -36,52 +29,52 @@ const ContactUs: React.FC = () => {
       <View className='quick-contact-section'>
         <View className='section-header'>
           <Text className='section-title'>快速联系</Text>
-          <Text className='section-subtitle'>添加微信 Brisbane10000，连接布玩小秘书</Text>
+          <Text className='section-subtitle'>点击下方卡片即可复制微信号</Text>
         </View>
+        
         <View className='contact-cards'>
-          <View className='contact-card wechat-card' onClick={handleCopyWechat}>
-            <View className='card-icon'>
-              <Text className='icon-emoji'>💬</Text>
-            </View>
+          <View className='contact-card' onClick={handleCopyWechat}>
+            <Text className='card-icon'>💬</Text>
             <View className='card-content'>
-              <Text className='card-title'>微信联系</Text>
+              <Text className='card-title'>布玩小秘书</Text>
               <Text className='card-subtitle'>{wechatContact}</Text>
-              <Text className='card-hint'>点击复制微信号</Text>
             </View>
           </View>
+          
+
         </View>
       </View>
 
       {/* Service Features */}
       <View className='features-section'>
         <View className='section-header'>
-          <Text className='section-title'>我们的优势</Text>
-          <Text className='section-subtitle'>专业的团队，贴心的服务</Text>
+          <Text className='section-title'>为什么选择我们</Text>
+          <Text className='section-subtitle'>用心打造最优质的布里斯班生活服务</Text>
         </View>
         
         <View className='features-grid'>
           <View className='feature-card'>
-            <View className='feature-icon'>🎯</View>
-            <Text className='feature-title'>专业服务</Text>
-            <Text className='feature-desc'>经验丰富的团队提供专业的活动策划与执行服务</Text>
+            <Text className='feature-icon'>🎯</Text>
+            <Text className='feature-title'>专业靠谱</Text>
+            <Text className='feature-desc'>深耕布村多年，经验丰富</Text>
           </View>
           
           <View className='feature-card'>
-            <View className='feature-icon'>⚡</View>
-            <Text className='feature-title'>快速响应</Text>
-            <Text className='feature-desc'>24小时内回复您的咨询，及时解决您的问题</Text>
+            <Text className='feature-icon'>⚡</Text>
+            <Text className='feature-title'>极速响应</Text>
+            <Text className='feature-desc'>全天候为您排忧解难</Text>
           </View>
           
           <View className='feature-card'>
-            <View className='feature-icon'>🌟</View>
-            <Text className='feature-title'>品质保证</Text>
-            <Text className='feature-desc'>以客户满意为目标，提供高品质的服务体验</Text>
+            <Text className='feature-icon'>🌟</Text>
+            <Text className='feature-title'>品质优选</Text>
+            <Text className='feature-desc'>严选活动与服务商家</Text>
           </View>
           
           <View className='feature-card'>
-            <View className='feature-icon'>🎉</View>
-            <Text className='feature-title'>丰富活动</Text>
-            <Text className='feature-desc'>涵盖各类活动场景，持续推出新颖有趣的项目</Text>
+            <Text className='feature-icon'>🎉</Text>
+            <Text className='feature-title'>缤纷活动</Text>
+            <Text className='feature-desc'>每周更新，精彩不断</Text>
           </View>
         </View>
       </View>
@@ -89,4 +82,4 @@ const ContactUs: React.FC = () => {
   )
 }
 
-export default ContactUs 
+export default ContactUs

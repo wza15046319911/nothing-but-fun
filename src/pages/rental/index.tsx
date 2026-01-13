@@ -70,27 +70,22 @@ const RentalPage: React.FC = () => {
   // Render Helpers
   const renderLoading = () => (
     <View className="loading-state">
-      <View className="state-icon">🔄</View>
+      <View className="state-icon">🌱</View>
       <Text className="state-text">正在寻找好物...</Text>
     </View>
   );
 
   const renderEmpty = () => (
     <View className="empty-state">
-      <View className="state-icon">🏝️</View>
+      <View className="state-icon">🍃</View>
       <Text className="state-text">暂无相关租赁物品</Text>
     </View>
   );
 
   return (
     <View className="rental-container">
-      {/* Header Section */}
+      {/* Immersive Header */}
       <View className="rental-header">
-        <View className="header-bg-elements">
-          <View className="circle-1"></View>
-          <View className="circle-2"></View>
-        </View>
-
         <View className="header-content">
           <Text className="header-title">布好玩租赁</Text>
           <Text className="header-subtitle">精选房产、车辆与设备租赁</Text>
@@ -98,17 +93,17 @@ const RentalPage: React.FC = () => {
           <View className="header-stats">
             <View className="stat-item">
               <Text className="stat-value">{items.length}</Text>
-              <Text className="stat-label">在租物品</Text>
+              <Text className="stat-label">在租</Text>
             </View>
             <View className="stat-item">
               <Text className="stat-value">{categories.length}</Text>
-              <Text className="stat-label">分类覆盖</Text>
+              <Text className="stat-label">分类</Text>
             </View>
           </View>
         </View>
       </View>
 
-      {/* Filters (Floating) */}
+      {/* Floating Filters */}
       <View className="filter-section">
         <ScrollView scrollX className="filter-scroll" showScrollbar={false}>
           <View className="filter-options">

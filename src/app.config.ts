@@ -2,15 +2,12 @@ export default defineAppConfig({
   pages: [
     'pages/loading/index',
     'pages/second-hand/publish/index',
-    // 'pages/carpool/index',
-    // 'pages/carpool/publish/index',
     'pages/contact-info/index',
     'pages/past-activities/index',
     'pages/update-phone/index',
     'pages/index/index',
     'pages/course/write-review/index',
     'pages/second-hand/index',
-    // 'pages/rental-house/index',
     'pages/restaurant/index',
     'pages/restaurant/detail/index',
     'pages/course/index',
@@ -23,10 +20,8 @@ export default defineAppConfig({
     'pages/gift/detail/index',
     'pages/rental/index',
     'pages/rental/detail/index',
-    // 'pages/rental-house/detail/index',
     'pages/course/reviews/index',
     'pages/user-registrations/index',
-
     'pages/contact-us/index'
   ],
   window: {

@@ -1,278 +1,308 @@
+@import "../index.less";
+
 .publish-page {
   min-height: 100vh;
-  background: #f5f7fb;
-  padding-bottom: 96px;
-  color: #1f2933;
+  background: @bg-base;
+  padding-bottom: 200rpx; // Space for bottom bar
+  position: relative;
+  overflow-x: hidden;
+
+  // Background Mesh Gradients
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10vh;
+    left: 20vw; // Different position from detail for variety
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    // Soft Mint & Warm Sun
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, rgba(251, 191, 36, 0.15) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 20s infinite alternate ease-in-out;
+  }
 }
 
 .publish-page__header {
-  padding: 40px 28px 16px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-}
+  position: relative;
+  z-index: 1;
+  padding: 40rpx 32rpx;
 
-.publish-page__title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #0f172a;
-}
+  .publish-page__title {
+    font-size: 56rpx;
+    font-weight: 800;
+    background: @primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    margin-bottom: 24rpx;
+    animation: slideRight 0.6s ease-out;
+  }
 
-.publish-page__subtitle {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #475569;
-}
+  .publish-page__stats {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    padding: 12rpx 24rpx;
+    border-radius: 100rpx;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.8s ease-out;
 
-.publish-page__stats {
-  margin-top: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 20px 45px -35px rgba(15, 118, 110, 0.5);
-}
+    .publish-page__stats-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8rpx;
 
-.publish-page__stats-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+      .publish-page__stats-value {
+        font-size: 32rpx;
+        font-weight: 700;
+        color: @accent-color;
+      }
 
-.publish-page__stats-value {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f766e;
-}
+      .publish-page__stats-label {
+        font-size: 24rpx;
+        color: @text-secondary;
+      }
+    }
 
-.publish-page__stats-label {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.publish-page__stats-divider {
-  width: 1px;
-  height: 28px;
-  background: rgba(148, 163, 184, 0.35);
+    .publish-page__stats-divider {
+      width: 1px;
+      height: 24rpx;
+      background: rgba(0, 0, 0, 0.1);
+      margin: 0 24rpx;
+      align-self: center;
+    }
+  }
 }
 
 .publish-page__body {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 0 24px 32px;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 28px 60px -48px rgba(15, 118, 110, 0.35);
-}
-
-.card__title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.card__subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #64748b;
-}
-
-.card__content {
-  margin-top: 18px;
-}
-
-.card__content--uploader {
-  padding: 12px;
-  border-radius: 18px;
-  // background: #f8fafc;
-}
-
-.card__content--gap {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 18px;
-  border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid transparent;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.field__label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.field__input,
-.field__textarea {
-  width: 100%;
-  background: transparent;
-  border: none;
-  font-size: 15px;
-  color: #1f2937;
-  line-height: 1.6;
-}
-
-.field__input {
-  padding: 4px 0;
-}
-
-.field__input--price {
-  text-align: right;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #047857;
-}
-
-.field__textarea {
-  min-height: 150px;
-  resize: none;
-}
-
-.field__placeholder {
-  color: #94a3b8;
-}
-
-.field__hint {
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.field__error {
-  font-size: 12px;
-  color: #dc2626;
-}
-
-.field__picker {
-  padding: 4px 0;
-  font-size: 15px;
-  color: #1f2937;
-  border-radius: 8px;
-  background: transparent;
   position: relative;
-}
-
-.field__picker::after {
-  content: '▼';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.field--error {
-  border-color: rgba(220, 38, 38, 0.35);
-  background: #fff4f4;
-}
-
-.card--tips {
-  background: linear-gradient(160deg, rgba(236, 253, 245, 0.9), #ffffff 55%, #f8fafc);
-  border: 1px solid rgba(16, 185, 129, 0.18);
-}
-
-.tips {
+  z-index: 1;
+  padding: 0 32rpx;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 32rpx;
 }
 
-.tips__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #0f766e;
-}
+// Glass Card Style for Form Sections
+.card {
+  background: @glass-bg;
+  backdrop-filter: blur(30px);
+  border-radius: 32rpx;
+  border: 1px solid @glass-border;
+  padding: 32rpx;
+  box-shadow: @card-shadow;
+  animation: fadeInUp 0.6s ease-out backwards;
 
-.tips__dot {
-  width: 8px;
-  height: 8px;
-  margin-top: 6px;
-  border-radius: 999px;
-  background: #10b981;
-}
-
-.tips__text {
-  flex: 1;
-}
-
-.submit-bar {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 24px 28px;
-  background: linear-gradient(180deg, rgba(245, 247, 251, 0) 0%, #f5f7fb 65%);
-}
-
-.submit-bar__button {
-  width: 100%;
-  padding: 14px 0;
-  border-radius: 999px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(135deg, #0ea5e9, #0f766e);
-  box-shadow: 0 16px 40px -24px rgba(14, 165, 233, 0.7);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-}
-
-.submit-bar__button:active {
-  transform: scale(0.97);
-  box-shadow: 0 10px 24px -18px rgba(14, 165, 233, 0.6);
-}
-
-.submit-bar__button--disabled {
-  opacity: 0.4;
-  box-shadow: none;
-}
-
-@media (max-width: 560px) {
-  .publish-page__header {
-    padding: 32px 20px 12px;
+  &:nth-child(1) {
+    animation-delay: 0.1s;
   }
 
-  .publish-page__title {
-    font-size: 24px;
+  &:nth-child(2) {
+    animation-delay: 0.2s;
   }
 
-  .publish-page__body {
-    padding: 0 20px 24px;
+  &:nth-child(3) {
+    animation-delay: 0.3s;
   }
 
-  .card {
-    border-radius: 20px;
-    padding: 20px;
+  &:nth-child(4) {
+    animation-delay: 0.4s;
   }
 
-  .field {
-    padding: 16px;
+  .card__title {
+    font-size: 32rpx;
+    font-weight: 700;
+    color: @text-primary;
+    margin-bottom: 12rpx;
+    display: block;
   }
 
   .card__subtitle {
-    font-size: 12px;
+    font-size: 24rpx;
+    color: @text-secondary;
+    margin-bottom: 24rpx;
+    display: block;
+  }
+
+  .card__content--uploader {
+    // Custom uploader styles override needed potentially depending on component
+    padding: 10rpx 0;
+  }
+
+  .card__content--gap {
+    display: flex;
+    flex-direction: column;
+    gap: 24rpx;
+  }
+}
+
+// Input Fields
+.field {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: @accent-color;
+    box-shadow: 0 0 0 4rpx rgba(16, 185, 129, 0.1);
+  }
+
+  &.field--error {
+    background: rgba(255, 71, 87, 0.05);
+    border-color: rgba(255, 71, 87, 0.3);
+  }
+
+  .field__label {
+    font-size: 26rpx;
+    font-weight: 600;
+    color: @text-secondary;
+    margin-bottom: 12rpx;
+  }
+
+  .field__input {
+    font-size: 30rpx;
+    color: @text-primary;
+    width: 100%;
+
+    &.field__input--price {
+      font-size: 40rpx;
+      font-weight: 700;
+      color: @accent-color;
+    }
+  }
+
+  .field__textarea {
+    font-size: 30rpx;
+    color: @text-primary;
+    width: 100%;
+    min-height: 200rpx;
+    line-height: 1.6;
+  }
+
+  .field__placeholder {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .field__hint {
+    font-size: 22rpx;
+    color: @text-secondary;
+    text-align: right;
+    margin-top: 12rpx;
+  }
+
+  .field__error {
+    font-size: 22rpx;
+    color: #ff4757;
+    margin-top: 8rpx;
+  }
+
+  .field__picker {
+    font-size: 30rpx;
+    color: @text-primary;
+    min-height: 44rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &::after {
+      content: '';
+      width: 16rpx;
+      height: 16rpx;
+      border-right: 4rpx solid @text-secondary;
+      border-bottom: 4rpx solid @text-secondary;
+      transform: rotate(45deg);
+      opacity: 0.5;
+    }
+  }
+}
+
+// Tips Card
+.card--tips {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(230, 240, 255, 0.5) 100%);
+
+  .tips {
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+
+    .tips__item {
+      display: flex;
+      gap: 16rpx;
+
+      .tips__dot {
+        width: 12rpx;
+        height: 12rpx;
+        background: @accent-color;
+        border-radius: 50%;
+        margin-top: 10rpx;
+        opacity: 0.6;
+      }
+
+      .tips__text {
+        font-size: 26rpx;
+        color: @text-secondary;
+        line-height: 1.5;
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Fixed Submit Bar
+.submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 40rpx calc(env(safe-area-inset-bottom) + 24rpx);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  z-index: 100;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  animation: slideUp 0.8s ease-out;
+
+  .submit-bar__button {
+    width: 100%;
+    height: 100rpx;
+    border-radius: 50rpx;
+    background: @primary-gradient;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 32rpx;
+    font-weight: 700;
+    letter-spacing: 2rpx;
+    box-shadow: 0 10rpx 30rpx rgba(16, 185, 129, 0.3);
+    transition: transform 0.2s;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &.submit-bar__button--disabled {
+      opacity: 0.5;
+      background: #ccc;
+      box-shadow: none;
+    }
+  }
+}
+
+// Animations
+@keyframes slideRight {
+  from {
+    transform: translateX(-40rpx);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }

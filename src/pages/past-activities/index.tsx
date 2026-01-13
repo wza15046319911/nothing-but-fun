@@ -3,26 +3,18 @@ import { View, Text, Image, ScrollView } from '@tarojs/components'
 import { PullToRefresh } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import { eventsApi, Event, EventFilters } from '../../services/events'
-import { Swiper } from '@nutui/nutui-react-taro'
+import { Swiper, SwiperItem } from '@tarojs/components' // Standard swiper
 import EventFiltersComponent from '../../components/EventFilters'
 import Pagination from '../../components/Pagination'
 import { useEventTypes } from '../../hooks/useTypes'
 import './index.less'
 
 const PastActivities: React.FC = () => {
-  // Use event types hook
   const { getEventTypeName } = useEventTypes()
 
-  // State for events data
+  // State
   const [events, setEvents] = useState<Event[]>([])
-
-  // State for loading
   const [loading, setLoading] = useState(false)
-
-  // State for refreshing
-  const [refreshing, setRefreshing] = useState(false)
-
-  // State for pagination
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -30,24 +22,20 @@ const PastActivities: React.FC = () => {
     totalPages: 0
   })
 
-  // State for filters
+  // Filters
   const [currentFilters, setCurrentFilters] = useState<EventFilters>({
     isHistorical: true,
     page: 1,
     limit: 10
   })
   
-  // Fetch past events from API
   const fetchPastEvents = async (showLoading = true, filters: EventFilters = currentFilters) => {
     try {
-      if (showLoading) {
-        setLoading(true)
-      }
+      if (showLoading) setLoading(true)
 
-      // 使用新的分页API
       const response = await eventsApi.getAllEvents(filters)
 
-      // Sort events by start time in descending order (most recent first)
+      // Sort: most recent first
       const sortedEvents = response.data.sort((a: Event, b: Event) =>
         new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
       )
@@ -60,149 +48,89 @@ const PastActivities: React.FC = () => {
         totalPages: response.totalPages
       })
     } catch (error) {
-      console.error('获取过去活动失败:', error)
-      Taro.showToast({
-        title: '加载失败，请稍后重试',
-        icon: 'error',
-        duration: 2000
-      })
+      console.error('获取活动失败:', error)
+      Taro.showToast({ title: '加载失败', icon: 'none' })
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
-  // Handle filter changes
   const handleFiltersChange = (filters: EventFilters) => {
     const newFilters = {
       ...filters,
-      isHistorical: true, // 确保始终获取历史活动
-      page: 1, // 重置到第一页
+      isHistorical: true,
+      page: 1,
       limit: 10
     }
     setCurrentFilters(newFilters)
     fetchPastEvents(true, newFilters)
   }
 
-  // Handle pagination change
   const handlePageChange = (page: number) => {
-    const newFilters = {
-      ...currentFilters,
-      page
-    }
+    const newFilters = { ...currentFilters, page }
     setCurrentFilters(newFilters)
     fetchPastEvents(true, newFilters)
   }
   
-  // Pull to refresh functionality
   const handleRefresh = async () => {
-    setRefreshing(true)
     await fetchPastEvents(false)
   }
   
-  // Fetch events on component mount
   useEffect(() => {
     fetchPastEvents()
   }, [])
   
-  // 直接使用从API获取的已过滤事件
-  const filteredEvents = events
-
-  
-  // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    return `${year}-${month}-${day}`
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
   }
 
-  // Format time for display
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
-    const hours = date.getHours().toString().padStart(2, '0')
-    const minutes = date.getMinutes().toString().padStart(2, '0')
-    return `${hours}:${minutes}`
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
   }
 
-  // Handle event card click
   const handleEventClick = (event: Event) => {
     Taro.navigateTo({
       url: `/pages/events/detail/index?id=${event.id}`
     })
   }
 
-
-
   return (
     <View className='enhanced-past-activities-container'>
-      {/* 增强的头部区域 */}
+      {/* Immersive Header */}
       <View className='enhanced-header-section'>
-        <View className='header-background'>
-          <Image
-            className='enhanced-header-image'
-            src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=400&fit=crop'
-            mode='aspectFill'
-          />
-          <View className='header-particles'>
-            <View className='particle particle-1'></View>
-            <View className='particle particle-2'></View>
-            <View className='particle particle-3'></View>
-            <View className='particle particle-4'></View>
-            <View className='particle particle-5'></View>
-          </View>
-          <View className='header-overlay'></View>
-        </View>
         <View className='header-content'>
           <View className='title-section'>
             <Text className='enhanced-header-title'>精彩回放站</Text>
-            <Text className='enhanced-header-subtitle'>高光瞬间随时重温</Text>
-            <View className='stats-section'>
-              <View className='stat-item'>
-                <Text className='stat-number'>{events.length}</Text>
-                <Text className='stat-label'>场活动</Text>
-              </View>
-              <View className='stat-divider'></View>
-              <View className='stat-item'>
-                <Text className='stat-number'>1000+</Text>
-                <Text className='stat-label'>参与人次</Text>
-              </View>
-            </View>
+            <Text className='enhanced-header-subtitle'>高光瞬间重温，留住美好记忆</Text>
           </View>
         </View>
       </View>
 
+      {/* Filters */}
+      <View className='enhanced-filters-wrapper'>
+          <EventFiltersComponent
+            onFiltersChange={handleFiltersChange}
+            initialFilters={currentFilters}
+          />
+      </View>
 
-
-      {/* 增强的筛选器 */}
-      {/* <View className='enhanced-filters-wrapper'> */}
-      <EventFiltersComponent
-        onFiltersChange={handleFiltersChange}
-        initialFilters={currentFilters}
-      />
-      {/* </View> */}
-
-      {/* 增强的活动列表 */}
-      <PullToRefresh onRefresh={handleRefresh}>
-        <ScrollView className='enhanced-content' scrollY>
+      {/* List */}
+      <ScrollView className='enhanced-content' scrollY>
           {loading ? (
             <View className='enhanced-loading-container'>
-              <View className='loading-animation'>
-                <View className='loading-dots'>
-                  <View className='dot dot-1'></View>
-                  <View className='dot dot-2'></View>
-                  <View className='dot dot-3'></View>
-                </View>
-                <Text className='loading-text'>正在加载精彩回放...</Text>
-              </View>
+               <View className='loading-dots'>
+                  <View className='dot'></View>
+               </View>
+               <Text>正在加载精彩回放...</Text>
             </View>
-          ) : filteredEvents.length > 0 ? (
+          ) : events.length > 0 ? (
             <View className='enhanced-activity-list'>
-              {filteredEvents.map((event, index) => (
+              {events.map((event, index) => (
                 <View
                   key={event.id}
-                  className={`enhanced-activity-card card-${index % 2 === 0 ? 'left' : 'right'}`}
+                  className='enhanced-activity-card'
                   onClick={() => handleEventClick(event)}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
@@ -211,21 +139,21 @@ const PastActivities: React.FC = () => {
                       {event.imageUrls && event.imageUrls.length > 1 ? (
                         <Swiper
                           circular
-                          defaultValue={0}
-                          indicator
-                          autoplay={true}
-                          style={{ height: '240rpx', width: '100%' }}
+                          indicatorDots
+                          autoplay
+                          style={{ height: '100%', width: '100%' }}
+                          indicatorColor="rgba(255,255,255,0.5)"
+                          indicatorActiveColor="#fff"
                         >
                           {event.imageUrls.map((imageUrl, imgIndex) => (
-                            <Swiper.Item key={imgIndex}>
+                            <SwiperItem key={imgIndex}>
                               <Image
                                 className='enhanced-activity-image'
                                 src={imageUrl}
                                 mode='aspectFill'
                                 lazyLoad
-                                onError={() => console.log('Image load failed:', imageUrl)}
                               />
-                            </Swiper.Item>
+                            </SwiperItem>
                           ))}
                         </Swiper>
                       ) : (
@@ -239,18 +167,26 @@ const PastActivities: React.FC = () => {
                       <View className='image-overlay'></View>
                     </View>
 
-                    {/* 活动类型标签 */}
                     {event.eventTypeRid && (
                       <View className='type-badge-floating'>
                         <Text className='type-text'>{getEventTypeName(event.eventTypeRid)}</Text>
                       </View>
                     )}
+                    
+                    {event.imageUrls && event.imageUrls.length > 1 && (
+                        <View className='image-badges'>
+                            <View className='image-count-badge'>
+                                <Text>📷 {event.imageUrls.length}</Text>
+                            </View>
+                        </View>
+                    )}
                   </View>
+                  
                   <View className='enhanced-activity-info'>
                     <View className='info-header'>
                       <Text className='enhanced-activity-title'>{event.title}</Text>
                       <View className='activity-date'>
-                        <Text className='date-text'>{formatDate(event.startTime)}</Text>
+                        <Text>{formatDate(event.startTime)}</Text>
                       </View>
                     </View>
 
@@ -260,73 +196,37 @@ const PastActivities: React.FC = () => {
                       </Text>
 
                       <View className='enhanced-activity-meta'>
-                        <View className='meta-row'>
                           <View className='enhanced-meta-item'>
-                            <Text className='meta-icon'>🕒</Text>
-                            <Text className='meta-text'>{formatTime(event.startTime)}</Text>
+                            <Text className='meta-icon'>LOCATION</Text>
+                            <Text>{event.location || '线上'}</Text>
                           </View>
                           <View className='enhanced-meta-item'>
-                            <Text className='meta-icon'>📍</Text>
-                            <Text className='meta-text'>{event.location || '线上活动'}</Text>
+                            <Text className='meta-icon'>TIME</Text>
+                            <Text>{formatTime(event.startTime)}</Text>
                           </View>
-                        </View>
-
-                        <View className='meta-row'>
-                          {event.capacity && (
-                            <View className='enhanced-meta-item'>
-                              <Text className='meta-icon'>👥</Text>
-                              <Text className='meta-text'>{event.capacity}人</Text>
-                            </View>
-                          )}
-                          {(event.priceFrom || event.price) && (
-                            <View className='enhanced-meta-item price-item'>
-                              <Text className='meta-icon'>💰</Text>
-                              <Text className='meta-text'>
-                                {event.priceFrom ?
-                                  (event.priceTo && event.priceTo !== event.priceFrom ?
-                                    `¥${event.priceFrom}-${event.priceTo}` :
-                                    `¥${event.priceFrom}`
-                                  ) :
-                                  `¥${event.price}`
-                                }
-                              </Text>
-                            </View>
-                          )}
-                          {event.free && (
-                            <View className='enhanced-meta-item price-item'>
-                              <Text className='meta-icon'>💰</Text>
-                              <Text className='meta-text'>免费</Text>
-                            </View>
-                          )}
-                        </View>
                       </View>
                     </View>
 
                     <View className='info-footer'>
-                      <View className='action-buttons'>
-                        <View className='action-button view-button'>
-                          <Text className='button-text'>查看详情</Text>
+                        <View className='view-button'>
+                          <Text>回顾精彩</Text>
                           <Text className='button-icon'>→</Text>
                         </View>
-                      </View>
                     </View>
                   </View>
                 </View>
               ))}
             </View>
           ) : (
-            <View className='enhanced-empty-container'>
-              <View className='empty-animation'>
-                <Text className='empty-icon'>📅</Text>
-                <Text className='empty-title'>暂无精彩回放</Text>
-                <Text className='empty-subtitle'>精彩活动即将到来，敬请期待</Text>
-              </View>
-            </View>
+             <View className='enhanced-empty-container'>
+                <Text className='empty-icon'>🎞️</Text>
+                <Text className='empty-title'>暂无回顾</Text>
+                <Text className='empty-subtitle'>美好正在发生，敬请期待</Text>
+             </View>
           )}
 
-          {/* 增强的分页 */}
-          {!loading && filteredEvents.length > 0 && pagination.totalPages > 1 && (
-            <View className='enhanced-pagination-wrapper'>
+          {!loading && events.length > 0 && pagination.totalPages > 1 && (
+            <View style={{marginTop: '40rpx'}}>
               <Pagination
                 currentPage={pagination.page}
                 totalPages={pagination.totalPages}
@@ -337,11 +237,11 @@ const PastActivities: React.FC = () => {
               />
             </View>
           )}
-
+          
+          <View style={{height: '60rpx'}}></View>
         </ScrollView>
-      </PullToRefresh>
     </View>
   )
 }
 
-export default PastActivities 
+export default PastActivities

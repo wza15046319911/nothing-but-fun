@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import { PullToRefresh, Loading, Empty, Button, Dialog, Rate } from '@nutui/nutui-react-taro'
-import Taro from '@tarojs/taro'
+import { Loading, Empty, Button, Dialog, Rate } from '@nutui/nutui-react-taro'
+import Taro, { usePullDownRefresh } from '@tarojs/taro'
 import { useAuth } from '../../context/auth'
 import { secondhandApi, type SecondhandItem } from '../../services/secondhand'
 import { restaurantApi, type UserRestaurantRating } from '../../services/restaurant'
@@ -95,7 +95,12 @@ const UserPosts: React.FC = () => {
     } else {
       await loadUserRatings()
     }
+    Taro.stopPullDownRefresh()
   }
+
+  usePullDownRefresh(() => {
+    handleRefresh()
+  })
 
   const handleTabChange = async (tabIndex: number) => {
     setActiveTab(tabIndex)
@@ -191,95 +196,118 @@ const UserPosts: React.FC = () => {
     return date.toLocaleDateString()
   }
 
+  const renderLoading = () => {
+    return (
+      <View className='custom-loading-container'>
+        <View className='nature-spinner'>
+            <View className='spinner-ring ring-1'></View>
+            <View className='spinner-ring ring-2'></View>
+            <View className='spinner-core'></View>
+        </View>
+        <Text className='loading-text'>Rummaging...</Text>
+      </View>
+    )
+  }
+
+  const renderEmptyState = (type: 'item' | 'rating') => {
+    const isItem = type === 'item'
+    const title = isItem ? '这里空空如也' : '暂无评分记录'
+    const subtitle = isItem ? '您还没有发布任何闲置物品，快来分享吧！' : '您还没有对任何餐厅进行评价，去尝尝鲜？'
+    const buttonText = isItem ? '🚀 立即发布' : '🍽️ 去探索美食'
+    const icon = isItem ? '📦' : '🥗'
+    
+    return (
+        <View className='custom-empty-state'>
+            <View className='empty-icon-wrapper'>
+                <Text className='empty-icon'>{icon}</Text>
+            </View>
+            <Text className='empty-title'>{title}</Text>
+            <Text className='empty-subtitle'>{subtitle}</Text>
+            <Button 
+                className='empty-action-btn' 
+                onClick={isItem ? handlePublishNew : () => Taro.navigateTo({ url: '/pages/restaurant/index' })}
+            >
+                {buttonText}
+            </Button>
+        </View>
+    )
+  }
+
   const renderRestaurantRatings = () => {
     if (restaurantLoading) {
-      return (
-        <View className='loading-container'>
-          <Loading type='spinner' />
-          <Text className='loading-text'>加载中...</Text>
-        </View>
-      )
+      return renderLoading()
     }
 
     if (restaurantRatings.length === 0) {
-      return (
-        <View className='empty-container'>
-          <Empty description='您还没有对任何餐厅进行评分' imageSize={120} />
-          <Button className='empty-publish-button' type='primary' onClick={() => Taro.navigateTo({ url: '/pages/restaurant/index' })}>
-            🍽️ 去餐厅页面
-          </Button>
-        </View>
-      )
+      return renderEmptyState('rating')
     }
 
     return (
       <View className='ratings-list'>
-        {restaurantRatings.map(rating => (
-          <View key={rating.id} className='rating-card' onClick={() => handleRestaurantRatingClick(rating)}>
-            <View className='rating-image-container'>
-              <Image
-                className='rating-image'
-                src={rating.restaurantImageUrls && rating.restaurantImageUrls.length > 0
-                  ? rating.restaurantImageUrls[0]
-                  : (rating.restaurantImage || '')}
-                mode='aspectFill'
-                lazyLoad
-              />
-              <View className='overall-rating-badge'>
-                ⭐ {rating.overallRating}
+        {restaurantRatings.map(rating => {
+             const hasImage = rating.restaurantImageUrls && rating.restaurantImageUrls.length > 0;
+             const displayImage = hasImage ? rating.restaurantImageUrls[0] : (rating.restaurantImage || '');
+             
+             return (
+              <View key={rating.id} className='rating-card-v2' onClick={() => handleRestaurantRatingClick(rating)}>
+                <View className='card-image-section'>
+                  {displayImage ? (
+                      <Image
+                        className='rating-image'
+                        src={displayImage}
+                        mode='aspectFill'
+                        lazyLoad
+                      />
+                  ) : (
+                      <View className='rating-image-placeholder'>
+                          <Text className='placeholder-icon'>🍽️</Text>
+                      </View>
+                  )}
+                  <View className='overall-badge'>
+                    <Text className='badge-star'>⭐</Text>
+                    <Text className='badge-score'>{rating.overallRating}</Text>
+                  </View>
+                </View>
+                
+                <View className='card-content-section'>
+                  <View className='id-row'>
+                      <Text className='restaurant-name'>{rating.restaurantName}</Text>
+                      <Text className='submit-date'>{formatTime(rating.createdAt)}</Text>
+                  </View>
+                  
+                  <View className='ratings-grid'>
+                    <View className='mini-rating-item'>
+                      <Text className='label'>口味</Text>
+                      <Text className='value'>{rating.tasteRating}</Text>
+                    </View>
+                    <View className='mini-rating-item'>
+                      <Text className='label'>环境</Text>
+                      <Text className='value'>{rating.environmentRating}</Text>
+                    </View>
+                    <View className='mini-rating-item'>
+                      <Text className='label'>服务</Text>
+                      <Text className='value'>{rating.serviceRating}</Text>
+                    </View>
+                    <View className='mini-rating-item'>
+                      <Text className='label'>价格</Text>
+                      <Text className='value'>{rating.priceRating}</Text>
+                    </View>
+                  </View>
+                </View>
               </View>
-            </View>
-            <View className='rating-info'>
-              <Text className='restaurant-name'>{rating.restaurantName}</Text>
-              <View className='rating-details'>
-                <View className='rating-item'>
-                  <Text className='rating-label'>口味:</Text>
-                  <Rate value={rating.tasteRating} readOnly />
-                  <Text className='rating-value'>{rating.tasteRating}</Text>
-                </View>
-                <View className='rating-item'>
-                  <Text className='rating-label'>环境:</Text>
-                  <Rate value={rating.environmentRating} readOnly />
-                  <Text className='rating-value'>{rating.environmentRating}</Text>
-                </View>
-                <View className='rating-item'>
-                  <Text className='rating-label'>服务:</Text>
-                  <Rate value={rating.serviceRating} readOnly />
-                  <Text className='rating-value'>{rating.serviceRating}</Text>
-                </View>
-                <View className='rating-item'>
-                  <Text className='rating-label'>价格:</Text>
-                  <Rate value={rating.priceRating} readOnly />
-                  <Text className='rating-value'>{rating.priceRating}</Text>
-                </View>
-              </View>
-              <Text className='rating-time'>{formatTime(rating.createdAt)}</Text>
-            </View>
-          </View>
-        ))}
+            )
+        })}
       </View>
     )
   }
 
   const renderSecondhandContent = () => {
     if (loading) {
-      return (
-        <View className='loading-container'>
-          <Loading type='spinner' />
-          <Text className='loading-text'>加载中...</Text>
-        </View>
-      )
+      return renderLoading()
     }
 
     if (items.length === 0) {
-      return (
-        <View className='empty-container'>
-          <Empty description='您还没有发布任何商品' imageSize={120} />
-          <Button className='empty-publish-button' type='primary' onClick={handlePublishNew}>
-            🚀 立即发布
-          </Button>
-        </View>
-      )
+      return renderEmptyState('item')
     }
 
     return (
@@ -355,7 +383,7 @@ const UserPosts: React.FC = () => {
                     size='small'
                     onClick={(e) => handleViewRejectionReason(item, e)}
                   >
-                    📋 查看原因
+                    查看原因
                   </Button>
                 )}
                 <Button
@@ -363,14 +391,14 @@ const UserPosts: React.FC = () => {
                   size='small'
                   onClick={(e) => handleEditItem(item, e)}
                 >
-                  ✏️ 编辑
+                  编辑
                 </Button>
                 <Button
                   className='action-button delete-button'
                   size='small'
                   onClick={(e) => handleDeleteConfirm(item, e)}
                 >
-                  🗑️ 删除
+                  删除
                 </Button>
               </View>
             </View>
@@ -382,10 +410,10 @@ const UserPosts: React.FC = () => {
 
   return (
     <View className='user-posts-container'>
-      <View className='header'>
+      <View className='enhanced-header'>
         <View className='header-content'>
-          <Text className='title'>我的发布</Text>
-          <Text className='subtitle'>管理您发布的闲置好物和餐厅点评</Text>
+          <Text className='header-title'>我的发布</Text>
+          <Text className='header-subtitle'>管理您发布的闲置好物和餐厅点评</Text>
         </View>
       </View>
 
@@ -404,17 +432,9 @@ const UserPosts: React.FC = () => {
         </View>
       </View>
 
-      <PullToRefresh
-        onRefresh={handleRefresh}
-        pullingText='下拉刷新'
-        canReleaseText='释放刷新'
-        refreshingText='刷新中...'
-        completeText='刷新完成'
-      >
-        <ScrollView className='content' scrollY>
-          {activeTab === 0 ? renderSecondhandContent() : renderRestaurantRatings()}
-        </ScrollView>
-      </PullToRefresh>
+      <ScrollView className='content' scrollY>
+        {activeTab === 0 ? renderSecondhandContent() : renderRestaurantRatings()}
+      </ScrollView>
 
       <Dialog
         visible={showDeleteDialog}

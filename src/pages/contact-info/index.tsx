@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
-import { Input, Button, Toast } from '@nutui/nutui-react-taro'
+import { View, Text, ScrollView, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuth } from '../../context/auth'
 import type { UserInfo } from '../../services/auth'
 import './index.less'
 
-type FormKeys = 'email' | 'phone' | 'wechat_id'
-
+type FormKeys = 'email' | 'phone' | 'wechatId'
 type FormState = Record<FormKeys, string>
-
 type ErrorState = Partial<Record<FormKeys, string>>
 
 const ContactInfo: React.FC = () => {
@@ -19,39 +16,24 @@ const ContactInfo: React.FC = () => {
   const [formData, setFormData] = useState<FormState>({
     email: userInfo?.email || '',
     phone: userInfo?.phone || '',
-    wechat_id: userInfo?.wechat_id || ''
+    wechatId: userInfo?.wechatId || ''
   })
   const [errors, setErrors] = useState<ErrorState>({})
   const [loading, setLoading] = useState(false)
-  const [showToast, setShowToast] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
 
   useEffect(() => {
     setFormData({
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
-      wechat_id: userInfo?.wechat_id || ''
+      wechatId: userInfo?.wechatId || ''
     })
-  }, [userInfo?.email, userInfo?.phone, userInfo?.wechat_id])
+  }, [userInfo?.email, userInfo?.phone, userInfo?.wechatId])
 
-  const normalizeInputValue = (val: unknown): string => {
-    if (typeof val === 'string') return val
-    if (val && typeof val === 'object') {
-      // @ts-ignore - NutUI/Taro event payload variations
-      if (typeof val.detail?.value === 'string') return val.detail.value
-      // @ts-ignore - Support synthetic event target value
-      if (typeof val.target?.value === 'string') return val.target.value
-      // @ts-ignore - Some components pass { value }
-      if (typeof val.value === 'string') return val.value
+  const handleFieldChange = (field: FormKeys, value: string) => {
+    let nextValue = value
+    if (field === 'phone') {
+        nextValue = value.replace(/[^\d]/g, '').slice(0, 10)
     }
-    return String(val ?? '')
-  }
-
-  const handleFieldChange = (field: FormKeys, value: unknown) => {
-    const rawText = normalizeInputValue(value)
-    const nextValue = field === 'phone'
-      ? rawText.replace(/[^\d]/g, '').slice(0, 10)
-      : rawText
 
     setFormData(prev => ({
       ...prev,
@@ -66,18 +48,10 @@ const ContactInfo: React.FC = () => {
     }
   }
 
-  const triggerToast = (message: string) => {
-    setToastMessage(message)
-    setShowToast(true)
-    setTimeout(() => setShowToast(false), 2000)
-  }
-
   const validateForm = (): boolean => {
     const nextErrors: ErrorState = {}
-
     const email = formData.email.trim()
     const phone = formData.phone.trim()
-    const wechat_id = formData.wechat_id.trim()
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       nextErrors.email = '请输入有效的邮箱地址'
@@ -87,27 +61,23 @@ const ContactInfo: React.FC = () => {
       nextErrors.phone = '请输入有效的澳洲手机号（例如 04XXXXXXXX）'
     }
 
-    if (wechat_id && !/^[a-zA-Z][a-zA-Z0-9_-]{5,19}$/.test(wechat_id)) {
-      nextErrors.wechat_id = '微信号需以字母开头，6-20位字符'
-    }
-
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      triggerToast('请检查输入信息')
+      Taro.showToast({ title: '请检查输入信息', icon: 'none' })
       return
     }
 
     const trimmedEmail = formData.email.trim()
     const trimmedPhone = formData.phone.trim()
-    const trimmedWechatId = formData.wechat_id.trim()
+    const trimmedWechatId = formData.wechatId.trim()
     
     const originalEmail = (userInfo?.email || '').trim()
     const originalPhone = (userInfo?.phone || '').trim()
-    const originalWechatId = (userInfo?.wechat_id || '').trim()
+    const originalWechatId = (userInfo?.wechatId || '').trim()
 
     const hasChanges =
       trimmedEmail !== originalEmail ||
@@ -115,44 +85,32 @@ const ContactInfo: React.FC = () => {
       trimmedWechatId !== originalWechatId
 
     if (!hasChanges) {
-      triggerToast('没有检测到任何更改')
+      Taro.showToast({ title: '没有检测到任何更改', icon: 'none' })
       return
     }
 
     try {
       setLoading(true)
-
       const updatePayload: Partial<UserInfo> = {}
 
-      if (trimmedEmail !== originalEmail) {
-        updatePayload.email = trimmedEmail || null
-      }
-
-      if (trimmedPhone !== originalPhone) {
-        updatePayload.phone = trimmedPhone || null
-      }
-      
-      if (trimmedWechatId !== originalWechatId) {
-        updatePayload.wechat_id = trimmedWechatId || null
-      }
-
-      if (openid || userInfo?.openid) {
-        updatePayload.openid = openid || userInfo?.openid || undefined
-      }
+      if (trimmedEmail !== originalEmail) updatePayload.email = trimmedEmail || null
+      if (trimmedPhone !== originalPhone) updatePayload.phone = trimmedPhone || null
+      if (trimmedWechatId !== originalWechatId) updatePayload.wechatId = trimmedWechatId || null
+      if (openid || userInfo?.openid) updatePayload.openid = openid || userInfo?.openid || undefined
 
       const success = await updateUserInfo(updatePayload)
 
       if (success) {
-        triggerToast('联系信息更新成功')
+        Taro.showToast({ title: '更新成功', icon: 'success' })
         setTimeout(() => {
           Taro.navigateBack()
         }, 1500)
       } else {
-        triggerToast('更新失败，请重试')
+        Taro.showToast({ title: '更新失败', icon: 'none' })
       }
     } catch (error) {
       console.error('更新联系信息失败:', error)
-      triggerToast('更新失败，请重试')
+      Taro.showToast({ title: '更新失败，请重试', icon: 'none' })
     } finally {
       setLoading(false)
     }
@@ -162,23 +120,25 @@ const ContactInfo: React.FC = () => {
     Taro.navigateBack()
   }
 
+  // Check for changes (re-calculate for button state)
   const trimmedEmail = formData.email.trim()
   const trimmedPhone = formData.phone.trim()
-  const trimmedWechatId = formData.wechat_id.trim()
-  
+  const trimmedWechatId = formData.wechatId.trim()
   const hasChanges =
     trimmedEmail !== (userInfo?.email || '').trim() ||
     trimmedPhone !== (userInfo?.phone || '').trim() ||
-    trimmedWechatId !== (userInfo?.wechat_id || '').trim()
+    trimmedWechatId !== (userInfo?.wechatId || '').trim()
 
   return (
     <View className='contact-info-container'>
       <ScrollView className='content' scrollY>
-        <View className='hero-block'>
-          <Text className='hero-title'>联系信息</Text>
-          <Text className='hero-subtitle'>更新联系方式以便其他买家能更快的联系您</Text>
+        {/* Immersive Header */}
+        <View className='enhanced-header'>
+           <Text className='header-title'>联系信息</Text>
+           <Text className='header-subtitle'>让买家更容易联系到您</Text>
         </View>
 
+        {/* Info Overview (Glass Cards) */}
         <View className='info-overview'>
           <View className='info-item'>
             <Text className='info-label'>邮箱</Text>
@@ -194,93 +154,79 @@ const ContactInfo: React.FC = () => {
           </View>
           <View className='info-item'>
             <Text className='info-label'>微信号</Text>
-            <Text className={`info-value ${userInfo?.wechat_id ? '' : 'placeholder'}`}>
-              {userInfo?.wechat_id || '未设置'}
+            <Text className={`info-value ${userInfo?.wechatId ? '' : 'placeholder'}`}>
+              {userInfo?.wechatId || '未设置'}
             </Text>
           </View>
         </View>
 
+        {/* Form Card (Glass) */}
         <View className='form-card'>
           <Text className='section-title'>更新联系方式</Text>
 
-          <View className={`input-group ${errors.email ? 'has-error' : ''}`}>
+          <View className='input-group'>
             <Text className='input-label'>邮箱</Text>
             <Input
+              className='custom-input'
               type='text'
-              placeholder='请输入常用邮箱（可选）'
+              placeholder='请输入常用邮箱'
               value={formData.email}
-              onChange={(value) => handleFieldChange('email', value)}
-              clearable
+              onInput={(e) => handleFieldChange('email', e.detail.value)}
               disabled={loading}
+              placeholderClass='input-placeholder'
             />
             {errors.email && <Text className='error-text'>{errors.email}</Text>}
           </View>
-          <View className={`input-group ${errors.wechat_id ? 'has-error' : ''}`}>
+
+          <View className='input-group'>
             <Text className='input-label'>微信号</Text>
             <Input
+              className='custom-input'
               type='text'
-              placeholder='用于二手交易中买家联系您'
-              value={formData.wechat_id}
-              onChange={(value) => handleFieldChange('wechat_id', value)}
-              clearable
+              placeholder='买家添加通过此ID联系您'
+              value={formData.wechatId}
+              onInput={(e) => handleFieldChange('wechatId', e.detail.value)}
               disabled={loading}
+              placeholderClass='input-placeholder'
             />
-            {errors.wechat_id && <Text className='error-text'>{errors.wechat_id}</Text>}
+            {errors.wechatId && <Text className='error-text'>{errors.wechatId}</Text>}
           </View>
 
-          <View className={`input-group ${errors.phone ? 'has-error' : ''}`}>
+          <View className='input-group'>
             <Text className='input-label'>手机号码</Text>
             <Input
-              type='text'
-              placeholder='请输入澳洲手机号（04 开头）'
+              className='custom-input'
+              type='number'
+              placeholder='请输入澳洲手机号 (04...)'
               value={formData.phone}
-              onChange={(value) => handleFieldChange('phone', value)}
-              clearable
+              onInput={(e) => handleFieldChange('phone', e.detail.value)}
               disabled={loading}
+              placeholderClass='input-placeholder'
             />
             {errors.phone && <Text className='error-text'>{errors.phone}</Text>}
           </View>
-          
-          
 
           <View className='tips-block'>
-            <Text className='tips-title'>小贴士</Text>
-            <Text className='tips-text'>• 邮箱将用于接收通知</Text>
-            <Text className='tips-text'>• 手机号建议填写澳洲本地号码</Text>
-            <Text className='tips-text'>• 微信号方便买家添加您沟通</Text>
-            <Text className='tips-text'>• 信息仅用于账户安全与服务通知</Text>
+            <Text className='tips-title'>📌 小贴士</Text>
+            <Text className='tips-text'>您的信息仅用于交易沟通，为了您的账户安全，请勿向他人透露验证码或密码。</Text>
           </View>
         </View>
-
-        <View className='safe-area-spacer' style={{ height: '40rpx' }} />
       </ScrollView>
 
+      {/* Floating Action Bar */}
       <View className='action-bar'>
-        <Button
-          type='default'
-          className='cancel-button'
-          onClick={handleCancel}
-          disabled={loading}
-        >
+        <Button className='cancel-button' onClick={handleCancel} disabled={loading}>
           取消
         </Button>
-        <Button
-          type='primary'
-          className='submit-button'
-          onClick={handleSubmit}
-          loading={loading}
-          disabled={loading || !hasChanges}
+        <Button 
+            className='submit-button' 
+            onClick={handleSubmit} 
+            loading={loading}
+            disabled={loading || !hasChanges}
         >
-          {loading ? '更新中...' : '保存更改'}
+          {loading ? '保存中...' : '保存更改'}
         </Button>
       </View>
-
-      <Toast
-        content={toastMessage}
-        visible={showToast}
-        type='text'
-        onClose={() => setShowToast(false)}
-      />
     </View>
   )
 }

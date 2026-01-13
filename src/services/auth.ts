@@ -19,7 +19,7 @@ export interface UserInfo {
   createdAt?: string
   updatedAt?: string
   contact?: string | null
-  wechat_id?: string | null
+  wechatId?: string | null
 }
 
 // 微信登录请求类型

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Image,
-  ScrollView,
   Swiper,
   SwiperItem,
 } from "@tarojs/components";
@@ -55,9 +54,10 @@ const RentalDetail: React.FC = () => {
   if (loading)
     return (
       <View className="rental-detail-container loading-state">
-        <Text>加载中...</Text>
+        {/* Simple loader placeholder */}
       </View>
     );
+    
   if (!item)
     return (
       <View className="rental-detail-container empty-state">
@@ -75,11 +75,10 @@ const RentalDetail: React.FC = () => {
 
   return (
     <View className="rental-detail-container">
-      {/* Image Carousel */}
+      {/* Immersive Image Carousel */}
       <View className="image-carousel">
         <Swiper
           className="swiper-container"
-          style={{ height: "100%" }}
           circular
           autoplay
           onChange={(e) => setCurrentImage(e.detail.current)}
@@ -95,47 +94,29 @@ const RentalDetail: React.FC = () => {
         </View>
       </View>
 
-      {/* Content Body */}
+      {/* Content Body with Glass Cards */}
       <View className="content-body">
-        {/* Header Info */}
-        <View className="head-section">
-          <View className="title-row">
-            <Text className="title">{item.title}</Text>
-          </View>
-
-          <View className="price-tag-row">
+        
+        {/* Main Head Card */}
+        <View className="head-card">
+          <Text className="title">{item.title}</Text>
+          <View className="price-row">
             <View className="price-block">
               <Text className="currency">$</Text>
               <Text className="amount">{item.price}</Text>
               <Text className="unit">
-                /{" "}
-                {item.period === "day"
-                  ? "天"
-                  : item.period === "week"
-                  ? "周"
-                  : "月"}
+                / {item.period === "day" ? "天" : item.period === "week" ? "周" : "月"}
               </Text>
             </View>
-
             <View className={`status-badge ${item.status}`}>
               {item.status === "available" ? "待租" : "已租"}
             </View>
           </View>
         </View>
 
-        <View className="divider" />
-
-        {/* Description */}
-        <View className="info-section">
-          <Text className="section-title">租赁详情</Text>
-          <Text className="desc-text">
-            {item.description || "暂无详细描述"}
-          </Text>
-        </View>
-
-        {/* Features if any */}
+        {/* Features Tag Cloud */}
         {item.features && item.features.length > 0 && (
-          <View className="info-section">
+          <View className="info-card">
             <Text className="section-title">特点</Text>
             <View className="features-grid">
               {item.features.map((feat, idx) => (
@@ -147,32 +128,36 @@ const RentalDetail: React.FC = () => {
           </View>
         )}
 
-        <View className="divider" />
+        {/* Description */}
+        <View className="info-card">
+          <Text className="section-title">租赁详情</Text>
+          <Text className="desc-text">
+            {item.description || "暂无详细描述"}
+          </Text>
+        </View>
 
-        {/* Contact */}
-        <View className="info-section">
+        {/* Contact Info */}
+        <View className="info-card">
           <Text className="section-title">联系方式</Text>
-          <View className="contact-card">
+          <View className="contact-block">
             <View className="contact-icon">💬</View>
             <View className="contact-details">
               <Text className="label">微信号 / 电话</Text>
               <Text className="value">{item.contact_info}</Text>
             </View>
-            <View className="copy-btn" onClick={handleCopyContact}>
-              复制
-            </View>
+            {/* Optional inline copy button if preferred, but dock handles primary action */}
           </View>
         </View>
       </View>
 
-      {/* Floating Footer */}
-      <View className="floating-footer">
-        <View className="action-btn secondary" onClick={handleBack}>
-          返回列表
-        </View>
-        <View className="action-btn primary" onClick={handleCopyContact}>
-          立即联系
-        </View>
+      {/* Floating Glass Dock */}
+      <View className="floating-dock">
+         <View className="dock-btn secondary" onClick={handleBack}>
+           ↩
+         </View>
+         <View className="dock-btn primary" onClick={handleCopyContact}>
+           立即联系 / 复制微信
+         </View>
       </View>
     </View>
   );

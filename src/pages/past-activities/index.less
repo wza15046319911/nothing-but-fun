@@ -1,439 +1,257 @@
-@spacing-sm: 16rpx;
-@spacing-md: 24rpx;
-@spacing-lg: 32rpx;
-@primary-color: #4a90e2;
-@text-color: #333;
-@text-secondary: #666;
-
-// 增强的往期活动容器
+// Fresh Nature Theme - Past Activities
+@glass-bg: rgba(255, 255, 255, 0.7);
+@glass-border: rgba(255, 255, 255, 0.6);
+@glass-blur: 24px;
+@primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+@accent-color: #059669;
+@text-primary: #0f172a;
+@text-secondary: #64748b;
+@bg-base: #f0fdf4;
+@card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
 .enhanced-past-activities-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  height: 100vh;
+  background: @bg-base;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
 
-  // 增强的头部区域
+  // Background Mesh Gradients
+  &::before {
+    content: '';
+    position: absolute;
+    top: -15vh;
+    left: -10vw;
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 25s infinite alternate ease-in-out;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10vh;
+    right: -20vw;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
+    filter: blur(70px);
+    z-index: 0;
+    animation: float-bg-reverse 30s infinite alternate ease-in-out;
+  }
+
+  // Header
   .enhanced-header-section {
     position: relative;
-    height: 400rpx;
-    overflow: hidden;
-
-    .header-background {
-      position: relative;
-      width: 100%;
-      height: 100%;
-
-      .enhanced-header-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s ease;
-      }
-
-      .header-particles {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: none;
-
-        .particle {
-          position: absolute;
-          width: 8rpx;
-          height: 8rpx;
-          background: rgba(255, 255, 255, 0.6);
-          border-radius: 50%;
-          animation: float 6s ease-in-out infinite;
-
-          &.particle-1 {
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-          }
-
-          &.particle-2 {
-            top: 40%;
-            right: 20%;
-            animation-delay: 1.2s;
-          }
-
-          &.particle-3 {
-            top: 60%;
-            left: 30%;
-            animation-delay: 2.4s;
-          }
-
-          &.particle-4 {
-            top: 30%;
-            right: 40%;
-            animation-delay: 3.6s;
-          }
-
-          &.particle-5 {
-            top: 70%;
-            right: 10%;
-            animation-delay: 4.8s;
-          }
-        }
-      }
-
-      .header-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-          135deg,
-          rgba(102, 126, 234, 0.8) 0%,
-          rgba(118, 75, 162, 0.8) 100%
-        );
-      }
-    }
+    z-index: 10;
+    padding: 120rpx 40rpx 20rpx;
+    flex-shrink: 0;
 
     .header-content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
       z-index: 2;
 
       .title-section {
-        text-align: center;
-        color: white;
-
         .enhanced-header-title {
           font-size: 56rpx;
-          font-weight: bold;
-          margin-bottom: 16rpx;
+          font-weight: 800;
+          background: @primary-gradient;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           display: block;
-          text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.3);
-          animation: slideInUp 0.8s ease-out;
+          margin-bottom: 16rpx;
+          letter-spacing: -1rpx;
+          animation: slideDown 0.6s ease-out;
         }
 
         .enhanced-header-subtitle {
-          font-size: 32rpx;
-          opacity: 0.9;
-          margin-bottom: 40rpx;
+          font-size: 28rpx;
+          color: @text-secondary;
+          font-weight: 500;
           display: block;
-          animation: slideInUp 0.8s ease-out 0.2s both;
+          margin-bottom: 40rpx;
+          animation: slideDown 0.6s ease-out 0.1s backwards;
         }
 
         .stats-section {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 32rpx;
-          animation: slideInUp 0.8s ease-out 0.4s both;
+          display: inline-flex;
+          background: rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(@glass-blur);
+          padding: 12rpx 32rpx;
+          border-radius: 100rpx;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+          animation: fadeIn 0.8s ease-out 0.2s backwards;
+          gap: 40rpx;
 
           .stat-item {
-            text-align: center;
+            display: flex;
+            align-items: baseline;
+            gap: 8rpx;
 
             .stat-number {
-              font-size: 40rpx;
-              font-weight: bold;
-              display: block;
-              margin-bottom: 8rpx;
+              font-size: 32rpx;
+              font-weight: 700;
+              color: @accent-color;
             }
 
             .stat-label {
               font-size: 24rpx;
-              opacity: 0.8;
+              color: @text-secondary;
             }
           }
 
           .stat-divider {
-            width: 2rpx;
-            height: 40rpx;
-            background: rgba(255, 255, 255, 0.3);
+            width: 1px;
+            height: 24rpx;
+            background: rgba(0, 0, 0, 0.1);
+            align-self: center;
           }
         }
       }
     }
   }
 
-  // 增强的筛选器包装
+  // Filters (Floating & Minimal)
+  // Assuming the component renders standard elements we might want to wrap
   .enhanced-filters-wrapper {
-    background: white;
-    margin: -40rpx 20rpx 20rpx;
-    border-radius: 24rpx;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 3;
-    animation: slideInUp 0.6s ease-out 0.6s both;
+    // This wrapper can be used if we need to enforce style encapsulation or positioning
+    // For now, let's keep it minimal or styled to match
+    margin-bottom: 20rpx;
+    padding: 0 32rpx;
+    flex-shrink: 0;
   }
 
-  // 增强的内容区域
+  // Content
   .enhanced-content {
-    min-height: calc(100vh - 400rpx);
-    background: transparent;
-    // 与餐厅、二手列表保持一致：左右留白交由卡片自身 margin 控制
-    padding: 20rpx 0;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    height: 0;
+    padding: 0 32rpx;
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  // 增强的加载状态
-  .enhanced-loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
-
-    .loading-animation {
-      text-align: center;
-
-      .loading-dots {
-        display: flex;
-        justify-content: center;
-        gap: 12rpx;
-        margin-bottom: 32rpx;
-
-        .dot {
-          width: 16rpx;
-          height: 16rpx;
-          border-radius: 50%;
-          background: #667eea;
-          animation: bounce 1.4s ease-in-out infinite both;
-
-          &.dot-1 { animation-delay: -0.32s; }
-          &.dot-2 { animation-delay: -0.16s; }
-          &.dot-3 { animation-delay: 0s; }
-        }
-      }
-
-      .loading-text {
-        font-size: 28rpx;
-        color: #666;
-      }
-    }
-  }
-
-  // 增强的空状态
-  .enhanced-empty-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400rpx;
-
-    .empty-animation {
-      text-align: center;
-      animation: fadeInUp 0.6s ease-out;
-
-      .empty-icon {
-        font-size: 120rpx;
-        margin-bottom: 32rpx;
-        display: block;
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      .empty-title {
-        font-size: 32rpx;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 16rpx;
-        display: block;
-      }
-
-      .empty-subtitle {
-        font-size: 26rpx;
-        color: #666;
-      }
-    }
-  }
-
-  // 增强的活动列表
+  // Event Cards - Glass
   .enhanced-activity-list {
     display: flex;
     flex-direction: column;
     gap: 32rpx;
-  }
-
-  // 增强的活动卡片
-  .enhanced-activity-card {
-    background: white;
-    border-radius: 24rpx;
-    overflow: hidden;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation: slideInUp 0.6s ease-out both;
-    position: relative;
-    // 对称左右间距，避免右侧贴边
-    margin: 0 30rpx;
+    width: 100%;
     box-sizing: border-box;
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    }
+  }
+
+  .enhanced-activity-card {
+    background: @glass-bg;
+    backdrop-filter: blur(@glass-blur);
+    border: 1px solid @glass-border;
+    border-radius: 32rpx;
+    overflow: hidden;
+    box-shadow: @card-shadow;
+    animation: fadeInUp 0.6s ease-out backwards;
+    transition: all 0.2s;
 
     &:active {
-      transform: translateY(-8rpx) scale(0.98);
-      box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.15);
-
-      &::before {
-        opacity: 1;
-      }
+      transform: scale(0.98);
     }
 
-    // 左右交替动画
-    &.card-left {
-      animation-name: slideInLeft;
-    }
-
-    &.card-right {
-      animation-name: slideInRight;
-    }
-
-    // 增强的图片容器
     .enhanced-activity-image-container {
       position: relative;
-      height: 240rpx;
-      overflow: hidden;
+      height: 360rpx; // Slightly taller for past highlights
 
       .image-wrapper {
         width: 100%;
         height: 100%;
-        position: relative;
-
-        .enhanced-activity-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.6s ease;
-        }
-
-        .image-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.1) 0%,
-            transparent 30%,
-            transparent 70%,
-            rgba(0, 0, 0, 0.4) 100%
-          );
-          pointer-events: none;
-        }
       }
 
-      .image-badges {
+      .enhanced-activity-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-overlay {
         position: absolute;
-        top: 16rpx;
-        right: 16rpx;
-        display: flex;
-        flex-direction: column;
-        gap: 8rpx;
-        z-index: 2;
-
-        .image-count-badge {
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 8rpx 16rpx;
-          border-radius: 20rpx;
-          display: flex;
-          align-items: center;
-          gap: 6rpx;
-          backdrop-filter: blur(10rpx);
-
-          .badge-icon {
-            font-size: 20rpx;
-          }
-
-          .badge-count {
-            font-size: 22rpx;
-            font-weight: 600;
-          }
-        }
-
-        .status-badge {
-          background: rgba(255, 107, 107, 0.9);
-          color: white;
-          padding: 6rpx 12rpx;
-          border-radius: 16rpx;
-          backdrop-filter: blur(10rpx);
-
-          .status-text {
-            font-size: 20rpx;
-            font-weight: 600;
-          }
-        }
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60%;
+        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.5));
       }
 
       .type-badge-floating {
         position: absolute;
-        bottom: 16rpx;
-        left: 16rpx;
-        background: rgba(255, 255, 255, 0.95);
-        color: #667eea;
-        padding: 8rpx 16rpx;
-        border-radius: 20rpx;
-        backdrop-filter: blur(10rpx);
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+        top: 24rpx;
+        left: 24rpx;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        padding: 6rpx 16rpx;
+        border-radius: 12rpx;
+        color: #fff;
+        font-size: 20rpx;
+      }
 
-        .type-text {
-          font-size: 22rpx;
-          font-weight: 600;
+      .image-badges {
+        position: absolute;
+        top: 24rpx;
+        right: 24rpx;
+        display: flex;
+        gap: 8rpx;
+
+        .image-count-badge {
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(10px);
+          color: #fff;
+          padding: 6rpx 16rpx;
+          border-radius: 100rpx;
+          font-size: 20rpx;
         }
       }
     }
 
-    // 增强的活动信息
     .enhanced-activity-info {
       padding: 32rpx;
-      position: relative;
-      z-index: 2;
 
       .info-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 24rpx;
+        margin-bottom: 20rpx;
 
         .enhanced-activity-title {
-          font-size: 36rpx;
-          font-weight: bold;
-          color: #333;
-          line-height: 1.3;
+          font-size: 34rpx;
+          font-weight: 700;
+          color: @text-primary;
           flex: 1;
+          line-height: 1.3;
           margin-right: 16rpx;
         }
 
         .activity-date {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 8rpx 16rpx;
-          border-radius: 20rpx;
+          font-size: 24rpx;
+          color: @accent-color;
+          background: rgba(16, 185, 129, 0.1);
+          padding: 4rpx 12rpx;
+          border-radius: 8rpx;
           white-space: nowrap;
-
-          .date-text {
-            font-size: 22rpx;
-            font-weight: 600;
-          }
         }
       }
 
       .info-content {
-        margin-bottom: 24rpx;
-
         .enhanced-activity-desc {
           font-size: 26rpx;
-          color: #666;
+          color: @text-secondary;
           line-height: 1.6;
-          margin-bottom: 20rpx;
+          margin-bottom: 24rpx;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
@@ -441,593 +259,116 @@
         }
 
         .enhanced-activity-meta {
-          .meta-row {
+          display: flex;
+          gap: 24rpx;
+          margin-bottom: 24rpx;
+
+          .enhanced-meta-item {
             display: flex;
-            gap: 24rpx;
-            margin-bottom: 12rpx;
+            align-items: center;
+            gap: 8rpx;
+            font-size: 24rpx;
+            color: @text-secondary;
 
-            &:last-child {
-              margin-bottom: 0;
-            }
-
-            .enhanced-meta-item {
-              display: flex;
-              align-items: center;
-              gap: 8rpx;
-              flex: 1;
-              background: #f8f9fa;
-              padding: 12rpx 16rpx;
-              border-radius: 16rpx;
-              transition: all 0.3s ease;
-
-              &:hover {
-                background: #e9ecef;
-              }
-
-              .meta-icon {
-                font-size: 24rpx;
-              }
-
-              .meta-text {
-                font-size: 24rpx;
-                color: #666;
-                font-weight: 500;
-              }
-
-              &.price-item {
-                background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-
-                .meta-text {
-                  color: #f57c00;
-                  font-weight: 600;
-                }
-              }
+            .meta-icon {
+              font-size: 24rpx;
             }
           }
         }
       }
 
       .info-footer {
-        .action-buttons {
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding-top: 24rpx;
+        display: flex;
+        justify-content: flex-end;
+
+        .view-button {
           display: flex;
-          justify-content: flex-end;
+          align-items: center;
+          gap: 8rpx;
+          color: @accent-color;
+          font-size: 26rpx;
+          font-weight: 600;
 
-          .action-button {
-            display: flex;
-            align-items: center;
-            gap: 8rpx;
-            padding: 12rpx 24rpx;
-            border-radius: 24rpx;
-            transition: all 0.3s ease;
-
-            &.view-button {
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
-
-              &:active {
-                transform: scale(0.95);
-                box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
-              }
-
-              .button-text {
-                font-size: 24rpx;
-                font-weight: 600;
-              }
-
-              .button-icon {
-                font-size: 20rpx;
-                font-weight: bold;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // 鼠标悬停效果
-    &:hover {
-      .enhanced-activity-image-container {
-        .image-wrapper {
-          .enhanced-activity-image {
-            transform: scale(1.05);
+          .button-icon {
+            font-size: 24rpx;
           }
         }
       }
     }
   }
 
-  // 增强的分页包装
-  .enhanced-pagination-wrapper {
-    background: white;
-    margin: 40rpx 20rpx 20rpx;
-    border-radius: 20rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-    padding: 20rpx;
+  // Loading
+  .enhanced-loading-container,
+  .enhanced-empty-container {
+    padding: 100rpx 0;
+    text-align: center;
+    color: @text-secondary;
+
+    .empty-icon {
+      font-size: 80rpx;
+      display: block;
+      margin-bottom: 20rpx;
+    }
+
+    .dot {
+      background: @accent-color;
+    }
   }
 }
 
-// 动画关键帧
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+// Animation Keyframes
+@keyframes float-bg {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
-  50% {
-    transform: translateY(-20rpx);
+
+  100% {
+    transform: translate(20px, 40px) scale(1.1);
   }
 }
 
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translateY(0);
+@keyframes float-bg-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
-  40%, 43% {
-    transform: translateY(-8rpx);
-  }
-  70% {
-    transform: translateY(-4rpx);
-  }
-  90% {
-    transform: translateY(-2rpx);
+
+  100% {
+    transform: translate(-30px, -20px) scale(0.9);
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes slideInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(40rpx);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40rpx);
-  }
   to {
     opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(40rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20rpx);
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-// 响应式设计
-@media (max-width: 750rpx) {
-  .enhanced-past-activities-container {
-    .enhanced-header-section {
-      height: 320rpx;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 
-      .header-content {
-        .title-section {
-          .enhanced-header-title {
-            font-size: 48rpx;
-          }
-
-          .enhanced-header-subtitle {
-            font-size: 28rpx;
-          }
-
-          .stats-section {
-            gap: 24rpx;
-
-            .stat-item {
-              .stat-number {
-                font-size: 36rpx;
-              }
-
-              .stat-label {
-                font-size: 22rpx;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .enhanced-filters-wrapper {
-      margin: -30rpx 16rpx 16rpx;
-    }
-
-    .enhanced-content {
-      padding: 16rpx;
-    }
-
-    .enhanced-activity-list {
-      gap: 24rpx;
-    }
-
-    .enhanced-activity-card {
-      .enhanced-activity-image-container {
-        height: 200rpx;
-      }
-
-      .enhanced-activity-info {
-        padding: 24rpx;
-
-        .info-header {
-          .enhanced-activity-title {
-            font-size: 32rpx;
-          }
-
-          .activity-date {
-            .date-text {
-              font-size: 20rpx;
-            }
-          }
-        }
-
-        .info-content {
-          .enhanced-activity-desc {
-            font-size: 24rpx;
-          }
-
-          .enhanced-activity-meta {
-            .meta-row {
-              gap: 16rpx;
-
-              .enhanced-meta-item {
-                padding: 10rpx 12rpx;
-
-                .meta-icon {
-                  font-size: 20rpx;
-                }
-
-                .meta-text {
-                  font-size: 22rpx;
-                }
-              }
-            }
-          }
-        }
-
-        .info-footer {
-          .action-buttons {
-            .action-button {
-              padding: 10rpx 20rpx;
-
-              &.view-button {
-                .button-text {
-                  font-size: 22rpx;
-                }
-
-                .button-icon {
-                  font-size: 18rpx;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-
-// 平板和桌面端优化
-@media (min-width: 750rpx) {
-  .enhanced-past-activities-container {
-    .enhanced-content {
-      max-width: 1200rpx;
-      margin: 0 auto;
-      padding: 40rpx;
-
-      .enhanced-activity-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 40rpx;
-      }
-    }
-  }
-}
-
-@media (min-width: 1200rpx) {
-  .enhanced-past-activities-container {
-    .enhanced-content {
-      .enhanced-activity-list {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-  }
-}
-
-// Filter section
-.filter-section {
-  background: white;
-  padding: @spacing-md 0;
-  margin-top: -20px;
-  border-radius: 20px 20px 0 0;
-  position: relative;
-  z-index: 1;
-  
-  .filter-scroll {
-    padding: 0 @spacing-md;
-  }
-  
-  .filter-list {
-    display: flex;
-    white-space: nowrap;
-    
-    .filter-item {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px 15px;
-      margin-right: 15px;
-      border-radius: 12px;
-      background: #f8f9fa;
-      border: 2px solid transparent;
-      transition: all 0.3s ease;
-      min-width: 70px;
-      
-      &.active {
-        background: #e3f2fd;
-        border-color: @primary-color;
-        
-        .filter-text {
-          color: @primary-color;
-          font-weight: 600;
-        }
-        
-        .filter-count {
-          color: @primary-color;
-        }
-      }
-      
-      .filter-text {
-        font-size: 14px;
-        color: @text-color;
-        margin-bottom: 2px;
-      }
-      
-      .filter-count {
-        font-size: 12px;
-        color: @text-secondary;
-      }
-    }
-  }
-}
-
-// Content area
-.content {
-  background: white;
-  min-height: calc(100vh - 280px);
-  
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    
-    .loading-text {
-      margin-top: 15px;
-      color: @text-secondary;
-      font-size: 14px;
-    }
-  }
-  
-  // Activity list
-  .activity-list {
-    padding: @spacing-md;
-    
-    .activity-card {
-      background: white;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      transition: all 0.3s ease;
-      
-      &:active {
-        transform: scale(0.98);
-      }
-      
-      .activity-image-container {
-        position: relative;
-        width: 100%;
-        height: 200px;
-
-        // 为Swiper组件设置样式
-        .nut-swiper {
-          height: 100%;
-          width: 100%;
-
-          .nut-swiper-pagination {
-            bottom: 12px;
-
-            .nut-swiper-pagination-bullet {
-              background-color: rgba(255, 255, 255, 0.5);
-              width: 6px;
-              height: 6px;
-              border-radius: 50%;
-              margin: 0 3px;
-
-              &.nut-swiper-pagination-bullet-active {
-                background-color: #fff;
-              }
-            }
-          }
-
-          // 确保轮播项占满容器
-          .nut-swiper-item {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-        }
-
-        // 图片计数器样式
-        .image-count-badge {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          background: rgba(0, 0, 0, 0.6);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
-          z-index: 10;
-        }
-      }
-
-      .activity-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-      }
-      
-      .activity-info {
-        padding: @spacing-md;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        
-        .activity-content {
-          flex: 1;
-          margin-right: @spacing-md;
-          
-          .activity-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: @text-color;
-            margin-bottom: @spacing-sm;
-            line-height: 1.3;
-          }
-          
-          .activity-desc {
-            font-size: 14px;
-            color: @text-secondary;
-            line-height: 1.5;
-            margin-bottom: @spacing-md;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-          
-          .activity-meta {
-            .meta-item {
-              display: flex;
-              align-items: center;
-              margin-bottom: 6px;
-              
-              &:last-child {
-                margin-bottom: 0;
-              }
-              
-              .meta-icon {
-                font-size: 14px;
-                margin-right: 6px;
-                width: 16px;
-              }
-              
-              .meta-text {
-                font-size: 13px;
-                color: @text-secondary;
-              }
-            }
-          }
-        }
-        
-        .activity-category {
-          .category-tag {
-            background: linear-gradient(135deg, @primary-color 0%, #5ba3f5 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-          }
-        }
-      }
-    }
-  }
-  
-  .bottom-tip {
-    display: flex;
-    justify-content: center;
-    padding: 24rpx 20rpx 32rpx;
-  }
-
-  .bottom-pill {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10rpx;
-    padding: 12rpx 20rpx;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.04);
-    border: 1rpx solid rgba(0,0,0,0.06);
-    color: #666;
-    font-size: 24rpx;
-  }
-
-  .pill-dot { width: 6rpx; height: 6rpx; border-radius: 50%; background: #bbb; }
-  .pill-text { white-space: nowrap; }
-}
-
-// 响应式设计
-@media (min-width: 768px) {
-  .past-activities-container {
-    .content {
-      .activity-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        
-        .activity-card {
-          margin-bottom: 0;
-        }
-      }
-    }
-  }
-}
-
-@media (min-width: 1024px) {
-  .past-activities-container {
-    .content {
-      .activity-list {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-    }
-  }
-} 

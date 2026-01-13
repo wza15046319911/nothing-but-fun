@@ -1,301 +1,399 @@
-
+// Premium Glassmorphism Variables - Fresh Nature Theme (Rental)
+@glass-bg: rgba(255, 255, 255, 0.7);
+@glass-border: rgba(255, 255, 255, 0.6);
+@glass-blur: 24px;
+// Sage Green to Forest Gradient
+@primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+@accent-color: #059669;
+@text-primary: #0f172a; // Dark Slate
+@text-secondary: #64748b; // Slate Grey
+@bg-base: #f0fdf4; // Mint Cream
+@card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
 .rental-container {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background: @bg-base;
+  position: relative;
+  overflow-x: hidden;
   padding-bottom: 40rpx;
-  box-sizing: border-box;
-}
 
-// 顶部头部设计
-.rental-header {
-  position: relative;
-  height: 500rpx;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  border-bottom-left-radius: 32rpx;
-  border-bottom-right-radius: 32rpx;
-  overflow: hidden;
-  box-shadow: 0 10rpx 30rpx rgba(15, 23, 42, 0.2);
-  z-index: 10;
-
-  .header-bg-elements {
+  // Background Mesh Gradients
+  &::before {
+    content: '';
     position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-
-    .circle-1 {
-      position: absolute;
-      top: -50rpx;
-      right: -50rpx;
-      width: 200rpx;
-      height: 200rpx;
-      border-radius: 50%;
-      background: radial-gradient(
-        circle,
-        rgba(99, 102, 241, 0.2) 0%,
-        rgba(99, 102, 241, 0) 70%
-      );
-      filter: blur(20rpx);
-    }
-
-    .circle-2 {
-      position: absolute;
-      bottom: 50rpx;
-      left: -30rpx;
-      width: 150rpx;
-      height: 150rpx;
-      border-radius: 50%;
-      background: radial-gradient(
-        circle,
-        rgba(236, 72, 153, 0.15) 0%,
-        rgba(236, 72, 153, 0) 70%
-      );
-      filter: blur(20rpx);
-    }
+    top: -15vh;
+    right: -10vw;
+    width: 90vw;
+    height: 90vh;
+    border-radius: 50%;
+    // Soft Mint & Warm Sun
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float-bg 25s infinite alternate ease-in-out;
   }
 
-  .header-content {
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10vh;
+    left: -20vw;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 50%;
+    // Soft Blue-Green & White
+    background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
+    filter: blur(70px);
+    z-index: 0;
+    animation: float-bg-reverse 30s infinite alternate ease-in-out;
+  }
+
+  // Header
+  .rental-header {
     position: relative;
-    padding: 100rpx 40rpx 0;
-    z-index: 2;
+    z-index: 10;
+    padding: 120rpx 40rpx 40rpx; // Increased top padding for immersive feel
 
-    .header-title {
-      font-size: 40rpx;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 16rpx;
-      letter-spacing: -1rpx;
-      text-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-      display: block;
-    }
+    .header-content {
+      position: relative;
+      z-index: 2;
 
-    .header-subtitle {
-      font-size: 26rpx;
-      color: rgba(255, 255, 255, 0.8);
-      font-weight: 400;
-      display: block;
-      margin-bottom: 40rpx;
-    }
-
-    .header-stats {
-      display: flex;
-      gap: 40rpx;
-
-      .stat-item {
-        .stat-value {
-          font-size: 32rpx;
-          font-weight: 700;
-          color: #fff;
-          display: block;
-        }
-        .stat-label {
-          font-size: 22rpx;
-          color: rgba(255, 255, 255, 0.6);
-          display: block;
-          margin-top: 6rpx;
-        }
-      }
-    }
-  }
-}
-
-// 筛选器样式
-.filter-section {
-  position: relative;
-  margin-top: -80rpx;
-  padding: 0 30rpx;
-  z-index: 20;
-
-  .filter-options {
-    display: flex;
-    overflow-x: auto;
-    gap: 20rpx;
-    padding-bottom: 20rpx;
-
-    /* 隐藏滚动条 */
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-chip {
-      padding: 16rpx 32rpx;
-      background: #ffffff;
-      border-radius: 100rpx;
-      font-size: 26rpx;
-      color: #64748b;
-      font-weight: 500;
-      white-space: nowrap;
-      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-
-      &.active {
-        background: #0f172a;
-        color: #ffffff;
-        box-shadow: 0 8rpx 20rpx rgba(15, 23, 42, 0.25);
-        transform: translateY(-2rpx);
-      }
-    }
-  }
-}
-
-// 商品列表
-.rental-list {
-  padding: 20rpx 30rpx;
-
-  // 瀑布流布局
-  .rental-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-
-    .rental-card {
-      width: 48%;
-      background: #ffffff;
-      border-radius: 24rpx;
-      overflow: hidden;
-      margin-bottom: 30rpx;
-      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-      &:active {
-        transform: scale(0.98);
+      .header-title {
+        font-size: 56rpx;
+        font-weight: 800;
+        background: @primary-gradient;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: block;
+        margin-bottom: 16rpx;
+        letter-spacing: -1rpx;
+        animation: slideDown 0.6s ease-out;
       }
 
-      .card-image-wrapper {
-        position: relative;
-        height: 340rpx;
-        background: #f1f5f9;
-
-        .card-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .category-tag {
-          position: absolute;
-          top: 20rpx;
-          left: 20rpx;
-          padding: 8rpx 16rpx;
-          background: rgba(15, 23, 42, 0.8);
-          backdrop-filter: blur(4rpx);
-          border-radius: 8rpx;
-          color: #fff;
-          font-size: 20rpx;
-          font-weight: 500;
-        }
-
-        .status-badge {
-          position: absolute;
-          top: 20rpx;
-          right: 20rpx;
-          width: 16rpx;
-          height: 16rpx;
-          border-radius: 50%;
-          border: 2rpx solid #fff;
-
-          &.available {
-            background-color: #10b981;
-          }
-
-          &.rented {
-            background-color: #94a3b8;
-          }
-        }
+      .header-subtitle {
+        font-size: 28rpx;
+        color: @text-secondary;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 40rpx;
+        animation: slideDown 0.6s ease-out 0.1s backwards;
       }
 
-      .card-content {
-        padding: 24rpx;
+      .header-stats {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(@glass-blur);
+        padding: 12rpx 32rpx;
+        border-radius: 100rpx;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+        animation: fadeIn 0.8s ease-out 0.2s backwards;
+        gap: 40rpx;
 
-        .card-title {
-          font-size: 28rpx;
-          font-weight: 700;
-          color: #1e293b;
-          margin-bottom: 12rpx;
-          display: -webkit-box;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 2;
-          overflow: hidden;
-          line-height: 1.4;
-        }
-
-        .card-price-row {
+        .stat-item {
           display: flex;
           align-items: baseline;
-          margin-bottom: 16rpx;
+          gap: 8rpx;
 
-          .currency {
-            font-size: 24rpx;
-            font-weight: 600;
-            color: #ef4444;
-          }
-
-          .price {
+          .stat-value {
             font-size: 32rpx;
-            font-weight: 800;
-            color: #ef4444;
-            margin: 0 4rpx;
-            font-family: "DIN Alternate", sans-serif;
+            font-weight: 700;
+            color: @accent-color;
           }
 
-          .period {
+          .stat-label {
+            font-size: 24rpx;
+            color: @text-secondary;
+          }
+        }
+      }
+    }
+  }
+
+  // Filters (Floating & Minimal)
+  .filter-section {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 20rpx 0;
+    margin-bottom: 20rpx;
+    background: transparent; // Allow blur to show through scroll view container if needed, but here we just keep it clean
+
+    .filter-scroll {
+      width: 100%;
+      white-space: nowrap;
+      padding-left: 40rpx; // Align with header content
+
+      .filter-options {
+        display: inline-flex;
+        padding-right: 40rpx;
+        gap: 20rpx;
+        padding-bottom: 10rpx; // Space for shadow
+
+        .filter-chip {
+          padding: 14rpx 36rpx;
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          border-radius: 100rpx;
+          font-size: 26rpx;
+          color: @text-secondary;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
+
+          &.active {
+            background: @primary-gradient;
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 8rpx 20rpx rgba(16, 185, 129, 0.3);
+            transform: scale(1.05);
+          }
+
+          &:active {
+            transform: scale(0.98);
+          }
+        }
+      }
+    }
+  }
+
+  // Rental List Grid
+  .rental-list {
+    position: relative;
+    z-index: 1;
+    padding: 0 32rpx;
+
+    .rental-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+
+      .rental-card {
+        width: 48%;
+        background: @glass-bg;
+        backdrop-filter: blur(@glass-blur);
+        border-radius: 32rpx;
+        border: 1px solid @glass-border;
+        overflow: hidden;
+        margin-bottom: 30rpx;
+        box-shadow: @card-shadow;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        animation: fadeInUp 0.6s ease-out backwards;
+
+        &:nth-child(even) {
+          animation-delay: 0.1s;
+        }
+
+        &:nth-child(odd) {
+          animation-delay: 0s;
+        }
+
+        &:active {
+          transform: scale(0.97);
+        }
+
+        .card-image-wrapper {
+          position: relative;
+          height: 360rpx;
+          background: #e2e8f0;
+
+          .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .category-tag {
+            position: absolute;
+            top: 20rpx;
+            left: 20rpx;
+            padding: 8rpx 20rpx;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 12rpx;
+            color: @text-primary;
             font-size: 22rpx;
-            color: #94a3b8;
+            font-weight: 700;
+            box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+          }
+
+          .status-badge {
+            position: absolute;
+            top: 20rpx;
+            right: 20rpx;
+            width: 18rpx;
+            height: 18rpx;
+            border-radius: 50%;
+            border: 2rpx solid #fff;
+            box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.3);
+
+            &.available {
+              background-color: #10b981;
+            }
+
+            &.rented {
+              background-color: #94a3b8;
+            }
           }
         }
 
-        .card-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-top: 1rpx solid #f1f5f9;
-          padding-top: 16rpx;
+        .card-content {
+          padding: 24rpx;
 
-          .seller-info {
+          .card-title {
+            font-size: 30rpx;
+            font-weight: 700;
+            color: @text-primary;
+            margin-bottom: 16rpx;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            line-height: 1.4;
+          }
+
+          .card-price-row {
             display: flex;
-            align-items: center;
+            align-items: baseline;
+            margin-bottom: 20rpx;
 
-            .seller-avatar {
-              width: 40rpx;
-              height: 40rpx;
-              border-radius: 50%;
-              background: #e2e8f0;
-              margin-right: 12rpx;
+            .currency {
+              font-size: 24rpx;
+              font-weight: 600;
+              color: @accent-color;
             }
 
-            .seller-name {
-              font-size: 22rpx;
-              color: #64748b;
-              max-width: 120rpx;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
+            .price {
+              font-size: 36rpx;
+              font-weight: 800;
+              color: @accent-color;
+              margin: 0 4rpx;
+              font-family: "DIN Alternate", sans-serif;
+            }
+
+            .period {
+              font-size: 24rpx;
+              color: @text-secondary;
+            }
+          }
+
+          .card-footer {
+            display: flex;
+            align-items: center;
+            padding-top: 16rpx;
+            border-top: 1px solid rgba(0, 0, 0, 0.03);
+
+            .seller-info {
+              display: flex;
+              align-items: center;
+
+              .seller-avatar {
+                width: 44rpx;
+                height: 44rpx;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+                margin-right: 12rpx;
+              }
+
+              .seller-name {
+                font-size: 24rpx;
+                color: @text-secondary;
+                font-weight: 500;
+              }
             }
           }
         }
       }
     }
   }
+
+  // Loading & Empty States
+  .loading-state,
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100rpx 0;
+    opacity: 0.7;
+
+    .state-icon {
+      font-size: 80rpx;
+      margin-bottom: 24rpx;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .state-text {
+      font-size: 28rpx;
+      color: @text-secondary;
+    }
+  }
 }
 
-// 占位图和加载状态
-.loading-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 100rpx 0;
-
-  .state-icon {
-    font-size: 80rpx;
-    margin-bottom: 30rpx;
-    opacity: 0.5;
+// Keyframes
+@keyframes float-bg {
+  0% {
+    transform: translate(0, 0) scale(1);
   }
 
-  .state-text {
-    font-size: 28rpx;
-    color: #94a3b8;
+  100% {
+    transform: translate(20px, 40px) scale(1.1);
+  }
+}
+
+@keyframes float-bg-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(-30px, -20px) scale(0.9);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
   }
 }

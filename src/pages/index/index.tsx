@@ -6,7 +6,9 @@ import Taro, {
   useLoad,
 } from "@tarojs/taro";
 import { Swiper } from "@taroify/core";
+import { useState } from "react";
 import "@taroify/core/swiper/style";
+import homepageApi from "../../services/homepage";
 import "./index.less";
 
 // SVG Icons
@@ -108,6 +110,8 @@ const mainFeatures: FeatureEntry[] = [
 ];
 
 const Index: React.FC = () => {
+  const [heroImages, setHeroImages] = useState<string[]>(HERO_IMAGES);
+
   useShareAppMessage(() => ({
     title: "Nothing But Fun | 布好玩",
     path: "/pages/loading/index",
@@ -118,9 +122,27 @@ const Index: React.FC = () => {
     query: "fromShare=1",
   }));
 
-  useLoad((options) => {
+  useLoad(async (options) => {
     if (options && options.fromShare === "1") {
       Taro.reLaunch({ url: "/pages/loading/index" });
+    }
+
+    try {
+        const response = await homepageApi.fetchHomepageImages();
+        if (response.success && response.data && response.data.length > 0) {
+            // Sort by sort order if available, otherwise keep API order
+            // Filter visible images just in case, though API should handle it
+            const apiImages = response.data
+                .filter(img => img.isVisible)
+                .map(img => img.imageUrl);
+            
+            if (apiImages.length > 0) {
+                setHeroImages(apiImages);
+            }
+        }
+    } catch (error) {
+        console.error("Failed to fetch homepage images:", error);
+        // Fallback to mock data (already set as initial state)
     }
   });
 
@@ -149,7 +171,7 @@ const Index: React.FC = () => {
       {/* Hero Swiper */}
       <View className="hero-section">
         <Swiper className="hero-swiper" autoplay={4000} indicatorColor="white">
-          {HERO_IMAGES.map((img, idx) => (
+          {heroImages.map((img, idx) => (
             <Swiper.Item key={idx}>
               <Image src={img} className="hero-image" mode="aspectFill" />
             </Swiper.Item>

@@ -1,24 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ScrollView, View, Text, Image } from '@tarojs/components'
-import { Swiper } from '@taroify/core'
+import { Swiper, SwiperItem } from '@tarojs/components' // Using standard component for consistency
 import Taro, { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { peripheralsApi, PeripheralItem } from '../../../services/peripherals'
 import './index.less'
-import '@taroify/core/swiper/style'
 
 const merchantWechatLabel = 'Brisbane10000'
 const fallbackImage = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80'
 
 const formatStock = (stock: number) => {
-  if (stock > 100) {
-    return '库存充足'
-  }
-  if (stock > 10) {
-    return `剩余${stock}件`
-  }
-  if (stock > 0) {
-    return `仅剩${stock}件`
-  }
+  if (stock > 100) return '库存充足'
+  if (stock > 10) return `剩余${stock}件`
+  if (stock > 0) return `仅剩${stock}件`
   return '暂时缺货'
 }
 
@@ -128,15 +121,8 @@ const GiftDetail: React.FC = () => {
     })
   }
 
-  const handleSwiperChange = (value: number | { detail?: { current?: number } }) => {
-    if (typeof value === 'number') {
-      setActiveImageIndex(value)
-      return
-    }
-    const next = value?.detail?.current
-    if (typeof next === 'number') {
-      setActiveImageIndex(next)
-    }
+  const handleSwiperChange = (e: any) => {
+    setActiveImageIndex(e.detail.current)
   }
 
   const handleContactMerchant = () => {
@@ -159,27 +145,20 @@ const GiftDetail: React.FC = () => {
   }
 
   if (loading) {
+     // Keep consistent container for loading
     return (
-      <View className='flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500'>
-        <Text>正在加载好物详情...</Text>
+      <View className='peripheral-detail-page'>
       </View>
     )
   }
 
   if (!item) {
+    // Basic Empty State
     return (
-      <View className='flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-100 px-8 text-center text-slate-500'>
-        <Text className='text-4xl'>📦</Text>
-        <View>
-          <Text className='block text-lg text-slate-900'>没有找到这个好物</Text>
-          <Text className='mt-2 block text-sm text-slate-500'>可能已经下架或暂时不可用</Text>
-        </View>
-        <View
-          className='inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm text-slate-600 shadow-sm active:scale-95'
-          onClick={handleBack}
-        >
-          <Text>返回列表</Text>
-        </View>
+      <View className='peripheral-detail-page'>
+         <View className="detail-wrapper" style={{paddingTop: '100rpx', textAlign: 'center'}}>
+            <Text>未找到商品</Text>
+         </View>
       </View>
     )
   }
@@ -205,44 +184,36 @@ const GiftDetail: React.FC = () => {
 
   return (
     <ScrollView className='peripheral-detail-page' scrollY>
-      <View className='detail-wrapper'>
-        <View className='top-bar'>
-          <View className='top-bar__button' onClick={handleBack}>
-            <Text className='top-bar__icon'>←</Text>
-            <Text>返回</Text>
-          </View>
-          <View className='top-bar__button' onClick={handleShare}>
-            <Text>分享</Text>
-          </View>
-        </View>
+      {/* Immersive Image Carousel */}
+      <View className='media-section'>
 
-        <View className='media-section'>
           <Swiper
             className='media-section__swiper'
             circular
-            indicator={imageList.length > 1}
-            autoplay={imageList.length > 1 ? 4000 : false}
-            defaultValue={0}
+            autoplay={imageList.length > 1}
             onChange={handleSwiperChange}
           >
             {imageList.map((imageUrl, index) => (
-              <Swiper.Item key={`${imageUrl}-${index}`}>
+              <SwiperItem key={`${imageUrl}-${index}`}>
                 <Image
                   className='media-section__image'
                   src={imageUrl}
                   mode='aspectFill'
                   lazyLoad
                   onClick={() => handleImagePreview(index)}
-                  onError={() => console.warn('图片加载失败:', imageUrl)}
                 />
-              </Swiper.Item>
+              </SwiperItem>
             ))}
           </Swiper>
           <View className='media-section__counter'>
             <Text>{activeImageIndex + 1} / {imageList.length}</Text>
           </View>
-        </View>
+      </View>
 
+      {/* Content Wrapper */}
+      <View className='detail-wrapper'>
+        
+        {/* Main Info Card */}
         <View className='info-card'>
           <View className='info-card__header'>
             <View className={`info-card__status info-card__status--${statusType}`}>
@@ -252,9 +223,6 @@ const GiftDetail: React.FC = () => {
           </View>
 
           <Text className='info-card__title'>{item.name}</Text>
-          {item.description && (
-            <Text className='info-card__subtitle'>{item.description}</Text>
-          )}
 
           <View className='info-card__chips'>
             {tags.map((tag) => (
@@ -265,11 +233,11 @@ const GiftDetail: React.FC = () => {
           </View>
 
           <View className='info-card__meta'>
-            <Text>上架时间：{formatTime(item.dateCreated || item.createdAt || new Date().toISOString())}</Text>
-            <Text>{stockSummary}</Text>
+            <Text>发布于 {formatTime(item.dateCreated || item.createdAt || new Date().toISOString())}</Text>
           </View>
         </View>
 
+        {/* Specs */}
         <View className='spec-card'>
           <Text className='section-title'>商品信息</Text>
           <View className='spec-grid'>
@@ -282,23 +250,27 @@ const GiftDetail: React.FC = () => {
           </View>
         </View>
 
+        {/* Description */}
         {item.description && (
           <View className='description-card'>
             <Text className='section-title'>商品描述</Text>
             <Text className='description-card__text'>{item.description}</Text>
           </View>
         )}
+        
+        {/* Spacer for dock */}
+         <View style={{height:'40rpx'}}></View>
 
-        <View className='contact-card'>
-          <Text className='section-title'>联系商家</Text>
-          <Text className='contact-card__hint'>团购、定制或合作咨询请联系 Nothing But Fun 团队，我们会在 1 个工作日内回复。</Text>
-          <View className='contact-card__info'>
-            <Text>{merchantWechatLabel}</Text>
-          </View>
-          <View className='contact-card__button' onClick={handleContactMerchant}>
-            <Text>复制微信号联系商家</Text>
-          </View>
-        </View>
+      </View>
+
+      {/* Floating Action Dock */}
+      <View className="floating-dock">
+         <View className="dock-btn secondary" onClick={handleShare}>
+           📤
+         </View>
+         <View className="dock-btn primary" onClick={handleContactMerchant}>
+           联系商家 / 复制微信
+         </View>
       </View>
     </ScrollView>
   )

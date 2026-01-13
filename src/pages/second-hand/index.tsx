@@ -49,7 +49,6 @@ const SecondHand: React.FC = () => {
         setLoading(true);
       }
 
-      // 使用新的分页API
       const response = await secondhandApi.getAllItems(filters);
       setItems(response.data);
       setPagination({
@@ -70,7 +69,7 @@ const SecondHand: React.FC = () => {
   const handleFiltersChange = (filters: SecondhandFilters) => {
     const newFilters = {
       ...filters,
-      page: 1, // 重置到第一页
+      page: 1,
       limit: 10,
     };
 
@@ -103,12 +102,16 @@ const SecondHand: React.FC = () => {
 
   // Handle post new item
   const handlePostNew = () => {
-    // Check if user is logged in using context
     if (!isLoggedIn) {
       Taro.showModal({
         title: "提示",
         content: "请先登录后再发布商品",
         confirmText: "去登录",
+        success: (res) => {
+            if (res.confirm) {
+                Taro.navigateTo({ url: '/pages/user-login/index' });
+            }
+        }
       });
       return;
     }
@@ -120,7 +123,6 @@ const SecondHand: React.FC = () => {
 
   // Handle product click
   const handleProductClick = (item: SecondhandItem) => {
-    // Navigate to product detail page
     Taro.navigateTo({
       url: `/pages/second-hand/detail/index?id=${item.id}`,
     });
@@ -153,64 +155,32 @@ const SecondHand: React.FC = () => {
   }, []);
 
   return (
-    <View className="enhanced-second-hand-container">
-      {/* 增强的页面头部 */}
-      <View className="enhanced-header">
-        <View className="header-background">
-          <View className="floating-shapes">
-            <View className="shape shape-1"></View>
-            <View className="shape shape-2"></View>
-            <View className="shape shape-3"></View>
-            <View className="shape shape-4"></View>
-          </View>
-          <View className="header-overlay"></View>
+    <View className="premium-container">
+      {/* Header */}
+      <View className="premium-header">
+        <View className="header-top">
+          <Text className="main-title">布村换换乐</Text>
+          <View className="sub-title">让闲置游起来</View>
         </View>
-        <View className="header-content">
-          <View className="title-section">
-            <Text className="enhanced-title">布村换换乐</Text>
-            <Text className="enhanced-subtitle">闲置宝贝轻松上新</Text>
 
-            {/* 新增说明区域 */}
-            <View className="description-box">
-              <Text className="desc-text">
-                本平台支持发布租房信息、拼车信息、闲置物品交易及车辆买卖等相关内容
-              </Text>
-              <View
-                className="contact-row"
-                onClick={() => {
-                  Taro.setClipboardData({
-                    data: "Brisbane10000",
-                    success: () =>
-                      Taro.showToast({
-                        title: "已复制微信号",
-                        icon: "success",
-                      }),
-                  });
-                }}
-              >
-                <Text className="contact-label">点击复制微信号</Text>
-                {/* <Text className="contact-value">Brisbane10000</Text> */}
-                <Text className="copy-icon">📋</Text>
-              </View>
-            </View>
-
-            <View className="stats-section">
-              <View className="stat-item">
-                <Text className="stat-number">{items.length}</Text>
-                <Text className="stat-label">件商品</Text>
-              </View>
-              <View className="stat-divider"></View>
-              <View className="stat-item">
-                <Text className="stat-number">
-                  {
-                    items.filter(
-                      (item) => !item.status || item.status === "available"
-                    ).length
-                  }
-                </Text>
-                <Text className="stat-label">可购买</Text>
-              </View>
-            </View>
+        <View className="info-card">
+          <Text className="info-text">
+            支持租房、拼车、闲置交易及车辆买卖信息发布
+          </Text>
+          <View
+            className="wechat-copy-btn"
+            onClick={() => {
+              Taro.setClipboardData({
+                data: "Brisbane10000",
+                success: () =>
+                  Taro.showToast({
+                    title: "已复制微信号",
+                    icon: "success",
+                  }),
+              });
+            }}
+          >
+            <Text className="btn-text">找客服</Text>
           </View>
         </View>
       </View>
@@ -220,85 +190,58 @@ const SecondHand: React.FC = () => {
         initialFilters={currentFilters}
       />
 
-      {/* 增强的商品列表 */}
-      <ScrollView className="enhanced-content -z-1" scrollY>
+      <ScrollView className="content-scroll" scrollY>
         {loading ? (
-          <View className="enhanced-loading-container">
-            <View className="loading-animation">
-              <View className="loading-dots">
-                <View className="dot dot-1"></View>
-                <View className="dot dot-2"></View>
-                <View className="dot dot-3"></View>
-              </View>
-              <Text className="loading-text">正在寻找好物...</Text>
-            </View>
+          <View style={{ padding: "40rpx", textAlign: "center", color: "#666" }}>
+            <Text>正在加载好物...</Text>
           </View>
         ) : items.length === 0 ? (
-          <View className="enhanced-empty-container">
-            <View className="empty-animation">
-              <Text className="empty-icon">🛍️</Text>
-              <Text className="empty-title">暂无商品</Text>
-              <Text className="empty-subtitle">快来发布第一件闲置物品吧</Text>
-            </View>
+          <View style={{ padding: "100rpx", textAlign: "center", color: "#999" }}>
+            <Text style={{ fontSize: "60rpx", display: "block", marginBottom: "20rpx" }}>🛍️</Text>
+            <Text>暂无商品，快来发布吧</Text>
           </View>
         ) : (
-          <View className="enhanced-items-grid">
+          <View className="items-masonry">
             {items.map((item, index) => (
               <View
                 key={item.id}
-                className={`enhanced-item-card card-${
-                  index % 2 === 0 ? "left" : "right"
-                }`}
+                className="glass-card"
                 onClick={() => handleProductClick(item)}
-                style={{ animationDelay: `${index * 0.1}s` }}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                {/* 增强的商品图片 */}
-                <View className="enhanced-item-image-container">
-                  <View className="image-wrapper">
-                    <Image
-                      className="enhanced-item-image"
-                      src={
-                        item.imageUrls && item.imageUrls.length > 0
-                          ? item.imageUrls[0]
-                          : item.image && /^(https?:)?\/\//.test(item.image)
-                          ? item.image
-                          : "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop"
-                      }
-                      mode="aspectFill"
-                      lazyLoad
-                    />
-                    <View className="image-overlay"></View>
+                <View className="card-image-wrapper">
+                  <Image
+                    className="card-image"
+                    src={
+                      item.imageUrls && item.imageUrls.length > 0
+                        ? item.imageUrls[0]
+                        : item.image && /^(https?:)?\/\//.test(item.image)
+                        ? item.image
+                        : "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop"
+                    }
+                    mode="aspectFill"
+                    lazyLoad
+                  />
+                  {/* Status Badge */}
+                  {item.status && item.status !== 'available' && (
+                     <View className={`status-tag ${item.status === 'sold' ? 'status-sold' : ''}`}>
+                        <Text>{item.status === 'sold' ? '已售出' : item.status}</Text>
+                     </View>
+                  )}
+                  
+                  <View className="time-tag">
+                     {formatTime(item.dateCreated || item.createdAt || "")}
                   </View>
                 </View>
 
-                {/* 增强的商品信息 */}
-                <View className="enhanced-item-info">
-                  <View className="info-header">
-                    <Text className="enhanced-item-name">{item.title}</Text>
-                    <View className="item-meta">
-                      <Text className="meta-time">
-                        {formatTime(
-                          item.dateCreated ||
-                            item.createdAt ||
-                            new Date().toISOString()
-                        )}
+                <View className="card-content">
+                  <Text className="item-title">{item.title}</Text>
+                  <View className="item-footer">
+                    <View className="price-wrapper">
+                      <Text className="currency">$</Text>
+                      <Text className="amount">
+                        {typeof item.price === "number" ? item.price : item.price}
                       </Text>
-                    </View>
-                  </View>
-
-                  <View className="info-footer">
-                    <View className="price-section">
-                      <Text className="enhanced-item-price">
-                        $
-                        {typeof item.price === "number"
-                          ? item.price
-                          : item.price}
-                      </Text>
-                    </View>
-                    <View className="action-section">
-                      <View className="action-button">
-                        <Text className="action-text">查看详情</Text>
-                      </View>
                     </View>
                   </View>
                 </View>
@@ -307,9 +250,9 @@ const SecondHand: React.FC = () => {
           </View>
         )}
 
-        {/* 增强的分页 */}
+        {/* Pagination Logic Reuse */}
         {!loading && items.length > 0 && pagination.totalPages > 1 && (
-          <View className="enhanced-pagination-wrapper">
+          <View style={{ padding: "20rpx 0" }}>
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
@@ -320,28 +263,19 @@ const SecondHand: React.FC = () => {
             />
           </View>
         )}
-
-        {/* 增强的底部提示 */}
+        
         {!loading && items.length > 0 && pagination.totalPages <= 1 && (
-          <View className="enhanced-footer-tip">
-            <View className="tip-content">
-              <Text className="tip-icon">✨</Text>
-              <Text className="tip-text">已显示全部商品</Text>
-              <Text className="tip-subtext">发现了 {items.length} 件好物</Text>
-            </View>
-          </View>
+           <View style={{ textAlign: 'center', padding: '40rpx', color: '#999', fontSize: '24rpx' }}>
+              - 都在这里了 -
+           </View>
         )}
       </ScrollView>
 
-      {/* 增强的浮动按钮 */}
-      <View className="enhanced-floating-button" onClick={handlePostNew}>
-        <View className="button-content">
-          <Text className="button-icon">+</Text>
-        </View>
-        <View className="button-ripple"></View>
+      {/* FAB */}
+      <View className="fab-publish" onClick={handlePostNew}>
+        <Text className="fab-icon">+</Text>
       </View>
 
-      {/* Toast */}
       <Toast
         content={toastMessage}
         visible={showToast}
