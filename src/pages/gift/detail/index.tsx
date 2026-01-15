@@ -26,7 +26,7 @@ const formatTime = (dateString: string) => {
 
 const formatPrice = (price: number | string) => {
   const priceStr = typeof price === 'number' ? price.toString() : price
-  return priceStr.startsWith('¥') ? priceStr : `¥${priceStr}`
+  return priceStr.startsWith('$') ? priceStr : `$${priceStr}`
 }
 
 const GiftDetail: React.FC = () => {

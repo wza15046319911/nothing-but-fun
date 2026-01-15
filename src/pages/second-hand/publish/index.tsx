@@ -228,19 +228,18 @@ const SecondHandPublish: React.FC = () => {
       return;
     }
 
-    if (!state.userInfo?.wechat_id) {
-      const res = await Taro.showModal({
-        title: "完善联系方式",
-        content:
-          "您还未设置微信号，添加微信号可让买家更快联系您。是否现在添加？",
-        confirmText: "去添加",
-        cancelText: "暂不添加",
+    if (!state.userInfo?.wechat_id && !state.userInfo?.phone) {
+      Taro.showModal({
+        title: "请先完善联系方式",
+        content: "发布商品前需要设置微信号或手机号，方便买家联系您。",
+        confirmText: "去设置",
+        showCancel: false,
+      }).then((res) => {
+        if (res.confirm) {
+          Taro.navigateTo({ url: "/pages/contact-info/index" });
+        }
       });
-
-      if (res.confirm) {
-        Taro.navigateTo({ url: "/pages/contact-info/index" });
-        return;
-      }
+      return;
     }
 
     if (fileList.length === 0) {
