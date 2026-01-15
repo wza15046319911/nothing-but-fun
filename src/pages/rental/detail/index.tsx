@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Image,
-  Swiper,
-  SwiperItem,
-} from "@tarojs/components";
+import { View, Text, Image, Swiper, SwiperItem } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { rentalApi, RentalItem } from "../../../services/rental";
 import "./index.less";
@@ -57,7 +51,7 @@ const RentalDetail: React.FC = () => {
         {/* Simple loader placeholder */}
       </View>
     );
-    
+
   if (!item)
     return (
       <View className="rental-detail-container empty-state">
@@ -68,6 +62,8 @@ const RentalDetail: React.FC = () => {
   const images =
     item.imageUrls?.length > 0
       ? item.imageUrls
+      : item.images?.length && item.images.length > 0
+      ? item.images
       : [
           "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
           "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&q=80",
@@ -96,7 +92,6 @@ const RentalDetail: React.FC = () => {
 
       {/* Content Body with Glass Cards */}
       <View className="content-body">
-        
         {/* Main Head Card */}
         <View className="head-card">
           <Text className="title">{item.title}</Text>
@@ -105,7 +100,12 @@ const RentalDetail: React.FC = () => {
               <Text className="currency">$</Text>
               <Text className="amount">{item.price}</Text>
               <Text className="unit">
-                / {item.period === "day" ? "天" : item.period === "week" ? "周" : "月"}
+                /{" "}
+                {item.period === "day"
+                  ? "天"
+                  : item.period === "week"
+                  ? "周"
+                  : "月"}
               </Text>
             </View>
             <View className={`status-badge ${item.status}`}>
@@ -152,12 +152,12 @@ const RentalDetail: React.FC = () => {
 
       {/* Floating Glass Dock */}
       <View className="floating-dock">
-         <View className="dock-btn secondary" onClick={handleBack}>
-           ↩
-         </View>
-         <View className="dock-btn primary" onClick={handleCopyContact}>
-           立即联系 / 复制微信
-         </View>
+        <View className="dock-btn secondary" onClick={handleBack}>
+          ↩
+        </View>
+        <View className="dock-btn primary" onClick={handleCopyContact}>
+          立即联系 / 复制微信
+        </View>
       </View>
     </View>
   );

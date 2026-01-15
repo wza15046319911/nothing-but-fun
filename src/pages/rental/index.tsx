@@ -148,8 +148,11 @@ const RentalPage: React.FC = () => {
                   <Image
                     className="card-image"
                     src={
-                      item.imageUrls?.[0] ||
-                      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80"
+                      item.imageUrls && item.imageUrls.length > 0
+                        ? item.imageUrls[0]
+                        : item.images && item.images.length > 0
+                        ? item.images[0]
+                        : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80"
                     }
                     mode="aspectFill"
                     lazyLoad

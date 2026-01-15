@@ -130,14 +130,43 @@ export const rentalApi = {
 
   // 获取租赁分类
   getCategories: async (): Promise<RentalCategory[]> => {
-    // Hardcoded categories for now or fetch from backend
-    return [
-      { id: 1, name: "房产", slug: "house" },
-      { id: 2, name: "车辆", slug: "car" },
-      { id: 3, name: "设备", slug: "equipment" },
-      { id: 4, name: "接送机", slug: "pickup" },
-      { id: 5, name: "拼车", slug: "carpool" },
-      { id: 6, name: "其他", slug: "other" },
-    ];
+    try {
+      const response = await request({
+        url: "/rental/categories",
+        method: "GET",
+      });
+
+      // Backend returns { success: true, data: [...] }
+      if (response && response.data && Array.isArray(response.data)) {
+        return response.data.map(
+          (cat: { id: string; name: string }, index: number) => ({
+            id: index + 1,
+            name: cat.name,
+            slug: cat.id, // Backend returns category value as id
+          })
+        );
+      }
+
+      // Fallback to hardcoded categories if API fails
+      return [
+        { id: 1, name: "房产", slug: "house" },
+        { id: 2, name: "车辆", slug: "car" },
+        { id: 3, name: "设备", slug: "equipment" },
+        { id: 4, name: "接送机", slug: "pickup" },
+        { id: 5, name: "拼车", slug: "carpool" },
+        { id: 6, name: "其他", slug: "other" },
+      ];
+    } catch (error) {
+      console.error("Failed to fetch rental categories:", error);
+      // Fallback to hardcoded categories on error
+      return [
+        { id: 1, name: "房产", slug: "house" },
+        { id: 2, name: "车辆", slug: "car" },
+        { id: 3, name: "设备", slug: "equipment" },
+        { id: 4, name: "接送机", slug: "pickup" },
+        { id: 5, name: "拼车", slug: "carpool" },
+        { id: 6, name: "其他", slug: "other" },
+      ];
+    }
   },
 };
