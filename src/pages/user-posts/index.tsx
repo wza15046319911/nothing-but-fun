@@ -199,12 +199,10 @@ const UserPosts: React.FC = () => {
   const renderLoading = () => {
     return (
       <View className='custom-loading-container'>
-        <View className='nature-spinner'>
-            <View className='spinner-ring ring-1'></View>
-            <View className='spinner-ring ring-2'></View>
-            <View className='spinner-core'></View>
-        </View>
         <Text className='loading-text'>Rummaging...</Text>
+        <View className='loading-bar-wrapper'>
+          <View className='loading-bar'></View>
+        </View>
       </View>
     )
   }
@@ -315,67 +313,77 @@ const UserPosts: React.FC = () => {
         {items.map(item => (
           <View key={item.id} className='item-card' onClick={() => handleItemClick(item)}>
             <View className='item-image-container'>
-              <Image
-                className='item-image'
-                src={item.imageUrls && item.imageUrls.length > 0
+              {(() => {
+                const imageSrc = item.imageUrls && item.imageUrls.length > 0
                   ? item.imageUrls[0]
-                  : (item.image && /^(https?:)?\/\//.test(item.image) ? item.image : '')}
-                mode='aspectFill'
-                lazyLoad
-              />
+                  : (item.image && /^(https?:)?\/\//.test(item.image) ? item.image : '')
+
+                if (!imageSrc) {
+                  return (
+                    <View className='item-image-placeholder'>
+                      <Text className='placeholder-icon'>📦</Text>
+                    </View>
+                  )
+                }
+
+                return (
+                  <Image
+                    className='item-image'
+                    src={imageSrc}
+                    mode='aspectFill'
+                    lazyLoad
+                  />
+                )
+              })()}
+              
+              {/* Status Badge on Image - Cleaner Look */}
               {(() => {
                 const statusMeta = resolveStatusMeta(item.status)
                 return (
-                  <View
-                    className={`status-badge ${item.status}`}
-                    style={{ backgroundColor: statusMeta.color }}
-                  >
+                  <View className={`status-badge-overlay ${item.status || 'available'}`}>
                     {statusMeta.text}
                   </View>
                 )
               })()}
-              {item.reviewStatus && (
+
+              {/* Review Status Badge on Image (only if not approved) */}
+              {item.reviewStatus && item.reviewStatus !== 'approved' && (
                 (() => {
                   const reviewMeta = resolveReviewStatusMeta(item.reviewStatus)
                   if (!reviewMeta) return null
                   return (
-                    <View
-                      className={`review-status-badge ${item.reviewStatus}`}
-                      style={{ backgroundColor: reviewMeta.color }}
-                    >
+                    <View className={`review-badge-overlay ${item.reviewStatus}`}>
                       {reviewMeta.icon} {reviewMeta.text}
                     </View>
                   )
                 })()
               )}
+
               {item.imageUrls && item.imageUrls.length > 1 && (
                 <View className='image-count-badge'>📷 {item.imageUrls.length}</View>
               )}
             </View>
 
             <View className='item-info'>
-              <Text className='item-name'>{item.title}</Text>
+              <View className='item-header'>
+                <Text className='item-name'>{item.title}</Text>
+                <Text className='item-price'>${item.price}</Text>
+              </View>
+              
               <Text className='item-description'>{item.description}</Text>
-              {item.reviewStatus && (
-                <View className='review-status-info'>
-                  {(() => {
-                    const reviewMeta = resolveReviewStatusMeta(item.reviewStatus)
-                    if (!reviewMeta) return null
-                    return (
-                      <Text className='review-status-text'>
-                        审核状态: {reviewMeta.icon} {reviewMeta.text}
-                      </Text>
-                    )
-                  })()}
-                  {item.reviewStatus === 'rejected' && item.reviewReason && (
-                    <Text className='rejection-reason'>拒绝原因: {item.reviewReason}</Text>
-                  )}
+              
+              <View className='item-meta-row'>
+                <Text className='meta-text'>发布于 {formatTime(item.createdAt)}</Text>
+                <Text className='meta-divider'>·</Text>
+              </View>
+
+              {item.reviewStatus === 'rejected' && item.reviewReason && (
+                <View className='review-alert'>
+                  <Text className='review-alert-title'>⚠️ 审核未通过</Text>
+                  <Text className='review-alert-text'>{item.reviewReason}</Text>
                 </View>
               )}
-              <View className='item-footer'>
-                <Text className='item-price'>${item.price}</Text>
-                <Text className='item-time'>{formatTime(item.createdAt)}</Text>
-              </View>
+              
               <View className='item-actions'>
                 {item.reviewStatus === 'rejected' && (
                   <Button
@@ -422,13 +430,13 @@ const UserPosts: React.FC = () => {
           className={`tab ${activeTab === 0 ? 'active' : ''}`}
           onClick={() => handleTabChange(0)}
         >
-          布村换换乐
+          <Text className='tab-text'>布村换换乐</Text>
         </View>
         <View
           className={`tab ${activeTab === 1 ? 'active' : ''}`}
           onClick={() => handleTabChange(1)}
         >
-          布村好吃榜
+          <Text className='tab-text'>布村好吃榜</Text>
         </View>
       </View>
 

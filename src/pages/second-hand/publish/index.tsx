@@ -228,7 +228,10 @@ const SecondHandPublish: React.FC = () => {
       return;
     }
 
-    if (!state.userInfo?.wechat_id && !state.userInfo?.phone) {
+    const wechatId = state.userInfo?.wechatId?.trim() || "";
+    const phone = state.userInfo?.phone?.trim() || "";
+
+    if (!wechatId && !phone) {
       Taro.showModal({
         title: "请先完善联系方式",
         content: "发布商品前需要设置微信号或手机号，方便买家联系您。",
@@ -251,12 +254,13 @@ const SecondHandPublish: React.FC = () => {
       return;
     }
 
-    Taro.showLoading({
-      title: isEditMode ? "保存中..." : "发布中...",
-    });
+    if (isEditMode && editingItemId) {
+      // 编辑模式：保持原有同步逻辑
+      Taro.showLoading({
+        title: "保存中...",
+      });
 
-    try {
-      if (isEditMode && editingItemId) {
+      try {
         const newLocalFiles = fileList.filter((f) => (f as any).path);
         let fileIds: string[] | undefined = undefined;
         if (newLocalFiles.length > 0) {
@@ -302,57 +306,83 @@ const SecondHandPublish: React.FC = () => {
           duration: 2000,
         });
         Taro.navigateBack();
-      } else {
-        const fileIds: string[] = await Promise.all(
-          fileList.map(async (file) => {
-            const res = await Taro.uploadFile({
-              url: `${API_BASE_URL}/file`,
-              filePath: (file as any).path || file.url || "",
-              name: "image",
-            });
-            const data = JSON.parse(res.data);
-            return data.data.id;
-          })
-        );
-
-        const res = await secondhandApi.createItem({
-          sellerId: parseInt(state.userInfo.id),
-          title: title.trim(),
-          description: description.trim(),
-          price: price.trim(),
-          status: "available",
-          images: fileIds,
-          categoryRid:
-            categories.length > 0
-              ? categories[selectedCategoryIndex].id
-              : undefined,
-          productStatusRid:
-            productStatuses.length > 0
-              ? productStatuses[selectedProductStatusIndex].id
-              : undefined,
+      } catch (error) {
+        console.error("保存失败:", error);
+        Taro.hideLoading();
+        Taro.showToast({
+          title: (error as any).message || "保存失败，请重试",
+          icon: "none",
+          duration: 2000,
         });
-        if (res.id) {
-          Taro.hideLoading();
-          Taro.showToast({
-            title: "发布成功！",
-            icon: "success",
-            duration: 2000,
-          });
-          setTitle("");
-          setDescription("");
-          setPrice("");
-          setFileList([]);
-          Taro.navigateBack();
-        }
       }
-    } catch (error) {
-      console.error("发布失败:", error);
-      Taro.hideLoading();
-      Taro.showToast({
-        title: (error as any).message || "操作失败，请重试",
-        icon: "none",
-        duration: 2000,
+    } else {
+      // 新发布模式：立即显示成功弹窗，后台异步上传
+      // 保存当前表单数据用于异步上传
+      const formData = {
+        fileList: [...fileList],
+        title: title.trim(),
+        description: description.trim(),
+        price: price.trim(),
+        sellerId: parseInt(state.userInfo.id),
+        categoryRid:
+          categories.length > 0
+            ? categories[selectedCategoryIndex].id
+            : undefined,
+        productStatusRid:
+          productStatuses.length > 0
+            ? productStatuses[selectedProductStatusIndex].id
+            : undefined,
+      };
+
+      // 立即显示成功弹窗
+      Taro.showModal({
+        title: "提交成功",
+        content: "您的商品已提交，请等待审核。审核通过后将自动上架。",
+        showCancel: false,
+        confirmText: "我知道了",
+      }).then(() => {
+        // 清空表单
+        setTitle("");
+        setDescription("");
+        setPrice("");
+        setFileList([]);
+        // 返回上一页
+        Taro.navigateBack();
       });
+
+      // 异步上传图片和创建商品（不阻塞用户）
+      (async () => {
+        try {
+          const fileIds: string[] = await Promise.all(
+            formData.fileList.map(async (file) => {
+              const res = await Taro.uploadFile({
+                url: `${API_BASE_URL}/file`,
+                filePath: (file as any).path || file.url || "",
+                name: "image",
+              });
+              const data = JSON.parse(res.data);
+              return data.data.id;
+            })
+          );
+
+          await secondhandApi.createItem({
+            sellerId: formData.sellerId,
+            title: formData.title,
+            description: formData.description,
+            price: formData.price,
+            status: "available",
+            images: fileIds,
+            categoryRid: formData.categoryRid,
+            productStatusRid: formData.productStatusRid,
+          });
+
+          console.log("商品发布成功（后台）");
+        } catch (error) {
+          console.error("后台发布失败:", error);
+          // 后台失败时可以考虑本地存储，下次重试
+          // 这里静默处理，因为用户已经离开页面
+        }
+      })();
     }
   };
 
