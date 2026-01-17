@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView } from "@tarojs/components";
-import { Toast } from "@nutui/nutui-react-taro";
-import Taro from "@tarojs/taro";
-import {
-  secondhandApi,
-  SecondhandItem,
-  SecondhandFilters,
-} from "../../services/secondhand";
-import { useAuth } from "../../context/auth";
-import SecondhandFiltersComponent from "../../components/SecondhandFilters";
-import Pagination from "../../components/Pagination";
-import "./index.less";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
+import { Toast } from '@nutui/nutui-react-taro';
+import Taro from '@tarojs/taro';
+import { secondhandApi, SecondhandItem, SecondhandFilters } from '../../services/secondhand';
+import { useAuth } from '../../context/auth';
+import SecondhandFiltersComponent from '../../components/SecondhandFilters';
+import Pagination from '../../components/Pagination';
+import './index.less';
 
 const SecondHand: React.FC = () => {
   // Auth context
@@ -21,7 +17,7 @@ const SecondHand: React.FC = () => {
   const [items, setItems] = useState<SecondhandItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState('');
 
   // State for pagination
   const [pagination, setPagination] = useState({
@@ -35,15 +31,12 @@ const SecondHand: React.FC = () => {
   const [currentFilters, setCurrentFilters] = useState<SecondhandFilters>({
     page: 1,
     limit: 10,
-    sortBy: "dateCreated",
-    sortOrder: "desc",
+    sortBy: 'dateCreated',
+    sortOrder: 'desc',
   });
 
   // Load secondhand items
-  const loadItems = async (
-    showLoading = true,
-    filters: SecondhandFilters = currentFilters
-  ) => {
+  const loadItems = async (showLoading = true, filters: SecondhandFilters = currentFilters) => {
     try {
       if (showLoading) {
         setLoading(true);
@@ -58,8 +51,8 @@ const SecondHand: React.FC = () => {
         totalPages: response.totalPages,
       });
     } catch (error) {
-      console.error("Failed to load secondhand items:", error);
-      showToastMessage("加载商品失败，请稍后重试");
+      console.error('Failed to load secondhand items:', error);
+      showToastMessage('加载商品失败，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -74,11 +67,11 @@ const SecondHand: React.FC = () => {
     };
 
     if (!newFilters.sortBy) {
-      newFilters.sortBy = "dateCreated";
+      newFilters.sortBy = 'dateCreated';
     }
 
     if (!newFilters.sortOrder) {
-      newFilters.sortOrder = "desc";
+      newFilters.sortOrder = 'desc';
     }
     setCurrentFilters(newFilters);
     loadItems(true, newFilters);
@@ -104,20 +97,20 @@ const SecondHand: React.FC = () => {
   const handlePostNew = () => {
     if (!isLoggedIn) {
       Taro.showModal({
-        title: "提示",
-        content: "请先登录后再发布商品",
-        confirmText: "去登录",
+        title: '提示',
+        content: '请先登录后再发布商品',
+        confirmText: '去登录',
         success: (res) => {
-            if (res.confirm) {
-                Taro.navigateTo({ url: '/pages/user-login/index' });
-            }
-        }
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/user-login/index' });
+          }
+        },
       });
       return;
     }
 
     Taro.navigateTo({
-      url: "/pages/second-hand/publish/index",
+      url: '/pages/second-hand/publish/index',
     });
   };
 
@@ -164,18 +157,16 @@ const SecondHand: React.FC = () => {
         </View>
 
         <View className="info-card">
-          <Text className="info-text">
-            支持租房、拼车、闲置交易及车辆买卖信息发布
-          </Text>
+          <Text className="info-text">支持租房、拼车、闲置交易及车辆买卖信息发布</Text>
           <View
             className="wechat-copy-btn"
             onClick={() => {
               Taro.setClipboardData({
-                data: "Brisbane10000",
+                data: 'Brisbane10000',
                 success: () =>
                   Taro.showToast({
-                    title: "已复制微信号",
-                    icon: "success",
+                    title: '已复制微信号',
+                    icon: 'success',
                   }),
               });
             }}
@@ -192,12 +183,12 @@ const SecondHand: React.FC = () => {
 
       <ScrollView className="content-scroll" scrollY>
         {loading ? (
-          <View style={{ padding: "40rpx", textAlign: "center", color: "#666" }}>
+          <View style={{ padding: '40rpx', textAlign: 'center', color: '#666' }}>
             <Text>正在加载好物...</Text>
           </View>
         ) : items.length === 0 ? (
-          <View style={{ padding: "100rpx", textAlign: "center", color: "#999" }}>
-            <Text style={{ fontSize: "60rpx", display: "block", marginBottom: "20rpx" }}>🛍️</Text>
+          <View style={{ padding: '100rpx', textAlign: 'center', color: '#999' }}>
+            <Text style={{ fontSize: '60rpx', display: 'block', marginBottom: '20rpx' }}>🛍️</Text>
             <Text>暂无商品，快来发布吧</Text>
           </View>
         ) : (
@@ -216,21 +207,21 @@ const SecondHand: React.FC = () => {
                       item.imageUrls && item.imageUrls.length > 0
                         ? item.imageUrls[0]
                         : item.image && /^(https?:)?\/\//.test(item.image)
-                        ? item.image
-                        : "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop"
+                          ? item.image
+                          : 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop'
                     }
                     mode="aspectFill"
                     lazyLoad
                   />
                   {/* Status Badge */}
                   {item.status && item.status !== 'available' && (
-                     <View className={`status-tag ${item.status === 'sold' ? 'status-sold' : ''}`}>
-                        <Text>{item.status === 'sold' ? '已售出' : item.status}</Text>
-                     </View>
+                    <View className={`status-tag ${item.status === 'sold' ? 'status-sold' : ''}`}>
+                      <Text>{item.status === 'sold' ? '已售出' : item.status}</Text>
+                    </View>
                   )}
-                  
+
                   <View className="time-tag">
-                     {formatTime(item.dateCreated || item.createdAt || "")}
+                    {formatTime(item.dateCreated || item.createdAt || '')}
                   </View>
                 </View>
 
@@ -240,7 +231,7 @@ const SecondHand: React.FC = () => {
                     <View className="price-wrapper">
                       <Text className="currency">$</Text>
                       <Text className="amount">
-                        {typeof item.price === "number" ? item.price : item.price}
+                        {typeof item.price === 'number' ? item.price : item.price}
                       </Text>
                     </View>
                   </View>
@@ -252,7 +243,7 @@ const SecondHand: React.FC = () => {
 
         {/* Pagination Logic Reuse */}
         {!loading && items.length > 0 && pagination.totalPages > 1 && (
-          <View style={{ padding: "20rpx 0" }}>
+          <View style={{ padding: '20rpx 0' }}>
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
@@ -263,11 +254,11 @@ const SecondHand: React.FC = () => {
             />
           </View>
         )}
-        
+
         {!loading && items.length > 0 && pagination.totalPages <= 1 && (
-           <View style={{ textAlign: 'center', padding: '40rpx', color: '#999', fontSize: '24rpx' }}>
-              - 都在这里了 -
-           </View>
+          <View style={{ textAlign: 'center', padding: '40rpx', color: '#999', fontSize: '24rpx' }}>
+            - 都在这里了 -
+          </View>
         )}
       </ScrollView>
 

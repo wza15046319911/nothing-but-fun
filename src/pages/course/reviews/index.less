@@ -1,11 +1,11 @@
 .course-reviews-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
+
   .header {
     padding: 40px 20px 20px;
     text-align: center;
-    
+
     .header-content {
       .course-code {
         display: block;
@@ -14,7 +14,7 @@
         color: #fff;
         margin-bottom: 4px;
       }
-      
+
       .course-name {
         display: block;
         font-size: 16px;
@@ -22,7 +22,7 @@
         margin-bottom: 8px;
         line-height: 1.4;
       }
-      
+
       .subtitle {
         display: block;
         font-size: 14px;
@@ -30,48 +30,48 @@
       }
     }
   }
-  
+
   .stats-section {
     margin: 0 20px 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    
+
     .overall-rating {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-bottom: 20px;
-      
+
       .rating-score {
         font-size: 36px;
         font-weight: bold;
         color: #faad14;
         margin-bottom: 8px;
       }
-      
+
       .total-reviews {
         font-size: 14px;
         color: #666;
         margin-top: 8px;
       }
     }
-    
+
     .rating-distribution {
       margin-bottom: 20px;
-      
+
       .distribution-item {
         display: flex;
         align-items: center;
         margin-bottom: 8px;
-        
+
         .rating-label {
           width: 40px;
           font-size: 14px;
           color: #333;
         }
-        
+
         .progress-bar {
           flex: 1;
           height: 8px;
@@ -79,14 +79,14 @@
           border-radius: 4px;
           margin: 0 12px;
           overflow: hidden;
-          
+
           .progress-fill {
             height: 100%;
             border-radius: 4px;
             transition: width 0.3s ease;
           }
         }
-        
+
         .count-text {
           width: 30px;
           text-align: right;
@@ -95,7 +95,7 @@
         }
       }
     }
-    
+
     .write-review-btn {
       width: 100%;
       border-radius: 8px;
@@ -103,34 +103,34 @@
       border: none;
     }
   }
-  
+
   .filter-section {
     margin: 0 20px 20px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
-    
+
     .filter-group {
       display: flex;
       align-items: center;
       margin-bottom: 12px;
-      
+
       &:last-child {
         margin-bottom: 0;
       }
-      
+
       .filter-label {
         font-size: 14px;
         color: #333;
         margin-right: 12px;
         min-width: 40px;
       }
-      
+
       .filter-options {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        
+
         .filter-option {
           padding: 4px 12px;
           border-radius: 16px;
@@ -138,7 +138,7 @@
           background: #f5f5f5;
           color: #666;
           transition: all 0.3s ease;
-          
+
           &.active {
             background: #667eea;
             color: #fff;
@@ -147,34 +147,34 @@
       }
     }
   }
-  
+
   .reviews-list {
     flex: 1;
     background: #f5f5f5;
     border-radius: 20px 20px 0 0;
     min-height: calc(100vh - 400px);
-    
+
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 60px 20px;
-      
+
       .loading-text {
         margin-top: 16px;
         font-size: 14px;
         color: #666;
       }
     }
-    
+
     .empty-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 60px 20px;
-      
+
       .first-review-btn {
         margin-top: 20px;
         border-radius: 8px;
@@ -182,30 +182,30 @@
         border: none;
       }
     }
-    
+
     .reviews-content {
       padding: 20px;
-      
+
       .review-item {
         background: #fff;
         border-radius: 12px;
         padding: 16px;
         margin-bottom: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        
+
         .review-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 12px;
-          
+
           .user-info {
             display: flex;
             align-items: center;
-            
+
             .user-details {
               margin-left: 12px;
-              
+
               .username {
                 display: block;
                 font-size: 14px;
@@ -213,7 +213,7 @@
                 color: #333;
                 margin-bottom: 2px;
               }
-              
+
               .review-time {
                 display: block;
                 font-size: 12px;
@@ -221,12 +221,12 @@
               }
             }
           }
-          
+
           .rating-info {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            
+
             .rating-text {
               font-size: 12px;
               font-weight: 500;
@@ -234,7 +234,7 @@
             }
           }
         }
-        
+
         .review-content {
           .content-text {
             font-size: 14px;
@@ -252,42 +252,42 @@
   .course-reviews-container {
     .header {
       padding: 30px 15px 15px;
-      
+
       .header-content {
         .course-code {
           font-size: 20px;
         }
-        
+
         .course-name {
           font-size: 14px;
         }
       }
     }
-    
+
     .stats-section {
       margin: 0 15px 15px;
       padding: 15px;
-      
+
       .overall-rating {
         .rating-score {
           font-size: 30px;
         }
       }
     }
-    
+
     .filter-section {
       margin: 0 15px 15px;
       padding: 12px;
     }
-    
+
     .reviews-list {
       .reviews-content {
         padding: 15px;
-        
+
         .review-item {
           padding: 12px;
         }
       }
     }
   }
-} 
+}

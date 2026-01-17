@@ -1,12 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useReducer,
-  useEffect,
-  ReactNode,
-} from "react";
-import { authApi, storageUtils, UserInfo } from "../services/auth";
-import Taro from "@tarojs/taro";
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { authApi, storageUtils, UserInfo } from '../services/auth';
+import Taro from '@tarojs/taro';
 
 // 认证状态类型
 export interface AuthState {
@@ -19,12 +13,12 @@ export interface AuthState {
 
 // 认证操作类型
 export type AuthAction =
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "LOGIN_SUCCESS"; payload: { userInfo: UserInfo; openid: string } }
-  | { type: "LOGIN_FAILURE"; payload: string }
-  | { type: "LOGOUT" }
-  | { type: "CLEAR_ERROR" }
-  | { type: "UPDATE_USER_INFO"; payload: UserInfo };
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'LOGIN_SUCCESS'; payload: { userInfo: UserInfo; openid: string } }
+  | { type: 'LOGIN_FAILURE'; payload: string }
+  | { type: 'LOGOUT' }
+  | { type: 'CLEAR_ERROR' }
+  | { type: 'UPDATE_USER_INFO'; payload: UserInfo };
 
 // 初始状态
 const initialState: AuthState = {
@@ -38,13 +32,13 @@ const initialState: AuthState = {
 // Reducer函数
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case "SET_LOADING":
+    case 'SET_LOADING':
       return {
         ...state,
         isLoading: action.payload,
         error: null,
       };
-    case "LOGIN_SUCCESS":
+    case 'LOGIN_SUCCESS':
       return {
         ...state,
         isLoggedIn: true,
@@ -53,7 +47,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         openid: action.payload.openid,
         error: null,
       };
-    case "LOGIN_FAILURE":
+    case 'LOGIN_FAILURE':
       return {
         ...state,
         isLoggedIn: false,
@@ -62,7 +56,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         openid: null,
         error: action.payload,
       };
-    case "LOGOUT":
+    case 'LOGOUT':
       return {
         ...state,
         isLoggedIn: false,
@@ -71,12 +65,12 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         openid: null,
         error: null,
       };
-    case "CLEAR_ERROR":
+    case 'CLEAR_ERROR':
       return {
         ...state,
         error: null,
       };
-    case "UPDATE_USER_INFO":
+    case 'UPDATE_USER_INFO':
       return {
         ...state,
         userInfo: action.payload,
@@ -90,10 +84,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 interface AuthContextType {
   state: AuthState;
   checkLoginStatus: () => Promise<void>;
-  createUser: (
-    code: string,
-    userInfo: { nickname: string; avatarUrl: string }
-  ) => Promise<boolean>;
+  createUser: (code: string, userInfo: { nickname: string; avatarUrl: string }) => Promise<boolean>;
   logout: () => void;
   updateUserInfo: (userInfo: Partial<UserInfo>) => Promise<boolean>;
   clearError: () => void;
@@ -114,21 +105,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 检查登录状态
   const checkLoginStatus = async () => {
     try {
-      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: 'SET_LOADING', payload: true });
 
       // 获取微信登录code
       const loginRes = await Taro.login();
       if (!loginRes.code) {
-        throw new Error("获取微信登录code失败");
+        throw new Error('获取微信登录code失败');
       }
-
 
       // 调用登录API获取openid
       const loginResponse = await authApi.wechatLogin({ code: loginRes.code });
 
       if (loginResponse.success && loginResponse.data.openid) {
         const openid = loginResponse.data.openid;
-        console.log("获取到openid:", openid);
+        console.log('获取到openid:', openid);
 
         // 根据openid获取用户信息
         try {
@@ -137,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (userInfoResponse.success && userInfoResponse.data) {
             // 用户已存在，直接设置登录状态
             const userInfo = userInfoResponse.data;
-            console.log("用户已存在，自动登录:", userInfo);
+            console.log('用户已存在，自动登录:', userInfo);
 
             // 保存到本地存储
             if (loginResponse.data.token) {
@@ -145,28 +135,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
 
             dispatch({
-              type: "LOGIN_SUCCESS",
+              type: 'LOGIN_SUCCESS',
               payload: { userInfo, openid },
             });
           } else {
             // 用户不存在，设置openid但不登录
-            dispatch({ type: "SET_LOADING", payload: false });
+            dispatch({ type: 'SET_LOADING', payload: false });
             // 可以在这里设置openid以便后续创建用户
-            console.log("用户不存在，需要创建用户");
+            console.log('用户不存在，需要创建用户');
           }
         } catch (userInfoError) {
           // 获取用户信息失败，说明用户不存在
-          console.log("用户不存在，需要创建用户");
-          dispatch({ type: "SET_LOADING", payload: false });
+          console.log('用户不存在，需要创建用户');
+          dispatch({ type: 'SET_LOADING', payload: false });
         }
       } else {
-        throw new Error("获取openid失败");
+        throw new Error('获取openid失败');
       }
     } catch (error) {
-      console.error("检查登录状态失败:", error);
+      console.error('检查登录状态失败:', error);
       dispatch({
-        type: "LOGIN_FAILURE",
-        payload: error.message || "检查登录状态失败",
+        type: 'LOGIN_FAILURE',
+        payload: error.message || '检查登录状态失败',
       });
     }
   };
@@ -177,17 +167,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     userInfo: { nickname: string; avatarUrl: string }
   ): Promise<boolean> => {
     try {
-      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: 'SET_LOADING', payload: true });
 
       // 首先获取openid
       const loginResponse = await authApi.wechatLogin({ code });
 
       if (!loginResponse.success || !loginResponse.data.openid) {
-        throw new Error("获取用户openid失败");
+        throw new Error('获取用户openid失败');
       }
 
       const openid = loginResponse.data.openid;
-      console.log("获取到openid:", openid);
+      console.log('获取到openid:', openid);
 
       // 创建用户
       const sanitizedNickname = userInfo.nickname.trim();
@@ -198,7 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         avatarUrl: userInfo.avatarUrl,
       });
 
-      console.log("创建用户结果:", createUserResponse);
+      console.log('创建用户结果:', createUserResponse);
 
       if (createUserResponse.success && createUserResponse.data) {
         const newUserInfo: UserInfo = {
@@ -206,11 +196,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           openid: createUserResponse.data.openid,
           nickname: createUserResponse.data.nickname,
           avatarUrl: createUserResponse.data.avatarUrl,
-          city: createUserResponse.data.city || "",
-          province: createUserResponse.data.province || "",
-          gender: createUserResponse.data.gender || "",
-          country: createUserResponse.data.country || "",
-          language: createUserResponse.data.language || "Chinese",
+          city: createUserResponse.data.city || '',
+          province: createUserResponse.data.province || '',
+          gender: createUserResponse.data.gender || '',
+          country: createUserResponse.data.country || '',
+          language: createUserResponse.data.language || 'Chinese',
         };
 
         // 保存用户信息到本地存储
@@ -219,27 +209,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         dispatch({
-          type: "LOGIN_SUCCESS",
+          type: 'LOGIN_SUCCESS',
           payload: { userInfo: newUserInfo, openid },
         });
 
         return true;
       } else {
-        throw new Error(createUserResponse.message || "创建用户失败");
+        throw new Error(createUserResponse.message || '创建用户失败');
       }
     } catch (error) {
-      console.error("创建用户失败:", error);
+      console.error('创建用户失败:', error);
       const backendMessage = (error as any)?.data?.message;
-      const message = backendMessage || (error instanceof Error ? error.message : "创建用户失败");
+      const message = backendMessage || (error instanceof Error ? error.message : '创建用户失败');
       if (!backendMessage) {
         Taro.showToast({
           title: message,
-          icon: "none",
+          icon: 'none',
           duration: 2000,
         });
       }
       dispatch({
-        type: "LOGIN_FAILURE",
+        type: 'LOGIN_FAILURE',
         payload: message,
       });
       return false;
@@ -247,11 +237,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 更新用户信息
-  const updateUserInfo = async (
-    userInfo: Partial<UserInfo>
-  ): Promise<boolean> => {
+  const updateUserInfo = async (userInfo: Partial<UserInfo>): Promise<boolean> => {
     try {
-      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: 'SET_LOADING', payload: true });
 
       const response = await authApi.updateProfile(userInfo);
 
@@ -263,20 +251,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         dispatch({
-          type: "UPDATE_USER_INFO",
+          type: 'UPDATE_USER_INFO',
           payload: response.data,
         });
 
-        dispatch({ type: "SET_LOADING", payload: false });
+        dispatch({ type: 'SET_LOADING', payload: false });
         return true;
       } else {
-        throw new Error(response.message || "更新用户信息失败");
+        throw new Error(response.message || '更新用户信息失败');
       }
     } catch (error) {
-      console.error("更新用户信息失败:", error);
+      console.error('更新用户信息失败:', error);
       dispatch({
-        type: "LOGIN_FAILURE",
-        payload: error.message || "更新用户信息失败",
+        type: 'LOGIN_FAILURE',
+        payload: error.message || '更新用户信息失败',
       });
       return false;
     }
@@ -285,13 +273,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 退出登录
   const logout = () => {
     storageUtils.clearUserData();
-    dispatch({ type: "LOGOUT" });
-    console.log("用户已退出登录");
+    dispatch({ type: 'LOGOUT' });
+    console.log('用户已退出登录');
   };
 
   // 清除错误
   const clearError = () => {
-    dispatch({ type: "CLEAR_ERROR" });
+    dispatch({ type: 'CLEAR_ERROR' });
   };
 
   // 组件挂载时检查登录状态
@@ -308,18 +296,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearError,
   };
 
-  return React.createElement(
-    AuthContext.Provider,
-    { value: contextValue },
-    children
-  );
+  return React.createElement(AuthContext.Provider, { value: contextValue }, children);
 };
 
 // 自定义Hook
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

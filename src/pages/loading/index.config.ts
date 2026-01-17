@@ -1,4 +1,4 @@
 export default definePageConfig({
   navigationBarTitleText: 'Loading...',
-  navigationStyle: 'custom'
-})
+  navigationStyle: 'custom',
+});

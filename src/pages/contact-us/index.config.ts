@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '布玩小秘书'
-}) 
+  navigationBarTitleText: '布玩小秘书',
+});

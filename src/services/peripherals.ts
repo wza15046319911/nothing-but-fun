@@ -1,52 +1,52 @@
-import request from './api'
+import request from './api';
 
 // 周边商品数据类型 - 更新以匹配后端schema
 export interface PeripheralItem {
-  id: number
-  name: string
-  description: string
-  price: number | string  // 后端使用integer，但支持字符串兼容性
-  stock: number
-  image?: string  // Legacy field for backward compatibility
-  imageUrls: string[]  // 主要图片字段，来自关联表
-  dateCreated: string  // 后端schema字段名
-  createdAt?: string  // Legacy field for backward compatibility
-  categoryName?: string | null
-  categoryRid?: number  // 分类ID
+  id: number;
+  name: string;
+  description: string;
+  price: number | string; // 后端使用integer，但支持字符串兼容性
+  stock: number;
+  image?: string; // Legacy field for backward compatibility
+  imageUrls: string[]; // 主要图片字段，来自关联表
+  dateCreated: string; // 后端schema字段名
+  createdAt?: string; // Legacy field for backward compatibility
+  categoryName?: string | null;
+  categoryRid?: number; // 分类ID
 }
 
 // 周边商品分类接口
 export interface PeripheralCategory {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 // 周边商品筛选参数接口
 export interface PeripheralFilters {
-  keyword?: string
-  categoryId?: number
-  priceFrom?: number
-  priceTo?: number
-  sortBy?: 'dateCreated' | 'priceLow' | 'priceHigh' | 'stock'
-  sortOrder?: 'asc' | 'desc'
-  page?: number
-  limit?: number
+  keyword?: string;
+  categoryId?: number;
+  priceFrom?: number;
+  priceTo?: number;
+  sortBy?: 'dateCreated' | 'priceLow' | 'priceHigh' | 'stock';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
 }
 
 // 分页响应接口
 export interface PaginatedPeripheralResponse {
-  data: PeripheralItem[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
+  data: PeripheralItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 // API响应类型
 interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message?: string
+  success: boolean;
+  data: T;
+  message?: string;
 }
 
 // 周边商品API
@@ -55,39 +55,41 @@ export const peripheralsApi = {
   getAllItems: async (filters?: PeripheralFilters): Promise<PaginatedPeripheralResponse> => {
     try {
       // 构建查询参数
-      const queryParams = new URLSearchParams()
+      const queryParams = new URLSearchParams();
 
       if (filters?.keyword) {
-        queryParams.append('keyword', filters.keyword)
+        queryParams.append('keyword', filters.keyword);
       }
       if (filters?.categoryId !== undefined) {
-        queryParams.append('categoryId', filters.categoryId.toString())
+        queryParams.append('categoryId', filters.categoryId.toString());
       }
       if (filters?.priceFrom !== undefined) {
-        queryParams.append('priceFrom', filters.priceFrom.toString())
+        queryParams.append('priceFrom', filters.priceFrom.toString());
       }
       if (filters?.priceTo !== undefined) {
-        queryParams.append('priceTo', filters.priceTo.toString())
+        queryParams.append('priceTo', filters.priceTo.toString());
       }
       if (filters?.page !== undefined) {
-        queryParams.append('page', filters.page.toString())
+        queryParams.append('page', filters.page.toString());
       }
       if (filters?.limit !== undefined) {
-        queryParams.append('limit', filters.limit.toString())
+        queryParams.append('limit', filters.limit.toString());
       }
       if (filters?.sortBy) {
-        queryParams.append('sortBy', filters.sortBy)
+        queryParams.append('sortBy', filters.sortBy);
       }
       if (filters?.sortOrder) {
-        queryParams.append('sortOrder', filters.sortOrder)
+        queryParams.append('sortOrder', filters.sortOrder);
       }
 
-      const url = queryParams.toString() ? `/peripherals?${queryParams.toString()}` : '/peripherals'
+      const url = queryParams.toString()
+        ? `/peripherals?${queryParams.toString()}`
+        : '/peripherals';
 
       const response = await request({
         url,
-        method: 'GET'
-      })
+        method: 'GET',
+      });
 
       // 检查响应格式 - 后端返回的格式是 { data: PeripheralItem[], total, page, limit, totalPages }
       if (response && typeof response === 'object' && 'data' in response && 'total' in response) {
@@ -96,11 +98,11 @@ export const peripheralsApi = {
           ...item,
           createdAt: item.dateCreated || item.createdAt, // 兼容旧字段
           imageUrls: item.imageUrls || [], // 确保图片数组存在
-        }))
+        }));
         return {
           ...response,
-          data: processedData
-        } as PaginatedPeripheralResponse
+          data: processedData,
+        } as PaginatedPeripheralResponse;
       }
 
       // 如果是简单数组格式，包装成分页响应
@@ -110,8 +112,8 @@ export const peripheralsApi = {
           total: response.length,
           page: 1,
           limit: response.length,
-          totalPages: 1
-        } as PaginatedPeripheralResponse
+          totalPages: 1,
+        } as PaginatedPeripheralResponse;
       }
 
       return {
@@ -119,35 +121,35 @@ export const peripheralsApi = {
         total: 0,
         page: 1,
         limit: 10,
-        totalPages: 0
-      } as PaginatedPeripheralResponse
+        totalPages: 0,
+      } as PaginatedPeripheralResponse;
     } catch (error) {
-      console.error('获取周边商品失败:', error)
+      console.error('获取周边商品失败:', error);
       // 返回模拟数据用于展示
-      const mockData = getMockPeripherals()
+      const mockData = getMockPeripherals();
       return {
         data: mockData,
         total: mockData.length,
         page: 1,
         limit: mockData.length,
-        totalPages: 1
-      }
+        totalPages: 1,
+      };
     }
   },
 
   // 获取所有周边商品（简化版本，保持向后兼容）
   getAllItemsSimple: async (): Promise<PeripheralItem[]> => {
-    const result = await peripheralsApi.getAllItems()
-    return result.data
+    const result = await peripheralsApi.getAllItems();
+    return result.data;
   },
 
   // 根据ID获取单个周边商品
   getItemById: async (id: number): Promise<PeripheralItem | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/peripherals/${id}`,
-        method: 'GET'
-      }) as any
+        method: 'GET',
+      })) as any;
 
       if (response) {
         // 处理数据兼容性
@@ -155,15 +157,15 @@ export const peripheralsApi = {
           ...response,
           createdAt: response.dateCreated || response.createdAt, // 兼容旧字段
           imageUrls: response.imageUrls || [], // 确保图片数组存在
-        } as PeripheralItem
+        } as PeripheralItem;
       }
 
-      return null
+      return null;
     } catch (error) {
-      console.error('获取周边商品详情失败:', error)
+      console.error('获取周边商品详情失败:', error);
       // 返回模拟数据
-      const mockItems = getMockPeripherals()
-      return mockItems.find(item => item.id === id) || null
+      const mockItems = getMockPeripherals();
+      return mockItems.find((item) => item.id === id) || null;
     }
   },
 
@@ -172,16 +174,16 @@ export const peripheralsApi = {
     try {
       const response = await request({
         url: '/peripherals/categories',
-        method: 'GET'
-      })
+        method: 'GET',
+      });
 
       if (response && typeof response === 'object' && 'success' in response && response.success) {
-        return response.data as PeripheralCategory[]
+        return response.data as PeripheralCategory[];
       }
 
-      return []
+      return [];
     } catch (error) {
-      console.error('获取周边商品分类失败:', error)
+      console.error('获取周边商品分类失败:', error);
       // 返回模拟分类数据
       return [
         { id: 1, name: '服装' },
@@ -189,10 +191,10 @@ export const peripheralsApi = {
         { id: 3, name: '数码' },
         { id: 4, name: '文具' },
         { id: 5, name: '生活用品' },
-      ]
+      ];
     }
-  }
-}
+  },
+};
 
 // 模拟数据（用于展示）- 更新以匹配新的数据结构
 const getMockPeripherals = (): PeripheralItem[] => {
@@ -204,9 +206,11 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: 99,
       stock: 150,
       image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
-      imageUrls: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'],
+      imageUrls: [
+        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+      ],
       dateCreated: '2024-01-15T10:00:00Z',
-      createdAt: '2024-01-15T10:00:00Z'
+      createdAt: '2024-01-15T10:00:00Z',
     },
     {
       id: 2,
@@ -215,9 +219,11 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: 79,
       stock: 88,
       image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop',
-      imageUrls: ['https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop'],
+      imageUrls: [
+        'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop',
+      ],
       dateCreated: '2024-01-20T14:30:00Z',
-      createdAt: '2024-01-20T14:30:00Z'
+      createdAt: '2024-01-20T14:30:00Z',
     },
     {
       id: 3,
@@ -226,7 +232,7 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '128.00',
       stock: 200,
       image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=400&fit=crop',
-      createdAt: '2024-01-25T09:15:00Z'
+      createdAt: '2024-01-25T09:15:00Z',
     },
     {
       id: 4,
@@ -235,7 +241,7 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '89.00',
       stock: 120,
       image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
-      createdAt: '2024-02-01T16:45:00Z'
+      createdAt: '2024-02-01T16:45:00Z',
     },
     {
       id: 5,
@@ -244,7 +250,7 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '45.00',
       stock: 300,
       image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop',
-      createdAt: '2024-02-05T11:20:00Z'
+      createdAt: '2024-02-05T11:20:00Z',
     },
     {
       id: 6,
@@ -253,7 +259,7 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '68.00',
       stock: 75,
       image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop',
-      createdAt: '2024-02-10T13:00:00Z'
+      createdAt: '2024-02-10T13:00:00Z',
     },
     {
       id: 7,
@@ -262,7 +268,7 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '35.00',
       stock: 180,
       image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop',
-      createdAt: '2024-02-15T08:30:00Z'
+      createdAt: '2024-02-15T08:30:00Z',
     },
     {
       id: 8,
@@ -271,9 +277,9 @@ const getMockPeripherals = (): PeripheralItem[] => {
       price: '39.00',
       stock: 250,
       image: 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=400&fit=crop',
-      createdAt: '2024-02-20T15:10:00Z'
-    }
-  ]
-}
+      createdAt: '2024-02-20T15:10:00Z',
+    },
+  ];
+};
 
-export default peripheralsApi 
+export default peripheralsApi;

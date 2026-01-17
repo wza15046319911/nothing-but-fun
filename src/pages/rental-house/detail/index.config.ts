@@ -4,5 +4,5 @@ export default definePageConfig({
   navigationBarTextStyle: 'white',
   backgroundColor: '#f5f5f5',
   enableShareAppMessage: true,
-  enableShareTimeline: true
-}) 
+  enableShareTimeline: true,
+});

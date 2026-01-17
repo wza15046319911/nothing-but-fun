@@ -1,55 +1,55 @@
-import request from './api'
+import request from './api';
 
 // 餐厅数据类型
 export interface Restaurant {
-  id: number
-  name: string
-  description: string
-  image?: string  // Legacy field, kept for backward compatibility
-  imageUrls: string[]  // 多图片支持，来自Cloudinary
-  streetAddress: string
-  suburb: string
-  postcode: string
-  state: string
-  overallRating: string
-  totalReviews: number
-  createdAt: string
-  updatedAt: string
-  pricingDetails?: string  // 价格详情
-  priceRangeRid?: number  // 价格范围ID
-  restaurantTypeRid?: number  // 餐厅类型ID
-  priceFrom?: number
-  priceTo?: number
+  id: number;
+  name: string;
+  description: string;
+  image?: string; // Legacy field, kept for backward compatibility
+  imageUrls: string[]; // 多图片支持，来自Cloudinary
+  streetAddress: string;
+  suburb: string;
+  postcode: string;
+  state: string;
+  overallRating: string;
+  totalReviews: number;
+  createdAt: string;
+  updatedAt: string;
+  pricingDetails?: string; // 价格详情
+  priceRangeRid?: number; // 价格范围ID
+  restaurantTypeRid?: number; // 餐厅类型ID
+  priceFrom?: number;
+  priceTo?: number;
   aspectRatings?: {
     taste: {
-      average: string
-      count: number
-    }
+      average: string;
+      count: number;
+    };
     environment: {
-      average: string
-      count: number
-    }
+      average: string;
+      count: number;
+    };
     service: {
-      average: string
-      count: number
-    }
+      average: string;
+      count: number;
+    };
     price: {
-      average: string
-      count: number
-    }
-  }
+      average: string;
+      count: number;
+    };
+  };
 }
 
 // 餐厅类型接口
 export interface RestaurantType {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 // 价格范围接口
 export interface PriceRange {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 // DEPRECATED: Restaurant review schema removed from database
@@ -96,42 +96,56 @@ export interface NewRestaurantReview {
 
 // 餐厅查询参数接口
 export interface RestaurantQueryParams {
-  page?: number
-  limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
-  sortOrder?: 'asc' | 'desc'
-  name?: string
-  suburb?: string
-  minRating?: number
-  priceRangeRid?: string  // 价格范围筛选
-  restaurantTypeRid?: string  // 餐厅类型筛选
-  priceFrom?: number
-  priceTo?: number
+  page?: number;
+  limit?: number;
+  sortBy?:
+    | 'name'
+    | 'overallRating'
+    | 'totalReviews'
+    | 'createdAt'
+    | 'priceLow'
+    | 'priceHigh'
+    | 'rating';
+  sortOrder?: 'asc' | 'desc';
+  name?: string;
+  suburb?: string;
+  minRating?: number;
+  priceRangeRid?: string; // 价格范围筛选
+  restaurantTypeRid?: string; // 餐厅类型筛选
+  priceFrom?: number;
+  priceTo?: number;
 }
 
 // 餐厅过滤参数接口（用于过滤组件）
 export interface RestaurantFilters {
-  page?: number
-  limit?: number
-  sortBy?: 'name' | 'overallRating' | 'totalReviews' | 'createdAt' | 'priceLow' | 'priceHigh' | 'rating'
-  sortOrder?: 'asc' | 'desc'
-  name?: string
-  suburb?: string
-  minRating?: number
-  priceRangeRid?: string
-  restaurantTypeRid?: string
-  keyword?: string  // 关键词搜索
-  priceFrom?: number
-  priceTo?: number
+  page?: number;
+  limit?: number;
+  sortBy?:
+    | 'name'
+    | 'overallRating'
+    | 'totalReviews'
+    | 'createdAt'
+    | 'priceLow'
+    | 'priceHigh'
+    | 'rating';
+  sortOrder?: 'asc' | 'desc';
+  name?: string;
+  suburb?: string;
+  minRating?: number;
+  priceRangeRid?: string;
+  restaurantTypeRid?: string;
+  keyword?: string; // 关键词搜索
+  priceFrom?: number;
+  priceTo?: number;
 }
 
 // 分页餐厅响应接口
 export interface PaginatedRestaurantResponse {
-  data: Restaurant[]
+  data: Restaurant[];
   // total: number
-  page: number
-  limit: number
-  totalPages: number
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 /*
@@ -176,34 +190,34 @@ export interface ModerationStats {
 
 // API响应接口
 export interface RestaurantResponse {
-  success: boolean
-  message: string
-  data: Restaurant[]
+  success: boolean;
+  message: string;
+  data: Restaurant[];
   pagination?: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export interface SingleRestaurantResponse {
-  success: boolean
-  message: string
-  data: Restaurant
+  success: boolean;
+  message: string;
+  data: Restaurant;
 }
 
 export interface RateRestaurantResult {
-  overallRating: string
-  totalReviews: number
+  overallRating: string;
+  totalReviews: number;
 }
 
 export interface RateRestaurantResponse {
-  success: boolean
-  message: string
-  data: RateRestaurantResult
+  success: boolean;
+  message: string;
+  data: RateRestaurantResult;
 }
 
 /*
@@ -242,18 +256,18 @@ export interface ModerationStatsResponse {
 
 // 用户餐厅评分接口
 export interface UserRestaurantRating {
-  id: number
-  restaurantId: number
-  restaurantName: string
-  restaurantImage?: string
-  restaurantImageUrls: string[]
-  tasteRating: number
-  environmentRating: number
-  serviceRating: number
-  priceRating: number
-  overallRating: number
-  createdAt: string
-  updatedAt: string
+  id: number;
+  restaurantId: number;
+  restaurantName: string;
+  restaurantImage?: string;
+  restaurantImageUrls: string[];
+  tasteRating: number;
+  environmentRating: number;
+  serviceRating: number;
+  priceRating: number;
+  overallRating: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 餐厅API
@@ -261,33 +275,39 @@ export const restaurantApi = {
   // 获取所有餐厅
   getAllRestaurants: async (params?: RestaurantQueryParams): Promise<RestaurantResponse> => {
     try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
+      const queryString = params
+        ? '?' +
+          new URLSearchParams(
+            Object.entries(params).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined && value !== null) {
+                  acc[key] = String(value);
+                }
+                return acc;
+              },
+              {} as Record<string, string>
+            )
+          ).toString()
+        : '';
 
-      const response = await request({
+      const response = (await request({
         url: `/restaurants${queryString}`,
-        method: 'GET'
-      }) as RestaurantResponse
+        method: 'GET',
+      })) as RestaurantResponse;
       // Ensure imageUrls is always an array
       if (response?.data) {
-        response.data = response.data.map(restaurant => ({
+        response.data = response.data.map((restaurant) => ({
           ...restaurant,
-          imageUrls: restaurant.imageUrls || []
-        }))
+          imageUrls: restaurant.imageUrls || [],
+        }));
       }
 
-      return response || { success: false, message: '获取数据失败', data: [] }
+      return response || { success: false, message: '获取数据失败', data: [] };
     } catch (error) {
-      console.error('获取餐厅列表失败:', error)
+      console.error('获取餐厅列表失败:', error);
       // 提供更详细的错误信息，但仍返回模拟数据用于展示
-      const errorMessage = error instanceof Error ? error.message : '网络连接失败，请检查网络设置'
-      console.warn(`API调用失败: ${errorMessage}，使用模拟数据`)
+      const errorMessage = error instanceof Error ? error.message : '网络连接失败，请检查网络设置';
+      console.warn(`API调用失败: ${errorMessage}，使用模拟数据`);
 
       return {
         success: true,
@@ -299,129 +319,147 @@ export const restaurantApi = {
           total: 8,
           totalPages: 1,
           hasNext: false,
-          hasPrev: false
+          hasPrev: false,
         },
-      }
+      };
     }
   },
 
   // 获取所有餐厅（新的分页格式）
-  getAllRestaurantsPaginated: async (params?: RestaurantFilters): Promise<PaginatedRestaurantResponse> => {
+  getAllRestaurantsPaginated: async (
+    params?: RestaurantFilters
+  ): Promise<PaginatedRestaurantResponse> => {
     try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
+      const queryString = params
+        ? '?' +
+          new URLSearchParams(
+            Object.entries(params).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined && value !== null) {
+                  acc[key] = String(value);
+                }
+                return acc;
+              },
+              {} as Record<string, string>
+            )
+          ).toString()
+        : '';
 
       const response = await request({
         url: `/restaurants${queryString}`,
-        method: 'GET'
-      })
+        method: 'GET',
+      });
 
       // 检查响应格式 - 后端返回的格式是 { data: Restaurant[], total, page, limit, totalPages }
       if (response && typeof response === 'object' && 'data' in response) {
         // Ensure imageUrls is always an array
         const restaurants = response.data.map((restaurant: Restaurant) => ({
           ...restaurant,
-          imageUrls: restaurant.imageUrls || []
-        }))
+          imageUrls: restaurant.imageUrls || [],
+        }));
 
         return {
           data: restaurants,
           page: response.page,
           limit: response.limit,
-          totalPages: response.totalPages
-        } as PaginatedRestaurantResponse
+          totalPages: response.totalPages,
+        } as PaginatedRestaurantResponse;
       }
 
       // 如果是简单数组格式，包装成分页响应
       if (Array.isArray(response)) {
         const restaurants = response.map((restaurant: Restaurant) => ({
           ...restaurant,
-          imageUrls: restaurant.imageUrls || []
-        }))
+          imageUrls: restaurant.imageUrls || [],
+        }));
         return {
           data: restaurants,
           page: 1,
           limit: restaurants.length,
-          totalPages: 1
-        } as PaginatedRestaurantResponse
+          totalPages: 1,
+        } as PaginatedRestaurantResponse;
       }
 
       return {
         data: [],
         page: 1,
         limit: 10,
-        totalPages: 0
-      } as PaginatedRestaurantResponse
+        totalPages: 0,
+      } as PaginatedRestaurantResponse;
     } catch (error) {
-      console.error('获取餐厅列表失败:', error)
+      console.error('获取餐厅列表失败:', error);
       // 返回模拟数据，包装成分页响应格式
-      const mockData = getMockRestaurants()
+      const mockData = getMockRestaurants();
       return {
         data: mockData,
         page: 1,
         limit: mockData.length,
-        totalPages: 1
-      }
+        totalPages: 1,
+      };
     }
   },
 
   // 根据ID获取单个餐厅
   getRestaurantById: async (id: number): Promise<Restaurant | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/${id}`,
-        method: 'GET'
-      }) as SingleRestaurantResponse
+        method: 'GET',
+      })) as SingleRestaurantResponse;
 
       // Ensure imageUrls is always an array
       if (response?.data) {
-        response.data.imageUrls = response.data.imageUrls || []
+        response.data.imageUrls = response.data.imageUrls || [];
       }
 
-      return response?.data || null
+      return response?.data || null;
     } catch (error) {
-      console.error('获取餐厅详情失败:', error)
+      console.error('获取餐厅详情失败:', error);
       // 返回模拟数据
-      const mockRestaurants = getMockRestaurants()
-      return mockRestaurants.find(restaurant => restaurant.id === id) || null
+      const mockRestaurants = getMockRestaurants();
+      return mockRestaurants.find((restaurant) => restaurant.id === id) || null;
     }
   },
 
   // 创建新餐厅
-  createRestaurant: async (restaurantData: Omit<Restaurant, 'id' | 'overallRating' | 'totalReviews' | 'createdAt' | 'updatedAt'>): Promise<Restaurant | null> => {
+  createRestaurant: async (
+    restaurantData: Omit<
+      Restaurant,
+      'id' | 'overallRating' | 'totalReviews' | 'createdAt' | 'updatedAt'
+    >
+  ): Promise<Restaurant | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/restaurants',
         method: 'POST',
-        data: restaurantData
-      }) as SingleRestaurantResponse
+        data: restaurantData,
+      })) as SingleRestaurantResponse;
 
-      return response?.data || null
+      return response?.data || null;
     } catch (error) {
-      console.error('创建餐厅失败:', error)
-      throw error
+      console.error('创建餐厅失败:', error);
+      throw error;
     }
   },
 
   // 更新餐厅
-  updateRestaurant: async (id: number, restaurantData: Partial<Omit<Restaurant, 'id' | 'overallRating' | 'totalReviews' | 'createdAt' | 'updatedAt'>>): Promise<Restaurant | null> => {
+  updateRestaurant: async (
+    id: number,
+    restaurantData: Partial<
+      Omit<Restaurant, 'id' | 'overallRating' | 'totalReviews' | 'createdAt' | 'updatedAt'>
+    >
+  ): Promise<Restaurant | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/${id}`,
         method: 'PUT',
-        data: restaurantData
-      }) as SingleRestaurantResponse
+        data: restaurantData,
+      })) as SingleRestaurantResponse;
 
-      return response?.data || null
+      return response?.data || null;
     } catch (error) {
-      console.error('更新餐厅失败:', error)
-      throw error
+      console.error('更新餐厅失败:', error);
+      throw error;
     }
   },
 
@@ -430,83 +468,86 @@ export const restaurantApi = {
     try {
       const response = await request({
         url: `/restaurants/${id}`,
-        method: 'DELETE'
-      })
+        method: 'DELETE',
+      });
 
-      return response?.success || false
+      return response?.success || false;
     } catch (error) {
-      console.error('删除餐厅失败:', error)
-      throw error
+      console.error('删除餐厅失败:', error);
+      throw error;
     }
   },
 
   // 为餐厅评分
-  rateRestaurant: async (restaurantId: number, ratingData: {
-    userId: number
-    tasteRating: number
-    environmentRating: number
-    serviceRating: number
-    priceRating: number
-  }): Promise<RateRestaurantResult | null> => {
+  rateRestaurant: async (
+    restaurantId: number,
+    ratingData: {
+      userId: number;
+      tasteRating: number;
+      environmentRating: number;
+      serviceRating: number;
+      priceRating: number;
+    }
+  ): Promise<RateRestaurantResult | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/rate/${restaurantId}`,
         method: 'POST',
-        data: ratingData
-      }) as RateRestaurantResponse
+        data: ratingData,
+      })) as RateRestaurantResponse;
 
       if (response?.success && response.data) {
-        return response.data
+        return response.data;
       }
 
-      return null
+      return null;
     } catch (error) {
-      console.error('提交餐厅评分失败:', error)
-      throw error
+      console.error('提交餐厅评分失败:', error);
+      throw error;
     }
   },
 
   // 根据区域获取餐厅
   getRestaurantsBySuburb: async (suburb: string): Promise<Restaurant[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/suburb/${encodeURIComponent(suburb)}`,
-        method: 'GET'
-      }) as RestaurantResponse
+        method: 'GET',
+      })) as RestaurantResponse;
 
-      return response?.data || []
+      return response?.data || [];
     } catch (error) {
-      console.error('根据区域获取餐厅失败:', error)
-      return []
+      console.error('根据区域获取餐厅失败:', error);
+      return [];
     }
   },
 
   // 搜索餐厅
   searchRestaurants: async (keyword: string): Promise<Restaurant[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/search/${encodeURIComponent(keyword)}`,
-        method: 'GET'
-      }) as RestaurantResponse
+        method: 'GET',
+      })) as RestaurantResponse;
 
-      return response?.data || []
+      return response?.data || [];
     } catch (error) {
-      console.error('搜索餐厅失败:', error)
-      return []
+      console.error('搜索餐厅失败:', error);
+      return [];
     }
   },
 
   // 获取餐厅类型
   getRestaurantTypes: async (): Promise<RestaurantType[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/restaurant-types',
-        method: 'GET'
-      }) as { success: boolean; data: RestaurantType[] }
+        method: 'GET',
+      })) as { success: boolean; data: RestaurantType[] };
 
-      return response?.data || []
+      return response?.data || [];
     } catch (error) {
-      console.error('获取餐厅类型失败:', error)
+      console.error('获取餐厅类型失败:', error);
       // 返回默认餐厅类型
       return [
         { id: 1, name: '中餐' },
@@ -515,70 +556,70 @@ export const restaurantApi = {
         { id: 4, name: '韩料' },
         { id: 5, name: '快餐' },
         { id: 6, name: '咖啡厅' },
-        { id: 7, name: '酒吧' }
-      ]
+        { id: 7, name: '酒吧' },
+      ];
     }
   },
 
   // 获取价格范围
   getPriceRanges: async (): Promise<PriceRange[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/price-ranges',
-        method: 'GET'
-      }) as { success: boolean; data: PriceRange[] }
+        method: 'GET',
+      })) as { success: boolean; data: PriceRange[] };
 
-      return response?.data || []
+      return response?.data || [];
     } catch (error) {
-      console.error('获取价格范围失败:', error)
+      console.error('获取价格范围失败:', error);
       // 返回默认价格范围
       return [
         { id: 1, name: '$' },
         { id: 2, name: '$$' },
         { id: 3, name: '$$$' },
-        { id: 4, name: '$$$$' }
-      ]
+        { id: 4, name: '$$$$' },
+      ];
     }
   },
 
   // 获取热门餐厅
   getTopRatedRestaurants: async (limit: number = 10): Promise<Restaurant[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/restaurants/top-rated?limit=${limit}`,
-        method: 'GET'
-      }) as RestaurantResponse
+        method: 'GET',
+      })) as RestaurantResponse;
 
-      return response?.data || []
+      return response?.data || [];
     } catch (error) {
-      console.error('获取热门餐厅失败:', error)
-      return []
+      console.error('获取热门餐厅失败:', error);
+      return [];
     }
   },
 
   // 获取用户餐厅评分
   getUserRatings: async (userId: string): Promise<UserRestaurantRating[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/users/${userId}/restaurant-ratings`,
-        method: 'GET'
-      }) as { success: boolean; data: UserRestaurantRating[] }
+        method: 'GET',
+      })) as { success: boolean; data: UserRestaurantRating[] };
 
       if (response?.data) {
-        return response.data.map(rating => ({
+        return response.data.map((rating) => ({
           ...rating,
-          restaurantImageUrls: rating.restaurantImageUrls || []
-        }))
+          restaurantImageUrls: rating.restaurantImageUrls || [],
+        }));
       }
 
-      return []
+      return [];
     } catch (error) {
-      console.error('获取用户餐厅评分失败:', error)
+      console.error('获取用户餐厅评分失败:', error);
       // 返回模拟数据用于展示
-      return getMockUserRatings()
+      return getMockUserRatings();
     }
-  }
-}
+  },
+};
 
 // 模拟餐厅数据（用于展示和测试）
 const getMockRestaurants = (): Restaurant[] => {
@@ -586,12 +627,13 @@ const getMockRestaurants = (): Restaurant[] => {
     {
       id: 1,
       name: '龙宫亚洲融合餐厅',
-      description: '现代亚洲融合餐厅，提供传统与现代风味的独特融合。招牌菜包括北京烤鸭、日式拉面和泰式咖喱。',
+      description:
+        '现代亚洲融合餐厅，提供传统与现代风味的独特融合。招牌菜包括北京烤鸭、日式拉面和泰式咖喱。',
       image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
       imageUrls: [
         'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
         'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop'
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop',
       ],
       streetAddress: '123 Brunswick Street',
       suburb: 'Fortitude Valley',
@@ -603,18 +645,19 @@ const getMockRestaurants = (): Restaurant[] => {
       updatedAt: '2024-01-20T14:30:00.000Z',
       pricingDetails: '主菜 $25-35，套餐 $45-65',
       priceRangeRid: 3,
-      restaurantTypeRid: 1
+      restaurantTypeRid: 1,
     },
     {
       id: 2,
       name: '意式风情餐厅',
-      description: '正宗意大利餐厅，提供手工制作的意大利面和传统比萨。使用进口意大利食材，营造地道的意式用餐体验。',
+      description:
+        '正宗意大利餐厅，提供手工制作的意大利面和传统比萨。使用进口意大利食材，营造地道的意式用餐体验。',
       image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
       imageUrls: [
         'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
         'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop',
         'https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop'
+        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop',
       ],
       streetAddress: '456 Queen Street',
       suburb: 'Brisbane City',
@@ -626,11 +669,10 @@ const getMockRestaurants = (): Restaurant[] => {
       updatedAt: '2024-01-25T16:45:00.000Z',
       pricingDetails: '比萨 $18-28，意面 $22-32',
       priceRangeRid: 2,
-      restaurantTypeRid: 2
+      restaurantTypeRid: 2,
     },
-
-  ]
-}
+  ];
+};
 
 // 模拟用户餐厅评分数据
 const getMockUserRatings = (): UserRestaurantRating[] => {
@@ -639,10 +681,11 @@ const getMockUserRatings = (): UserRestaurantRating[] => {
       id: 1,
       restaurantId: 1,
       restaurantName: '龙宫亚洲融合餐厅',
-      restaurantImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
+      restaurantImage:
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
       restaurantImageUrls: [
         'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop'
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
       ],
       tasteRating: 5,
       environmentRating: 4,
@@ -650,16 +693,17 @@ const getMockUserRatings = (): UserRestaurantRating[] => {
       priceRating: 4,
       overallRating: 4.5,
       createdAt: '2024-01-20T10:00:00.000Z',
-      updatedAt: '2024-01-20T10:00:00.000Z'
+      updatedAt: '2024-01-20T10:00:00.000Z',
     },
     {
       id: 2,
       restaurantId: 2,
       restaurantName: '意式风情餐厅',
-      restaurantImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+      restaurantImage:
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
       restaurantImageUrls: [
         'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop'
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop',
       ],
       tasteRating: 5,
       environmentRating: 4,
@@ -667,15 +711,16 @@ const getMockUserRatings = (): UserRestaurantRating[] => {
       priceRating: 3,
       overallRating: 4.0,
       createdAt: '2024-01-22T14:30:00.000Z',
-      updatedAt: '2024-01-22T14:30:00.000Z'
+      updatedAt: '2024-01-22T14:30:00.000Z',
     },
     {
       id: 3,
       restaurantId: 3,
       restaurantName: '海鲜码头',
-      restaurantImage: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop',
+      restaurantImage:
+        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop',
       restaurantImageUrls: [
-        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop'
+        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&h=400&fit=crop',
       ],
       tasteRating: 5,
       environmentRating: 4,
@@ -683,10 +728,10 @@ const getMockUserRatings = (): UserRestaurantRating[] => {
       priceRating: 3,
       overallRating: 4.25,
       createdAt: '2024-01-25T18:45:00.000Z',
-      updatedAt: '2024-01-25T18:45:00.000Z'
-    }
-  ]
-}
+      updatedAt: '2024-01-25T18:45:00.000Z',
+    },
+  ];
+};
 
 /*
 // 模拟评论数据（用于展示和测试）
@@ -912,4 +957,4 @@ const getMockReviews = (): RestaurantReview[] => {
 }
 */
 
-export default { restaurantApi }
+export default { restaurantApi };

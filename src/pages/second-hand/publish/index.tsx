@@ -1,26 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Input, Textarea, ScrollView } from "@tarojs/components";
-import Taro from "@tarojs/taro";
-import "./index.less";
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, Input, Textarea, ScrollView } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import './index.less';
 import {
   secondhandApi,
   SecondhandCategory,
   SecondhandSubCategory,
   SecondhandProductStatus,
-} from "src/services/secondhand";
-import { API_BASE_URL } from "src/services/api";
-import { useAuth } from "src/context/auth";
+} from 'src/services/secondhand';
+import { API_BASE_URL } from 'src/services/api';
+import { useAuth } from 'src/context/auth';
 
-import "@taroify/core/uploader/style";
-import "@taroify/core/picker/style";
-import "@taroify/core/popup/style";
-import { Uploader, Picker, Popup } from "@taroify/core";
+import '@taroify/core/uploader/style';
+import '@taroify/core/picker/style';
+import '@taroify/core/popup/style';
+import { Uploader, Picker, Popup } from '@taroify/core';
 
 const SecondHandPublish: React.FC = () => {
   // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
   const [fileList, setFileList] = useState<Uploader.File[]>([]);
   const [titleTouched, setTitleTouched] = useState(false);
   const [descTouched, setDescTouched] = useState(false);
@@ -30,17 +30,12 @@ const SecondHandPublish: React.FC = () => {
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
 
   // Category and product status state
-  const [subCategories, setSubCategories] = useState<SecondhandSubCategory[]>(
-    []
-  );
+  const [subCategories, setSubCategories] = useState<SecondhandSubCategory[]>([]);
   const [categories, setCategories] = useState<SecondhandCategory[]>([]);
-  const [productStatuses, setProductStatuses] = useState<
-    SecondhandProductStatus[]
-  >([]);
+  const [productStatuses, setProductStatuses] = useState<SecondhandProductStatus[]>([]);
   const [selectedSubCategoryIndex, setSelectedSubCategoryIndex] = useState(0);
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
-  const [selectedProductStatusIndex, setSelectedProductStatusIndex] =
-    useState(0);
+  const [selectedProductStatusIndex, setSelectedProductStatusIndex] = useState(0);
   const [subCategoryTouched, setSubCategoryTouched] = useState(false);
   const [categoryTouched, setCategoryTouched] = useState(false);
   const [productStatusTouched, setProductStatusTouched] = useState(false);
@@ -73,16 +68,14 @@ const SecondHandPublish: React.FC = () => {
     if (!selectedCategory?.subCategoryId) {
       return subCategories; // Show all if no subCategoryId
     }
-    return subCategories.filter(
-      (sub) => sub.id === selectedCategory.subCategoryId
-    );
+    return subCategories.filter((sub) => sub.id === selectedCategory.subCategoryId);
   }, [categories, selectedCategoryIndex, subCategories]);
 
   const handleUpload = () => {
     Taro.chooseImage({
       count: maxImages - fileList.length,
-      sizeType: ["original", "compressed"],
-      sourceType: ["album", "camera"],
+      sizeType: ['original', 'compressed'],
+      sourceType: ['album', 'camera'],
     }).then(({ tempFiles }) => {
       setFileList([
         ...fileList,
@@ -97,7 +90,7 @@ const SecondHandPublish: React.FC = () => {
 
   // Handle file change
   const handleFileChange = (files: Uploader.File[]) => {
-    console.log("文件列表更新:", files);
+    console.log('文件列表更新:', files);
     setFileList(files);
   };
 
@@ -110,11 +103,11 @@ const SecondHandPublish: React.FC = () => {
   };
 
   const handlePriceInput = (value: string) => {
-    let sanitized = value.replace(/[^\d.]/g, "");
-    const parts = sanitized.split(".");
-    if (parts.length > 2) sanitized = parts[0] + "." + parts.slice(1).join("");
-    const [i = "", d = ""] = sanitized.split(".");
-    const intPart = i.replace(/^0+(?=\d)/, "");
+    let sanitized = value.replace(/[^\d.]/g, '');
+    const parts = sanitized.split('.');
+    if (parts.length > 2) sanitized = parts[0] + '.' + parts.slice(1).join('');
+    const [i = '', d = ''] = sanitized.split('.');
+    const intPart = i.replace(/^0+(?=\d)/, '');
     const decPart = d.slice(0, 2);
     setPrice(decPart.length ? `${intPart}.${decPart}` : intPart);
   };
@@ -123,18 +116,17 @@ const SecondHandPublish: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesData, subCategoriesData, statusesData] =
-          await Promise.all([
-            secondhandApi.getAllCategories(),
-            secondhandApi.getAllSubCategories(),
-            secondhandApi.getProductStatuses(),
-          ]);
+        const [categoriesData, subCategoriesData, statusesData] = await Promise.all([
+          secondhandApi.getAllCategories(),
+          secondhandApi.getAllSubCategories(),
+          secondhandApi.getProductStatuses(),
+        ]);
         setCategories(categoriesData);
         setSubCategories(subCategoriesData);
         setProductStatuses(statusesData);
       } catch (error) {
-        console.error("加载数据失败:", error);
-        Taro.showToast({ title: "加载数据失败", icon: "none" });
+        console.error('加载数据失败:', error);
+        Taro.showToast({ title: '加载数据失败', icon: 'none' });
       }
     };
 
@@ -144,7 +136,7 @@ const SecondHandPublish: React.FC = () => {
     const params = Taro.getCurrentInstance()?.router?.params || {};
     const mode = params.mode;
     const idStr = params.id;
-    if (mode === "edit" && idStr) {
+    if (mode === 'edit' && idStr) {
       const id = parseInt(idStr);
       if (!Number.isNaN(id)) {
         setIsEditMode(true);
@@ -152,18 +144,16 @@ const SecondHandPublish: React.FC = () => {
         (async () => {
           try {
             const item = await secondhandApi.getItemById(id);
-            setTitle(item.title || "");
-            setDescription(item.description || "");
-            setPrice(item.price ? String(item.price) : "");
+            setTitle(item.title || '');
+            setDescription(item.description || '');
+            setPrice(item.price ? String(item.price) : '');
             const existingImages = (item.imageUrls || [])
               .filter(Boolean)
-              .map((url) => ({ url } as Uploader.File));
+              .map((url) => ({ url }) as Uploader.File);
             setFileList(existingImages);
 
             if (item.categoryRid && categories.length > 0) {
-              const categoryIndex = categories.findIndex(
-                (cat) => cat.id === item.categoryRid
-              );
+              const categoryIndex = categories.findIndex((cat) => cat.id === item.categoryRid);
               if (categoryIndex >= 0) {
                 setSelectedCategoryIndex(categoryIndex);
                 const currentCategory = categories[categoryIndex];
@@ -171,8 +161,7 @@ const SecondHandPublish: React.FC = () => {
                   const subCategoryIndex = subCategories.findIndex(
                     (subCat) => subCat.id === currentCategory.subCategoryId
                   );
-                  if (subCategoryIndex >= 0)
-                    setSelectedSubCategoryIndex(subCategoryIndex);
+                  if (subCategoryIndex >= 0) setSelectedSubCategoryIndex(subCategoryIndex);
                 }
               }
             }
@@ -183,8 +172,8 @@ const SecondHandPublish: React.FC = () => {
               if (statusIndex >= 0) setSelectedProductStatusIndex(statusIndex);
             }
           } catch (e) {
-            console.error("加载商品详情失败:", e);
-            Taro.showToast({ title: "加载失败", icon: "none" });
+            console.error('加载商品详情失败:', e);
+            Taro.showToast({ title: '加载失败', icon: 'none' });
           }
         })();
       }
@@ -212,8 +201,8 @@ const SecondHandPublish: React.FC = () => {
   const handleSubmit = async () => {
     if (!isFormValid) {
       Taro.showToast({
-        title: "请完善商品信息",
-        icon: "none",
+        title: '请完善商品信息',
+        icon: 'none',
         duration: 2000,
       });
       return;
@@ -221,25 +210,25 @@ const SecondHandPublish: React.FC = () => {
 
     if (!state.userInfo?.id) {
       Taro.showToast({
-        title: "请先登录",
-        icon: "none",
+        title: '请先登录',
+        icon: 'none',
         duration: 2000,
       });
       return;
     }
 
-    const wechatId = state.userInfo?.wechatId?.trim() || "";
-    const phone = state.userInfo?.phone?.trim() || "";
+    const wechatId = state.userInfo?.wechatId?.trim() || '';
+    const phone = state.userInfo?.phone?.trim() || '';
 
     if (!wechatId && !phone) {
       Taro.showModal({
-        title: "请先完善联系方式",
-        content: "发布商品前需要设置微信号或手机号，方便买家联系您。",
-        confirmText: "去设置",
+        title: '请先完善联系方式',
+        content: '发布商品前需要设置微信号或手机号，方便买家联系您。',
+        confirmText: '去设置',
         showCancel: false,
       }).then((res) => {
         if (res.confirm) {
-          Taro.navigateTo({ url: "/pages/contact-info/index" });
+          Taro.navigateTo({ url: '/pages/contact-info/index' });
         }
       });
       return;
@@ -247,8 +236,8 @@ const SecondHandPublish: React.FC = () => {
 
     if (fileList.length === 0) {
       Taro.showToast({
-        title: "请先选择商品图片",
-        icon: "none",
+        title: '请先选择商品图片',
+        icon: 'none',
         duration: 2000,
       });
       return;
@@ -257,7 +246,7 @@ const SecondHandPublish: React.FC = () => {
     if (isEditMode && editingItemId) {
       // 编辑模式：保持原有同步逻辑
       Taro.showLoading({
-        title: "保存中...",
+        title: '保存中...',
       });
 
       try {
@@ -268,8 +257,8 @@ const SecondHandPublish: React.FC = () => {
             newLocalFiles.map(async (file) => {
               const res = await Taro.uploadFile({
                 url: `${API_BASE_URL}/file`,
-                filePath: (file as any).path || file.url || "",
-                name: "image",
+                filePath: (file as any).path || file.url || '',
+                name: 'image',
               });
               const data = JSON.parse(res.data);
               return data.data.id;
@@ -289,29 +278,24 @@ const SecondHandPublish: React.FC = () => {
           payload.categoryRid = categories[selectedCategoryIndex].id;
         }
         if (productStatuses.length > 0) {
-          payload.productStatusRid =
-            productStatuses[selectedProductStatusIndex].id;
+          payload.productStatusRid = productStatuses[selectedProductStatusIndex].id;
         }
 
-        await secondhandApi.updateUserItem(
-          state.userInfo.openid,
-          editingItemId,
-          payload
-        );
+        await secondhandApi.updateUserItem(state.userInfo.openid, editingItemId, payload);
 
         Taro.hideLoading();
         Taro.showToast({
-          title: "修改成功！",
-          icon: "success",
+          title: '修改成功！',
+          icon: 'success',
           duration: 2000,
         });
         Taro.navigateBack();
       } catch (error) {
-        console.error("保存失败:", error);
+        console.error('保存失败:', error);
         Taro.hideLoading();
         Taro.showToast({
-          title: (error as any).message || "保存失败，请重试",
-          icon: "none",
+          title: (error as any).message || '保存失败，请重试',
+          icon: 'none',
           duration: 2000,
         });
       }
@@ -324,27 +308,22 @@ const SecondHandPublish: React.FC = () => {
         description: description.trim(),
         price: price.trim(),
         sellerId: parseInt(state.userInfo.id),
-        categoryRid:
-          categories.length > 0
-            ? categories[selectedCategoryIndex].id
-            : undefined,
+        categoryRid: categories.length > 0 ? categories[selectedCategoryIndex].id : undefined,
         productStatusRid:
-          productStatuses.length > 0
-            ? productStatuses[selectedProductStatusIndex].id
-            : undefined,
+          productStatuses.length > 0 ? productStatuses[selectedProductStatusIndex].id : undefined,
       };
 
       // 立即显示成功弹窗
       Taro.showModal({
-        title: "提交成功",
-        content: "您的商品已提交，请等待审核。审核通过后将自动上架。",
+        title: '提交成功',
+        content: '您的商品已提交，请等待审核。审核通过后将自动上架。',
         showCancel: false,
-        confirmText: "我知道了",
+        confirmText: '我知道了',
       }).then(() => {
         // 清空表单
-        setTitle("");
-        setDescription("");
-        setPrice("");
+        setTitle('');
+        setDescription('');
+        setPrice('');
         setFileList([]);
         // 返回上一页
         Taro.navigateBack();
@@ -357,8 +336,8 @@ const SecondHandPublish: React.FC = () => {
             formData.fileList.map(async (file) => {
               const res = await Taro.uploadFile({
                 url: `${API_BASE_URL}/file`,
-                filePath: (file as any).path || file.url || "",
-                name: "image",
+                filePath: (file as any).path || file.url || '',
+                name: 'image',
               });
               const data = JSON.parse(res.data);
               return data.data.id;
@@ -370,15 +349,15 @@ const SecondHandPublish: React.FC = () => {
             title: formData.title,
             description: formData.description,
             price: formData.price,
-            status: "available",
+            status: 'available',
             images: fileIds,
             categoryRid: formData.categoryRid,
             productStatusRid: formData.productStatusRid,
           });
 
-          console.log("商品发布成功（后台）");
+          console.log('商品发布成功（后台）');
         } catch (error) {
-          console.error("后台发布失败:", error);
+          console.error('后台发布失败:', error);
           // 后台失败时可以考虑本地存储，下次重试
           // 这里静默处理，因为用户已经离开页面
         }
@@ -391,17 +370,15 @@ const SecondHandPublish: React.FC = () => {
       <ScrollView
         className="publish-page__scroll"
         scrollY
-        style={{ height: "100vh", boxSizing: "border-box" }}
+        style={{ height: '100vh', boxSizing: 'border-box' }}
       >
         <View className="publish-page__header">
           <Text className="publish-page__title">
-            {isEditMode ? "编辑换换乐好物" : "发布换换乐好物"}
+            {isEditMode ? '编辑换换乐好物' : '发布换换乐好物'}
           </Text>
           <View className="publish-page__stats">
             <View className="publish-page__stats-item">
-              <Text className="publish-page__stats-value">
-                {fileList.length}
-              </Text>
+              <Text className="publish-page__stats-value">{fileList.length}</Text>
               <Text className="publish-page__stats-label">已选图片</Text>
             </View>
             <View className="publish-page__stats-divider" />
@@ -417,9 +394,7 @@ const SecondHandPublish: React.FC = () => {
         <View className="publish-page__body">
           <View className="card">
             <Text className="card__title">商品图片</Text>
-            <Text className="card__subtitle">
-              至少上传 1 张清晰照片，最多 {maxImages} 张
-            </Text>
+            <Text className="card__subtitle">至少上传 1 张清晰照片，最多 {maxImages} 张</Text>
             <View className="card__content card__content--uploader">
               <Uploader
                 value={fileList}
@@ -436,9 +411,7 @@ const SecondHandPublish: React.FC = () => {
             <Text className="card__title">基本信息</Text>
             <View className="card__content card__content--gap">
               <View
-                className={`field ${
-                  titleTouched && title.trim() === "" ? "field--error" : ""
-                }`}
+                className={`field ${titleTouched && title.trim() === '' ? 'field--error' : ''}`}
               >
                 <Text className="field__label">标题</Text>
                 <Input
@@ -455,7 +428,7 @@ const SecondHandPublish: React.FC = () => {
 
               <View
                 className={`field field--textarea ${
-                  descTouched && description.trim() === "" ? "field--error" : ""
+                  descTouched && description.trim() === '' ? 'field--error' : ''
                 }`}
               >
                 <Text className="field__label">商品描述</Text>
@@ -479,24 +452,15 @@ const SecondHandPublish: React.FC = () => {
               {/* 商品大类 - Category Picker (First) */}
               <View
                 className={`field ${
-                  categoryTouched && categories.length === 0
-                    ? "field--error"
-                    : ""
+                  categoryTouched && categories.length === 0 ? 'field--error' : ''
                 }`}
               >
                 <Text className="field__label">商品大类</Text>
-                <View
-                  className="field__picker"
-                  onClick={() => setCategoryPickerOpen(true)}
-                >
-                  <Text
-                    className={
-                      categories.length === 0 ? "field__placeholder" : ""
-                    }
-                  >
+                <View className="field__picker" onClick={() => setCategoryPickerOpen(true)}>
+                  <Text className={categories.length === 0 ? 'field__placeholder' : ''}>
                     {categories.length > 0
-                      ? categories[selectedCategoryIndex]?.name || "请选择大类"
-                      : "正在加载大类..."}
+                      ? categories[selectedCategoryIndex]?.name || '请选择大类'
+                      : '正在加载大类...'}
                   </Text>
                 </View>
 
@@ -532,37 +496,24 @@ const SecondHandPublish: React.FC = () => {
               {/* 商品细分类 - SubCategory Display (Auto-populated based on Category) */}
               <View
                 className={`field ${
-                  subCategoryTouched && filteredSubCategories.length === 0
-                    ? "field--error"
-                    : ""
+                  subCategoryTouched && filteredSubCategories.length === 0 ? 'field--error' : ''
                 }`}
               >
                 <Text className="field__label">商品细分类</Text>
                 <View
                   className="field__picker"
-                  onClick={() =>
-                    filteredSubCategories.length > 0 &&
-                    setSubCategoryPickerOpen(true)
-                  }
+                  onClick={() => filteredSubCategories.length > 0 && setSubCategoryPickerOpen(true)}
                 >
-                  <Text
-                    className={
-                      filteredSubCategories.length === 0
-                        ? "field__placeholder"
-                        : ""
-                    }
-                  >
+                  <Text className={filteredSubCategories.length === 0 ? 'field__placeholder' : ''}>
                     {filteredSubCategories.length > 0
                       ? filteredSubCategories.find(
-                          (sub) =>
-                            sub.id ===
-                            subCategories[selectedSubCategoryIndex]?.id
+                          (sub) => sub.id === subCategories[selectedSubCategoryIndex]?.id
                         )?.name ||
                         filteredSubCategories[0]?.name ||
-                        "请选择细分类"
+                        '请选择细分类'
                       : categories.length === 0
-                      ? "请先选择大类"
-                      : "无对应细分类"}
+                        ? '请先选择大类'
+                        : '无对应细分类'}
                   </Text>
                 </View>
 
@@ -575,8 +526,7 @@ const SecondHandPublish: React.FC = () => {
                     onConfirm={(values) => {
                       const filteredIndex = parseInt(values[0] as string);
                       // Map the filtered index back to the original subCategories index
-                      const selectedSubCat =
-                        filteredSubCategories[filteredIndex];
+                      const selectedSubCat = filteredSubCategories[filteredIndex];
                       const originalIndex = subCategories.findIndex(
                         (sub) => sub.id === selectedSubCat?.id
                       );
@@ -605,25 +555,15 @@ const SecondHandPublish: React.FC = () => {
 
               <View
                 className={`field ${
-                  productStatusTouched && productStatuses.length === 0
-                    ? "field--error"
-                    : ""
+                  productStatusTouched && productStatuses.length === 0 ? 'field--error' : ''
                 }`}
               >
                 <Text className="field__label">商品状况</Text>
-                <View
-                  className="field__picker"
-                  onClick={() => setProductStatusPickerOpen(true)}
-                >
-                  <Text
-                    className={
-                      productStatuses.length === 0 ? "field__placeholder" : ""
-                    }
-                  >
+                <View className="field__picker" onClick={() => setProductStatusPickerOpen(true)}>
+                  <Text className={productStatuses.length === 0 ? 'field__placeholder' : ''}>
                     {productStatuses.length > 0
-                      ? productStatuses[selectedProductStatusIndex]?.name ||
-                        "请选择状况"
-                      : "正在加载状况..."}
+                      ? productStatuses[selectedProductStatusIndex]?.name || '请选择状况'
+                      : '正在加载状况...'}
                   </Text>
                 </View>
 
@@ -665,11 +605,9 @@ const SecondHandPublish: React.FC = () => {
               <View
                 className={`field ${
                   priceTouched &&
-                  (price.trim() === "" ||
-                    Number.isNaN(parseFloat(price)) ||
-                    parseFloat(price) <= 0)
-                    ? "field--error"
-                    : ""
+                  (price.trim() === '' || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0)
+                    ? 'field--error'
+                    : ''
                 }`}
               >
                 <Text className="field__label">标价 (AUD)</Text>
@@ -691,9 +629,7 @@ const SecondHandPublish: React.FC = () => {
             <View className="tips">
               <View className="tips__item">
                 <View className="tips__dot" />
-                <Text className="tips__text">
-                  请确认商品为个人闲置物品，严禁发布虚假或违规内容
-                </Text>
+                <Text className="tips__text">请确认商品为个人闲置物品，严禁发布虚假或违规内容</Text>
               </View>
               <View className="tips__item">
                 <View className="tips__dot" />
@@ -703,32 +639,26 @@ const SecondHandPublish: React.FC = () => {
               </View>
               <View className="tips__item">
                 <View className="tips__dot" />
-                <Text className="tips__text">
-                  若涉及邮寄，请提前说明邮费、发货时间等信息
-                </Text>
+                <Text className="tips__text">若涉及邮寄，请提前说明邮费、发货时间等信息</Text>
               </View>
               <View className="tips__item">
                 <View className="tips__dot" />
-                <Text className="tips__text">
-                  发布后图片会同步上传，审核期间请耐心等待通知
-                </Text>
+                <Text className="tips__text">发布后图片会同步上传，审核期间请耐心等待通知</Text>
               </View>
             </View>
           </View>
 
           {/* Spacer for bottom bar */}
-          <View style={{ height: "200rpx" }} />
+          <View style={{ height: '200rpx' }} />
         </View>
       </ScrollView>
 
       <View className="submit-bar">
         <View
-          className={`submit-bar__button ${
-            !isFormValid ? "submit-bar__button--disabled" : ""
-          }`}
+          className={`submit-bar__button ${!isFormValid ? 'submit-bar__button--disabled' : ''}`}
           onClick={handleSubmit}
         >
-          {isEditMode ? "保存修改" : "立即发布"}
+          {isEditMode ? '保存修改' : '立即发布'}
         </View>
       </View>
     </View>

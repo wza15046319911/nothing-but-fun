@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView } from "@tarojs/components";
-import { Button, Toast, Dialog } from "@nutui/nutui-react-taro";
-import { Swiper } from "@taroify/core";
-import Taro, { useRouter, useShareAppMessage, useShareTimeline } from "@tarojs/taro";
-import { secondhandApi, SecondhandItem } from "../../../services/secondhand";
-import "./index.less";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
+import { Button, Toast, Dialog } from '@nutui/nutui-react-taro';
+import { Swiper } from '@taroify/core';
+import Taro, { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro';
+import { secondhandApi, SecondhandItem } from '../../../services/secondhand';
+import './index.less';
 
-import "@taroify/core/swiper/style";
+import '@taroify/core/swiper/style';
 
 // Status display mapping
 const statusMap = {
-  available: { text: "可购买", color: "rgba(52, 199, 89, 0.85)" },
-  sold: { text: "已售出", color: "rgba(255, 59, 48, 0.85)" },
-  reserved: { text: "已预订", color: "rgba(250, 173, 20, 0.85)" },
+  available: { text: '可购买', color: 'rgba(52, 199, 89, 0.85)' },
+  sold: { text: '已售出', color: 'rgba(255, 59, 48, 0.85)' },
+  reserved: { text: '已预订', color: 'rgba(250, 173, 20, 0.85)' },
 };
 
 const SecondHandDetail: React.FC = () => {
@@ -21,7 +21,7 @@ const SecondHandDetail: React.FC = () => {
 
   // 分享给好友 / 群聊
   useShareAppMessage(() => {
-    const title = item?.title ? `${item.title} · 布村换换乐` : "布村换换乐精选";
+    const title = item?.title ? `${item.title} · 布村换换乐` : '布村换换乐精选';
     const imageUrl = item?.imageUrls?.[0] || item?.image;
     const redirect = encodeURIComponent('/pages/second-hand/detail/index');
     const path = `/pages/loading/index?redirect=${redirect}&id=${id || ''}`;
@@ -30,7 +30,7 @@ const SecondHandDetail: React.FC = () => {
 
   // 朋友圈分享
   useShareTimeline(() => {
-    const title = item?.title || "布村换换乐精选";
+    const title = item?.title || '布村换换乐精选';
     const redirect = encodeURIComponent('/pages/second-hand/detail/index');
     return { title, query: `redirect=${redirect}&id=${id || ''}` };
   });
@@ -40,15 +40,15 @@ const SecondHandDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Load item details
   const loadItemDetail = async () => {
     if (!id) {
       Taro.showToast({
-        title: "商品ID不存在",
-        icon: "none",
+        title: '商品ID不存在',
+        icon: 'none',
       });
       Taro.navigateBack();
       return;
@@ -72,8 +72,8 @@ const SecondHandDetail: React.FC = () => {
 
       setItem(response);
     } catch (error) {
-      console.error("Failed to load item detail:", error);
-      showToastMessage("加载商品详情失败");
+      console.error('Failed to load item detail:', error);
+      showToastMessage('加载商品详情失败');
     } finally {
       setLoading(false);
     }
@@ -88,29 +88,29 @@ const SecondHandDetail: React.FC = () => {
   // Handle contact seller
   const handleContactSeller = () => {
     if (!item) return;
-    const contactChunks: string[] = []
-    
+    const contactChunks: string[] = [];
+
     // 优先显示微信号
     if (item.sellerWechatId) {
-      contactChunks.push(`微信号：${item.sellerWechatId}`)
+      contactChunks.push(`微信号：${item.sellerWechatId}`);
     }
     if (item.sellerContact) {
-      contactChunks.push(`联系方式：${item.sellerContact}`)
+      contactChunks.push(`联系方式：${item.sellerContact}`);
     }
     if (item.sellerEmail) {
-      contactChunks.push(`邮箱：${item.sellerEmail}`)
+      contactChunks.push(`邮箱：${item.sellerEmail}`);
     }
 
     if (contactChunks.length === 0) {
       Taro.showToast({
         title: '卖家暂未提供联系方式',
         icon: 'none',
-        duration: 1800
-      })
-      return
+        duration: 1800,
+      });
+      return;
     }
 
-    const clipboardText = contactChunks.join('\n')
+    const clipboardText = contactChunks.join('\n');
 
     Taro.setClipboardData({ data: clipboardText })
       .then(() => {
@@ -118,18 +118,17 @@ const SecondHandDetail: React.FC = () => {
           title: '联系卖家',
           content: '联系方式已复制，快去联系吧~',
           showCancel: false,
-          confirmText: '好'
-        })
+          confirmText: '好',
+        });
       })
       .catch(() => {
         Taro.showToast({
           title: '复制失败，请稍后重试',
           icon: 'none',
-          duration: 1800
-        })
-      })
+          duration: 1800,
+        });
+      });
   };
-
 
   // Confirm delete
   const confirmDelete = async () => {
@@ -137,42 +136,41 @@ const SecondHandDetail: React.FC = () => {
 
     try {
       await secondhandApi.deleteItem(item.id);
-      showToastMessage("删除成功");
+      showToastMessage('删除成功');
       setTimeout(() => {
         Taro.navigateBack();
       }, 1500);
     } catch (error) {
-      console.error("Delete failed:", error);
-      showToastMessage("删除失败，请稍后重试");
+      console.error('Delete failed:', error);
+      showToastMessage('删除失败，请稍后重试');
     }
     setShowDeleteDialog(false);
   };
 
   // Format time display
   const formatTime = (dateString: string) => {
-    if (!dateString) return "—";
+    if (!dateString) return '—';
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "—";
-    return date.toLocaleString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
   // Check if current user is the seller
   const isOwner = () => {
-    const userInfo = Taro.getStorageSync("userInfo");
+    const userInfo = Taro.getStorageSync('userInfo');
     return userInfo && item && userInfo.id === item.sellerId;
   };
 
   const handleImagePreview = (startIndex: number) => {
     if (!item) return;
-    const urls = (item.imageUrls && item.imageUrls.length > 0)
-      ? item.imageUrls
-      : (item.image ? [item.image] : []);
+    const urls =
+      item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : item.image ? [item.image] : [];
     if (!urls.length) return;
     Taro.previewImage({
       current: urls[Math.max(0, Math.min(startIndex, urls.length - 1))],
@@ -180,15 +178,13 @@ const SecondHandDetail: React.FC = () => {
     });
   };
 
-  const handleSwiperChange = (
-    value: number | { detail?: { current?: number } }
-  ) => {
-    if (typeof value === "number") {
+  const handleSwiperChange = (value: number | { detail?: { current?: number } }) => {
+    if (typeof value === 'number') {
       setCurrentImageIndex(value);
       return;
     }
     const next = value?.detail?.current;
-    if (typeof next === "number") {
+    if (typeof next === 'number') {
       setCurrentImageIndex(next);
     }
   };
@@ -220,7 +216,6 @@ const SecondHandDetail: React.FC = () => {
     );
   }
 
-
   return (
     <View className="detail-container">
       <ScrollView className="detail-content" scrollY>
@@ -242,7 +237,7 @@ const SecondHandDetail: React.FC = () => {
                     mode="aspectFill"
                     lazyLoad
                     onClick={() => handleImagePreview(index)}
-                    onError={() => console.warn("图片加载失败:", imageUrl)}
+                    onError={() => console.warn('图片加载失败:', imageUrl)}
                   />
                 </Swiper.Item>
               ))}
@@ -270,9 +265,7 @@ const SecondHandDetail: React.FC = () => {
                 className="status-tag"
                 style={{ backgroundColor: statusMap[item.status || 'available'].color }}
               >
-                <Text className="status-text">
-                  {statusMap[item.status || 'available'].text}
-                </Text>
+                <Text className="status-text">{statusMap[item.status || 'available'].text}</Text>
               </View>
             </View>
             <Text className="item-title">{item.title}</Text>
@@ -295,8 +288,7 @@ const SecondHandDetail: React.FC = () => {
                 <Text className="info-value">
                   {item.subCategoryName && item.categoryName
                     ? `${item.subCategoryName} / ${item.categoryName}`
-                    : item.categoryName || item.subCategoryName
-                  }
+                    : item.categoryName || item.subCategoryName}
                 </Text>
               </View>
             )}
@@ -328,11 +320,7 @@ const SecondHandDetail: React.FC = () => {
         {/* Action Bar */}
         {!isOwner() && (
           <View className="action-section">
-            <Button
-              className="contact-btn"
-              onClick={handleContactSeller}
-              block
-            >
+            <Button className="contact-btn" onClick={handleContactSeller} block>
               联系卖家
             </Button>
           </View>

@@ -22,32 +22,32 @@ export default defineAppConfig({
     'pages/rental/detail/index',
     'pages/course/reviews/index',
     'pages/user-registrations/index',
-    'pages/contact-us/index'
+    'pages/contact-us/index',
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
     navigationBarTitleText: 'WeChat',
-    navigationBarTextStyle: 'black'
+    navigationBarTextStyle: 'black',
   },
   tabBar: {
-    color: "#666666",
-    selectedColor: "#4a90e2",
-    backgroundColor: "#ffffff",
-    borderStyle: "black",
+    color: '#666666',
+    selectedColor: '#4a90e2',
+    backgroundColor: '#ffffff',
+    borderStyle: 'black',
     list: [
       {
-        pagePath: "pages/index/index",
-        text: "首页",
-        iconPath: "assets/icons/home.png",
-        selectedIconPath: "assets/icons/home_click.png"
+        pagePath: 'pages/index/index',
+        text: '首页',
+        iconPath: 'assets/icons/home.png',
+        selectedIconPath: 'assets/icons/home_click.png',
       },
       {
-        pagePath: "pages/user-login/index",
-        text: "我的",
-        iconPath: "assets/icons/user.png",
-        selectedIconPath: "assets/icons/user_click.png"
-      }
-    ]
-  }
-})
+        pagePath: 'pages/user-login/index',
+        text: '我的',
+        iconPath: 'assets/icons/user.png',
+        selectedIconPath: 'assets/icons/user_click.png',
+      },
+    ],
+  },
+});

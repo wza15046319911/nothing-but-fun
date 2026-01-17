@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '拼拼车'
-}) 
+  navigationBarTitleText: '拼拼车',
+});

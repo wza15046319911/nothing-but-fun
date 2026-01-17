@@ -90,7 +90,9 @@
   border-radius: @radius-lg;
   position: relative;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   box-shadow: @shadow-sm;
 
   &:active {
@@ -110,7 +112,7 @@
     position: absolute;
     width: 300rpx;
     height: 300rpx;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
     border-radius: 50%;
     top: -100rpx;
     right: -80rpx;
@@ -136,10 +138,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
       border-radius: 50%;
-      box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 
       .icon-svg.large {
         width: 72rpx;
@@ -173,7 +175,7 @@
     position: absolute;
     width: 260rpx;
     height: 260rpx;
-    background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%);
     border-radius: 50%;
     bottom: -60rpx;
     left: -40rpx;
@@ -199,10 +201,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
       border-radius: 50%;
-      box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 
       .icon-svg {
         width: 72rpx;
@@ -239,7 +241,7 @@
   flex-direction: column;
   min-height: 200rpx;
   justify-content: space-between;
-  
+
   .card-content.vertical {
     display: flex;
     flex-direction: column;
@@ -278,7 +280,7 @@
 // Minimal Card (Support)
 .minimal-card {
   background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 
   .card-content.horizontal-center {
     display: flex;
@@ -314,10 +316,13 @@
   }
 }
 
-
 // Shared Utilities
-.ml-auto { margin-left: auto; }
-.ml-2 { margin-left: 16rpx; }
+.ml-auto {
+  margin-left: auto;
+}
+.ml-2 {
+  margin-left: 16rpx;
+}
 
 .badge {
   position: absolute;
@@ -329,7 +334,7 @@
   font-weight: bold;
   padding: 8rpx 16rpx;
   border-bottom-left-radius: @radius-md;
-  box-shadow: -2rpx 2rpx 4rpx rgba(0,0,0,0.1);
+  box-shadow: -2rpx 2rpx 4rpx rgba(0, 0, 0, 0.1);
 
   &.small {
     padding: 4rpx 12rpx;

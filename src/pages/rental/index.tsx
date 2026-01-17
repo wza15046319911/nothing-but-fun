@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, ScrollView } from "@tarojs/components";
-import Taro from "@tarojs/taro";
-import {
-  rentalApi,
-  RentalItem,
-  RentalCategory,
-  RentalFilters,
-} from "../../services/rental";
-import "./index.less";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import { rentalApi, RentalItem, RentalCategory, RentalFilters } from '../../services/rental';
+import './index.less';
 
 const RentalPage: React.FC = () => {
   // State
   const [items, setItems] = useState<RentalItem[]>([]);
   const [categories, setCategories] = useState<RentalCategory[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
   // Data Fetching
   const fetchItems = async (category?: string) => {
@@ -23,19 +18,19 @@ const RentalPage: React.FC = () => {
       const filters: RentalFilters = {
         limit: 20,
         page: 1,
-        sortOrder: "desc",
-        sortBy: "date_created",
+        sortOrder: 'desc',
+        sortBy: 'date_created',
       };
 
-      if (category && category !== "all") {
+      if (category && category !== 'all') {
         filters.category = category;
       }
 
       const response = await rentalApi.getAllItems(filters);
       setItems(response.data);
     } catch (error) {
-      console.error("Failed to fetch rentals:", error);
-      Taro.showToast({ title: "加载失败", icon: "none" });
+      console.error('Failed to fetch rentals:', error);
+      Taro.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       setLoading(false);
     }
@@ -46,7 +41,7 @@ const RentalPage: React.FC = () => {
       const data = await rentalApi.getCategories();
       setCategories(data);
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
+      console.error('Failed to fetch categories:', error);
     }
   };
 
@@ -108,19 +103,15 @@ const RentalPage: React.FC = () => {
         <ScrollView scrollX className="filter-scroll" showScrollbar={false}>
           <View className="filter-options">
             <View
-              className={`filter-chip ${
-                activeCategory === "all" ? "active" : ""
-              }`}
-              onClick={() => handleCategoryChange("all")}
+              className={`filter-chip ${activeCategory === 'all' ? 'active' : ''}`}
+              onClick={() => handleCategoryChange('all')}
             >
               全部
             </View>
             {categories.map((cat) => (
               <View
                 key={cat.id}
-                className={`filter-chip ${
-                  activeCategory === cat.slug ? "active" : ""
-                }`}
+                className={`filter-chip ${activeCategory === cat.slug ? 'active' : ''}`}
                 onClick={() => handleCategoryChange(cat.slug)}
               >
                 {cat.name}
@@ -139,11 +130,7 @@ const RentalPage: React.FC = () => {
         ) : (
           <View className="rental-grid">
             {items.map((item) => (
-              <View
-                key={item.id}
-                className="rental-card"
-                onClick={() => handleItemClick(item.id)}
-              >
+              <View key={item.id} className="rental-card" onClick={() => handleItemClick(item.id)}>
                 <View className="card-image-wrapper">
                   <Image
                     className="card-image"
@@ -151,15 +138,14 @@ const RentalPage: React.FC = () => {
                       item.imageUrls && item.imageUrls.length > 0
                         ? item.imageUrls[0]
                         : item.images && item.images.length > 0
-                        ? item.images[0]
-                        : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80"
+                          ? item.images[0]
+                          : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'
                     }
                     mode="aspectFill"
                     lazyLoad
                   />
                   <View className="category-tag">
-                    {categories.find((c) => c.slug === item.category)?.name ||
-                      item.category}
+                    {categories.find((c) => c.slug === item.category)?.name || item.category}
                   </View>
                   <View className={`status-badge ${item.status}`} />
                 </View>
@@ -171,21 +157,14 @@ const RentalPage: React.FC = () => {
                     <Text className="currency">$</Text>
                     <Text className="price">{item.price}</Text>
                     <Text className="period">
-                      /{" "}
-                      {item.period === "day"
-                        ? "天"
-                        : item.period === "week"
-                        ? "周"
-                        : "月"}
+                      / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
                     </Text>
                   </View>
 
                   <View className="card-footer">
                     <View className="seller-info">
                       <View className="seller-avatar" />
-                      <Text className="seller-name">
-                        {item.contact_info || "布好玩管家"}
-                      </Text>
+                      <Text className="seller-name">{item.contact_info || '布好玩管家'}</Text>
                     </View>
                   </View>
                 </View>

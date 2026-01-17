@@ -1,4 +1,4 @@
-import request from "./api";
+import request from './api';
 
 // 二手商品数据类型定义 - 更新以匹配后端schema
 export interface SecondhandItem {
@@ -10,8 +10,8 @@ export interface SecondhandItem {
   image?: string; // Legacy field for backward compatibility
   images?: string[]; // Legacy field for backward compatibility
   imageUrls: string[]; // 主要图片字段，来自关联表
-  status?: "available" | "sold" | "reserved";
-  reviewStatus: "pending" | "approved" | "rejected";
+  status?: 'available' | 'sold' | 'reserved';
+  reviewStatus: 'pending' | 'approved' | 'rejected';
   reviewReason?: string;
   reviewedAt?: string;
   dateCreated: string; // 后端schema字段名
@@ -37,7 +37,7 @@ export interface CreateSecondhandItemRequest {
   description?: string;
   price: string | number;
   images?: string[]; // Directus文件ID数组
-  status?: "available" | "sold" | "reserved";
+  status?: 'available' | 'sold' | 'reserved';
   categoryRid?: number; // 分类ID
   productStatusRid?: number; // 商品状况ID
 }
@@ -48,7 +48,7 @@ export interface CreateSecondhandItemWithImagesRequest {
   title: string;
   description?: string;
   price: string | number;
-  status?: "available" | "sold" | "reserved";
+  status?: 'available' | 'sold' | 'reserved';
   categoryRid?: number; // 分类ID
   productStatusRid?: number; // 商品状况ID
 }
@@ -72,7 +72,7 @@ export interface UpdateSecondhandItemRequest {
   price?: string | number;
   image?: string; // Legacy field
   images?: string[]; // Directus文件ID数组
-  status?: "available" | "sold" | "reserved";
+  status?: 'available' | 'sold' | 'reserved';
   categoryRid?: number; // 分类ID
   productStatusRid?: number; // 商品状况ID
 }
@@ -111,9 +111,9 @@ export interface SecondhandFilters {
   categoryId?: number;
   subCategoryId?: number;
   productStatusId?: number;
-  status?: "available" | "sold" | "reserved";
-  sortBy?: "dateCreated";
-  sortOrder?: "asc" | "desc";
+  status?: 'available' | 'sold' | 'reserved';
+  sortBy?: 'dateCreated';
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 }
@@ -130,66 +130,54 @@ export interface PaginatedSecondhandResponse {
 // 二手商品API服务
 export const secondhandApi = {
   // 获取所有二手商品（支持筛选和分页）
-  getAllItems: async (
-    filters?: SecondhandFilters
-  ): Promise<PaginatedSecondhandResponse> => {
+  getAllItems: async (filters?: SecondhandFilters): Promise<PaginatedSecondhandResponse> => {
     try {
       // 构建查询参数
       const queryParams = new URLSearchParams();
 
       if (filters?.priceFrom !== undefined) {
-        queryParams.append("priceFrom", filters.priceFrom.toString());
+        queryParams.append('priceFrom', filters.priceFrom.toString());
       }
       if (filters?.priceTo !== undefined) {
-        queryParams.append("priceTo", filters.priceTo.toString());
+        queryParams.append('priceTo', filters.priceTo.toString());
       }
       if (filters?.keyword) {
-        queryParams.append("keyword", filters.keyword);
+        queryParams.append('keyword', filters.keyword);
       }
       if (filters?.categoryId !== undefined) {
-        queryParams.append("categoryId", filters.categoryId.toString());
+        queryParams.append('categoryId', filters.categoryId.toString());
       }
       if (filters?.subCategoryId !== undefined) {
-        queryParams.append("subCategoryId", filters.subCategoryId.toString());
+        queryParams.append('subCategoryId', filters.subCategoryId.toString());
       }
       if (filters?.productStatusId !== undefined) {
-        queryParams.append(
-          "productStatusId",
-          filters.productStatusId.toString()
-        );
+        queryParams.append('productStatusId', filters.productStatusId.toString());
       }
       if (filters?.status) {
-        queryParams.append("status", filters.status);
+        queryParams.append('status', filters.status);
       }
       if (filters?.page !== undefined) {
-        queryParams.append("page", filters.page.toString());
+        queryParams.append('page', filters.page.toString());
       }
       if (filters?.limit !== undefined) {
-        queryParams.append("limit", filters.limit.toString());
+        queryParams.append('limit', filters.limit.toString());
       }
       if (filters?.sortBy) {
-        queryParams.append("sortBy", filters.sortBy);
+        queryParams.append('sortBy', filters.sortBy);
       }
       if (filters?.sortOrder) {
-        queryParams.append("sortOrder", filters.sortOrder);
+        queryParams.append('sortOrder', filters.sortOrder);
       }
 
-      const url = queryParams.toString()
-        ? `/secondhand?${queryParams.toString()}`
-        : "/secondhand";
+      const url = queryParams.toString() ? `/secondhand?${queryParams.toString()}` : '/secondhand';
 
       const response = await request({
         url,
-        method: "GET",
+        method: 'GET',
       });
-      console.log("response secondhand is ::", response);
+      console.log('response secondhand is ::', response);
       // 检查响应格式 - 后端返回的格式是 { data: SecondhandItem[], total, page, limit, totalPages }
-      if (
-        response &&
-        typeof response === "object" &&
-        "data" in response &&
-        "total" in response
-      ) {
+      if (response && typeof response === 'object' && 'data' in response && 'total' in response) {
         return response as PaginatedSecondhandResponse;
       }
       // 如果是简单数组格式，包装成分页响应
@@ -211,7 +199,7 @@ export const secondhandApi = {
         totalPages: 0,
       } as PaginatedSecondhandResponse;
     } catch (error) {
-      console.error("获取二手商品列表失败:", error);
+      console.error('获取二手商品列表失败:', error);
       return {
         data: [],
         total: 0,
@@ -232,15 +220,15 @@ export const secondhandApi = {
   getItemById: (id: number): Promise<SecondhandItem> => {
     return request({
       url: `/secondhand/${id}`,
-      method: "GET",
+      method: 'GET',
     });
   },
 
   // 创建新的二手商品（不带图片）
   createItem: (data: CreateSecondhandItemRequest): Promise<SecondhandItem> => {
     return request({
-      url: "/secondhand",
-      method: "POST",
+      url: '/secondhand',
+      method: 'POST',
       data,
     });
   },
@@ -251,19 +239,14 @@ export const secondhandApi = {
   ): Promise<CreateItemWithImagesResponse> => {
     // 注意：这个方法需要在调用时配合 Taro.uploadFile 使用
     // 因为需要上传文件，不能直接用 request 函数
-    throw new Error(
-      "请使用 Taro.uploadFile 直接调用 /secondhand/with-images 接口"
-    );
+    throw new Error('请使用 Taro.uploadFile 直接调用 /secondhand/with-images 接口');
   },
 
   // 更新二手商品
-  updateItem: (
-    id: number,
-    data: UpdateSecondhandItemRequest
-  ): Promise<SecondhandItem> => {
+  updateItem: (id: number, data: UpdateSecondhandItemRequest): Promise<SecondhandItem> => {
     return request({
       url: `/secondhand/${id}`,
-      method: "PUT",
+      method: 'PUT',
       data,
     });
   },
@@ -272,18 +255,15 @@ export const secondhandApi = {
   deleteItem: (id: number): Promise<{ message: string }> => {
     return request({
       url: `/secondhand/${id}`,
-      method: "DELETE",
+      method: 'DELETE',
     });
   },
 
   // 审核二手商品
-  reviewItem: (
-    id: number,
-    data: ReviewSecondhandItemRequest
-  ): Promise<SecondhandItem> => {
+  reviewItem: (id: number, data: ReviewSecondhandItemRequest): Promise<SecondhandItem> => {
     return request({
       url: `/secondhand/${id}/review`,
-      method: "PUT",
+      method: 'PUT',
       data,
     });
   },
@@ -292,7 +272,7 @@ export const secondhandApi = {
   getUserItems: (userId: string): Promise<SecondhandItem[]> => {
     return request({
       url: `/secondhand/user/${userId}`,
-      method: "GET",
+      method: 'GET',
     });
   },
 
@@ -306,7 +286,7 @@ export const secondhandApi = {
   ): Promise<SecondhandItem> => {
     return request({
       url: `/secondhand/user/${userId}`,
-      method: "PUT",
+      method: 'PUT',
       data: { itemId, ...data },
     });
   },
@@ -314,13 +294,10 @@ export const secondhandApi = {
   // 基于用户的删除二手商品
   // 后端路由: DELETE /secondhand/user/:userId
   // 约定: 在请求体中传递 itemId
-  deleteUserItem: (
-    userId: string,
-    itemId: number
-  ): Promise<{ message: string }> => {
+  deleteUserItem: (userId: string, itemId: number): Promise<{ message: string }> => {
     return request({
       url: `/secondhand/user/${userId}`,
-      method: "DELETE",
+      method: 'DELETE',
       data: { itemId },
     });
   },
@@ -329,17 +306,12 @@ export const secondhandApi = {
   getAllCategories: async (): Promise<SecondhandCategory[]> => {
     try {
       const response = await request({
-        url: "/secondhand/categories",
-        method: "GET",
+        url: '/secondhand/categories',
+        method: 'GET',
       });
 
       // Handle wrapped response format: { success: true, data: [...] }
-      if (
-        response &&
-        typeof response === "object" &&
-        "success" in response &&
-        response.success
-      ) {
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
         return response.data as SecondhandCategory[];
       }
 
@@ -348,10 +320,10 @@ export const secondhandApi = {
         return response as SecondhandCategory[];
       }
 
-      console.warn("Unexpected category response format:", response);
+      console.warn('Unexpected category response format:', response);
       return [];
     } catch (error) {
-      console.error("获取二手商品分类失败:", error);
+      console.error('获取二手商品分类失败:', error);
       return [];
     }
   },
@@ -360,17 +332,12 @@ export const secondhandApi = {
   getProductStatuses: async (): Promise<SecondhandProductStatus[]> => {
     try {
       const response = await request({
-        url: "/secondhand/product-statuses",
-        method: "GET",
+        url: '/secondhand/product-statuses',
+        method: 'GET',
       });
 
       // Handle wrapped response format: { success: true, data: [...] }
-      if (
-        response &&
-        typeof response === "object" &&
-        "success" in response &&
-        response.success
-      ) {
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
         return response.data as SecondhandProductStatus[];
       }
 
@@ -379,10 +346,10 @@ export const secondhandApi = {
         return response as SecondhandProductStatus[];
       }
 
-      console.warn("Unexpected product statuses response format:", response);
+      console.warn('Unexpected product statuses response format:', response);
       return [];
     } catch (error) {
-      console.error("获取商品状况失败:", error);
+      console.error('获取商品状况失败:', error);
       return [];
     }
   },
@@ -391,17 +358,12 @@ export const secondhandApi = {
   getAllSubCategories: async (): Promise<SecondhandSubCategory[]> => {
     try {
       const response = await request({
-        url: "/secondhand/sub-categories",
-        method: "GET",
+        url: '/secondhand/sub-categories',
+        method: 'GET',
       });
 
       // Handle wrapped response format: { success: true, data: [...] }
-      if (
-        response &&
-        typeof response === "object" &&
-        "success" in response &&
-        response.success
-      ) {
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
         return response.data as SecondhandSubCategory[];
       }
 
@@ -410,31 +372,24 @@ export const secondhandApi = {
         return response as SecondhandSubCategory[];
       }
 
-      console.warn("Unexpected sub-categories response format:", response);
+      console.warn('Unexpected sub-categories response format:', response);
       return [];
     } catch (error) {
-      console.error("获取子分类失败:", error);
+      console.error('获取子分类失败:', error);
       return [];
     }
   },
 
   // 根据子分类ID获取二级分类
-  getCategoriesBySubCategory: async (
-    subCategoryId: number
-  ): Promise<SecondhandCategory[]> => {
+  getCategoriesBySubCategory: async (subCategoryId: number): Promise<SecondhandCategory[]> => {
     try {
       const response = await request({
         url: `/secondhand/categories/${subCategoryId}`,
-        method: "GET",
+        method: 'GET',
       });
 
       // Handle wrapped response format: { success: true, data: [...] }
-      if (
-        response &&
-        typeof response === "object" &&
-        "success" in response &&
-        response.success
-      ) {
+      if (response && typeof response === 'object' && 'success' in response && response.success) {
         return response.data as SecondhandCategory[];
       }
 
@@ -443,13 +398,10 @@ export const secondhandApi = {
         return response as SecondhandCategory[];
       }
 
-      console.warn(
-        "Unexpected categories by sub-category response format:",
-        response
-      );
+      console.warn('Unexpected categories by sub-category response format:', response);
       return [];
     } catch (error) {
-      console.error("获取分类失败:", error);
+      console.error('获取分类失败:', error);
       return [];
     }
   },

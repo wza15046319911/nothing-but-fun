@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '发布闲置'
-}) 
+  navigationBarTitleText: '发布闲置',
+});

@@ -1,33 +1,33 @@
-import request from './api'
+import request from './api';
 
 // 租赁商品数据类型
 export interface RentalItem {
-  id: number
-  name: string
-  description: string
-  categoryId: number
-  categoryName: string
-  rentalRate: string
-  rentalPeriod: 'hourly' | 'daily' | 'weekly' | 'monthly'
-  deposit: string
-  status: 'available' | 'rented_out' | 'in_maintenance'
-  imageUrl: string
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  description: string;
+  categoryId: number;
+  categoryName: string;
+  rentalRate: string;
+  rentalPeriod: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  deposit: string;
+  status: 'available' | 'rented_out' | 'in_maintenance';
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // 租赁分类类型
 export interface RentalCategory {
-  id: number
-  name: string
-  icon: string
+  id: number;
+  name: string;
+  icon: string;
 }
 
 // API响应类型
 interface ApiResponse<T> {
-  success: boolean
-  data: T
-  message?: string
+  success: boolean;
+  data: T;
+  message?: string;
 }
 
 // 租赁商品API
@@ -35,68 +35,68 @@ export const rentalsApi = {
   // 获取所有租赁商品
   getAllItems: async (): Promise<RentalItem[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/rentals',
-        method: 'GET'
-      }) as ApiResponse<RentalItem[]>
-      
-      return response.data || []
+        method: 'GET',
+      })) as ApiResponse<RentalItem[]>;
+
+      return response.data || [];
     } catch (error) {
-      console.error('获取租赁商品失败:', error)
+      console.error('获取租赁商品失败:', error);
       // 返回模拟数据用于展示
-      return getMockRentals()
+      return getMockRentals();
     }
   },
 
   // 获取可用的租赁商品
   getAvailableItems: async (): Promise<RentalItem[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/rentals/available',
-        method: 'GET'
-      }) as ApiResponse<RentalItem[]>
-      
-      return response.data || []
+        method: 'GET',
+      })) as ApiResponse<RentalItem[]>;
+
+      return response.data || [];
     } catch (error) {
-      console.error('获取可用租赁商品失败:', error)
+      console.error('获取可用租赁商品失败:', error);
       // 返回模拟数据中的可用商品
-      return getMockRentals().filter(item => item.status === 'available')
+      return getMockRentals().filter((item) => item.status === 'available');
     }
   },
 
   // 根据分类获取租赁商品
   getItemsByCategory: async (categoryId: number): Promise<RentalItem[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rentals/category/${categoryId}`,
-        method: 'GET'
-      }) as ApiResponse<RentalItem[]>
-      
-      return response.data || []
+        method: 'GET',
+      })) as ApiResponse<RentalItem[]>;
+
+      return response.data || [];
     } catch (error) {
-      console.error('获取分类租赁商品失败:', error)
+      console.error('获取分类租赁商品失败:', error);
       // 返回模拟数据中的对应分类商品
-      return getMockRentals().filter(item => item.categoryId === categoryId)
+      return getMockRentals().filter((item) => item.categoryId === categoryId);
     }
   },
 
   // 根据ID获取单个租赁商品
   getItemById: async (id: number): Promise<RentalItem | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rentals/${id}`,
-        method: 'GET'
-      }) as ApiResponse<RentalItem>
-      
-      return response.data || null
+        method: 'GET',
+      })) as ApiResponse<RentalItem>;
+
+      return response.data || null;
     } catch (error) {
-      console.error('获取租赁商品详情失败:', error)
+      console.error('获取租赁商品详情失败:', error);
       // 返回模拟数据
-      const mockItems = getMockRentals()
-      return mockItems.find(item => item.id === id) || null
+      const mockItems = getMockRentals();
+      return mockItems.find((item) => item.id === id) || null;
     }
-  }
-}
+  },
+};
 
 // 租赁分类数据
 export const getRentalCategories = (): RentalCategory[] => {
@@ -106,9 +106,9 @@ export const getRentalCategories = (): RentalCategory[] => {
     { id: 3, name: '电子设备', icon: '💻' },
     { id: 4, name: '户外用品', icon: '🏕️' },
     { id: 5, name: '音响设备', icon: '🎵' },
-    { id: 6, name: '交通工具', icon: '🚲' }
-  ]
-}
+    { id: 6, name: '交通工具', icon: '🚲' },
+  ];
+};
 
 // 模拟数据（用于展示）
 const getMockRentals = (): RentalItem[] => {
@@ -125,7 +125,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=400&fit=crop',
       createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z'
+      updatedAt: '2024-01-15T10:00:00Z',
     },
     {
       id: 2,
@@ -139,7 +139,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=400&fit=crop',
       createdAt: '2024-01-16T14:30:00Z',
-      updatedAt: '2024-01-16T14:30:00Z'
+      updatedAt: '2024-01-16T14:30:00Z',
     },
     {
       id: 3,
@@ -153,7 +153,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
       createdAt: '2024-01-18T09:15:00Z',
-      updatedAt: '2024-01-18T09:15:00Z'
+      updatedAt: '2024-01-18T09:15:00Z',
     },
     {
       id: 4,
@@ -167,7 +167,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'rented_out',
       imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=400&fit=crop',
       createdAt: '2024-01-20T16:45:00Z',
-      updatedAt: '2024-01-25T10:30:00Z'
+      updatedAt: '2024-01-25T10:30:00Z',
     },
     {
       id: 5,
@@ -181,7 +181,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
       createdAt: '2024-01-22T11:20:00Z',
-      updatedAt: '2024-01-22T11:20:00Z'
+      updatedAt: '2024-01-22T11:20:00Z',
     },
     {
       id: 6,
@@ -195,7 +195,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=400&h=400&fit=crop',
       createdAt: '2024-01-25T13:00:00Z',
-      updatedAt: '2024-01-25T13:00:00Z'
+      updatedAt: '2024-01-25T13:00:00Z',
     },
     {
       id: 7,
@@ -209,7 +209,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=400&fit=crop',
       createdAt: '2024-01-28T08:30:00Z',
-      updatedAt: '2024-01-28T08:30:00Z'
+      updatedAt: '2024-01-28T08:30:00Z',
     },
     {
       id: 8,
@@ -223,7 +223,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'in_maintenance',
       imageUrl: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=400&h=400&fit=crop',
       createdAt: '2024-02-01T15:10:00Z',
-      updatedAt: '2024-02-05T09:45:00Z'
+      updatedAt: '2024-02-05T09:45:00Z',
     },
     {
       id: 9,
@@ -237,7 +237,7 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=400&fit=crop',
       createdAt: '2024-02-03T12:25:00Z',
-      updatedAt: '2024-02-03T12:25:00Z'
+      updatedAt: '2024-02-03T12:25:00Z',
     },
     {
       id: 10,
@@ -251,9 +251,9 @@ const getMockRentals = (): RentalItem[] => {
       status: 'available',
       imageUrl: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=400&fit=crop',
       createdAt: '2024-02-05T17:40:00Z',
-      updatedAt: '2024-02-05T17:40:00Z'
-    }
-  ]
-}
+      updatedAt: '2024-02-05T17:40:00Z',
+    },
+  ];
+};
 
-export default rentalsApi 
+export default rentalsApi;

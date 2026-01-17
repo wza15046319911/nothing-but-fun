@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, Image, Button, Input } from "@tarojs/components";
-import Taro from "@tarojs/taro";
-import { useAuth } from "../../context/auth";
-import "./index.less";
-import { API_BASE_URL } from "src/services/api";
+import React, { useState } from 'react';
+import { View, Text, Image, Button, Input } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import { useAuth } from '../../context/auth';
+import './index.less';
+import { API_BASE_URL } from 'src/services/api';
 
 // 默认头像URL
 const defaultAvatarUrl =
-  "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0";
+  'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
 
 const UserLogin: React.FC = () => {
   // 使用Auth Context
@@ -16,8 +16,8 @@ const UserLogin: React.FC = () => {
 
   // 新增状态用于头像和昵称
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatarUrl);
-  const [nickname, setNickname] = useState("");
-  const [wechatCode, setWechatCode] = useState("");
+  const [nickname, setNickname] = useState('');
+  const [wechatCode, setWechatCode] = useState('');
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [hasUploadedAvatar, setHasUploadedAvatar] = useState(false);
@@ -31,7 +31,7 @@ const UserLogin: React.FC = () => {
 
     // 显示加载状态
     Taro.showLoading({
-      title: "上传头像中...",
+      title: '上传头像中...',
     });
 
     try {
@@ -41,12 +41,12 @@ const UserLogin: React.FC = () => {
         Taro.uploadFile({
           url: url,
           filePath: avatarUrl,
-          name: "image",
+          name: 'image',
           formData: {
-            user: "test",
+            user: 'test',
           },
           success: (res) => {
-            console.log("头像上传结果:", res);
+            console.log('头像上传结果:', res);
             try {
               const data = JSON.parse(res.data);
               resolve(
@@ -68,16 +68,16 @@ const UserLogin: React.FC = () => {
 
       Taro.hideLoading();
       Taro.showToast({
-        title: "头像上传成功",
-        icon: "success",
+        title: '头像上传成功',
+        icon: 'success',
         duration: 1500,
       });
     } catch (error) {
-      console.error("头像上传失败:", error);
+      console.error('头像上传失败:', error);
       Taro.hideLoading();
       Taro.showToast({
-        title: "头像上传失败，请重试",
-        icon: "none",
+        title: '头像上传失败，请重试',
+        icon: 'none',
         duration: 2000,
       });
       setAvatarUrl(defaultAvatarUrl);
@@ -101,17 +101,17 @@ const UserLogin: React.FC = () => {
       const loginRes = await Taro.login();
 
       if (!loginRes.code) {
-        throw new Error("获取微信登录code失败");
+        throw new Error('获取微信登录code失败');
       }
 
       // 保存code用于后续创建用户
       setWechatCode(loginRes.code);
       setShowProfileForm(true);
     } catch (error) {
-      console.error("登录失败:", error);
+      console.error('登录失败:', error);
       Taro.showToast({
-        title: error.message || "获取微信授权失败，请重试",
-        icon: "none",
+        title: error.message || '获取微信授权失败，请重试',
+        icon: 'none',
         duration: 2000,
       });
     }
@@ -120,12 +120,12 @@ const UserLogin: React.FC = () => {
   // 完成头像昵称设置并创建用户
   const handleCompleteProfile = async () => {
     if (!wechatCode) {
-      Taro.showToast({ title: "请先进行微信登录", icon: "none" });
+      Taro.showToast({ title: '请先进行微信登录', icon: 'none' });
       return;
     }
 
     if (!nickname.trim()) {
-      Taro.showToast({ title: "请输入昵称", icon: "none" });
+      Taro.showToast({ title: '请输入昵称', icon: 'none' });
       return;
     }
 
@@ -142,28 +142,28 @@ const UserLogin: React.FC = () => {
 
       if (success) {
         setShowProfileForm(false);
-        setWechatCode("");
+        setWechatCode('');
         setAvatarUrl(defaultAvatarUrl);
-        setNickname("");
+        setNickname('');
         setHasUploadedAvatar(false);
 
         Taro.showToast({
-          title: "注册成功",
-          icon: "success",
+          title: '注册成功',
+          icon: 'success',
           duration: 2000,
         });
       }
     } catch (error) {
-      console.error("创建用户失败:", error);
+      console.error('创建用户失败:', error);
     }
   };
 
   // 取消头像昵称设置
   const handleCancelProfile = () => {
     setShowProfileForm(false);
-    setWechatCode("");
+    setWechatCode('');
     setAvatarUrl(defaultAvatarUrl);
-    setNickname("");
+    setNickname('');
     setHasUploadedAvatar(false);
     setIsUploadingAvatar(false);
   };
@@ -172,29 +172,29 @@ const UserLogin: React.FC = () => {
   const handleMenuClick = (menuType: string) => {
     if (!isLoggedIn) {
       Taro.showModal({
-        title: "需要登录",
-        content: "请先登录后再使用此功能",
+        title: '需要登录',
+        content: '请先登录后再使用此功能',
         showCancel: false,
-        confirmText: "知道了",
+        confirmText: '知道了',
       });
       return;
     }
 
     switch (menuType) {
-      case "orders":
-        Taro.navigateTo({ url: "/pages/user-posts/index" });
+      case 'orders':
+        Taro.navigateTo({ url: '/pages/user-posts/index' });
         break;
-      case "favorites":
-        Taro.showToast({ title: "我的收藏功能开发中", icon: "none" });
+      case 'favorites':
+        Taro.showToast({ title: '我的收藏功能开发中', icon: 'none' });
         break;
-      case "phone":
-        Taro.navigateTo({ url: "/pages/update-phone/index" });
+      case 'phone':
+        Taro.navigateTo({ url: '/pages/update-phone/index' });
         break;
-      case "contact":
-        Taro.navigateTo({ url: "/pages/contact-info/index" });
+      case 'contact':
+        Taro.navigateTo({ url: '/pages/contact-info/index' });
         break;
       default:
-        Taro.showToast({ title: "功能开发中", icon: "none" });
+        Taro.showToast({ title: '功能开发中', icon: 'none' });
         break;
     }
   };
@@ -212,9 +212,7 @@ const UserLogin: React.FC = () => {
                 mode="aspectFill"
               />
               <View className="login-text">{userInfo.nickname || `用户`}</View>
-              <View className="login-desc">
-                欢迎回来，{userInfo.nickname || ""}
-              </View>
+              <View className="login-desc">欢迎回来，{userInfo.nickname || ''}</View>
               {/* Optional: Add logout button here if needed */}
             </>
           ) : (
@@ -225,10 +223,10 @@ const UserLogin: React.FC = () => {
               <View className="login-text">您尚未登录</View>
               <View className="login-desc">登录后体验更多功能</View>
               <View
-                className={`wechat-login-button ${isLoading ? "loading" : ""}`}
+                className={`wechat-login-button ${isLoading ? 'loading' : ''}`}
                 onClick={isLoading ? undefined : handleWechatLogin}
               >
-                {isLoading ? "登录中..." : "微信一键登录"}
+                {isLoading ? '登录中...' : '微信一键登录'}
               </View>
             </>
           )}
@@ -239,15 +237,12 @@ const UserLogin: React.FC = () => {
       <View className="content-section">
         {/* Menu Options */}
         <View className="card menu-list">
-          <View className="menu-item" onClick={() => handleMenuClick("orders")}>
+          <View className="menu-item" onClick={() => handleMenuClick('orders')}>
             <Text className="menu-icon">📋</Text>
             <Text className="menu-text">我的发布</Text>
             <Text className="menu-arrow">›</Text>
           </View>
-          <View
-            className="menu-item"
-            onClick={() => handleMenuClick("favorites")}
-          >
+          <View className="menu-item" onClick={() => handleMenuClick('favorites')}>
             <Text className="menu-icon">❤️</Text>
             <Text className="menu-text">我的收藏</Text>
             <Text className="menu-arrow">›</Text>
@@ -255,15 +250,12 @@ const UserLogin: React.FC = () => {
         </View>
 
         <View className="card menu-list">
-          <View className="menu-item" onClick={() => handleMenuClick("phone")}>
+          <View className="menu-item" onClick={() => handleMenuClick('phone')}>
             <Text className="menu-icon">📱</Text>
             <Text className="menu-text">绑定手机</Text>
             <Text className="menu-arrow">›</Text>
           </View>
-          <View
-            className="menu-item"
-            onClick={() => handleMenuClick("contact")}
-          >
+          <View className="menu-item" onClick={() => handleMenuClick('contact')}>
             <Text className="menu-icon">📧</Text>
             <Text className="menu-text">联系我</Text>
             <Text className="menu-arrow">›</Text>
@@ -286,18 +278,10 @@ const UserLogin: React.FC = () => {
                 onChooseAvatar={onChooseAvatar}
                 disabled={isUploadingAvatar}
               >
-                <Image
-                  className="avatar-preview"
-                  src={avatarUrl}
-                  mode="aspectFill"
-                />
+                <Image className="avatar-preview" src={avatarUrl} mode="aspectFill" />
               </Button>
               <Text className="avatar-tip">
-                {isUploadingAvatar
-                  ? "上传中..."
-                  : hasUploadedAvatar
-                  ? "✅ 已选择"
-                  : "点击上方图标"}
+                {isUploadingAvatar ? '上传中...' : hasUploadedAvatar ? '✅ 已选择' : '点击上方图标'}
               </Text>
             </View>
 
@@ -318,10 +302,10 @@ const UserLogin: React.FC = () => {
                 取消
               </View>
               <View
-                className={`complete-button ${isLoading ? "loading" : ""}`}
+                className={`complete-button ${isLoading ? 'loading' : ''}`}
                 onClick={handleCompleteProfile}
               >
-                {isLoading ? "处理中..." : "完成注册"}
+                {isLoading ? '处理中...' : '完成注册'}
               </View>
             </View>
           </View>

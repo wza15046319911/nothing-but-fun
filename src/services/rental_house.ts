@@ -1,93 +1,93 @@
-import request from './api'
+import request from './api';
 
 // 租房数据类型
 export interface RentalHouse {
-  id: number
-  title: string
-  description: string
-  weeklyPrice: string
-  depositPrice: string
-  bondAmount: string
-  bedrooms: number
-  bathrooms: number
-  carSpaces: number
-  studyRooms: number
-  propertyType: string
-  streetAddress: string
-  suburb: string
-  state: string
-  postcode: string
-  country: string
-  latitude: string
-  longitude: string
-  images: string[]
-  mainImageIndex: number
-  features: string[]
-  furnished: boolean
-  petsAllowed: boolean
-  smokingAllowed: boolean
-  availableFrom: string
-  minimumLeaseTerm: number
-  maximumLeaseTerm: number | null
-  floorArea: number
-  landArea: number | null
-  buildYear: number
-  utilitiesIncluded: string[]
+  id: number;
+  title: string;
+  description: string;
+  weeklyPrice: string;
+  depositPrice: string;
+  bondAmount: string;
+  bedrooms: number;
+  bathrooms: number;
+  carSpaces: number;
+  studyRooms: number;
+  propertyType: string;
+  streetAddress: string;
+  suburb: string;
+  state: string;
+  postcode: string;
+  country: string;
+  latitude: string;
+  longitude: string;
+  images: string[];
+  mainImageIndex: number;
+  features: string[];
+  furnished: boolean;
+  petsAllowed: boolean;
+  smokingAllowed: boolean;
+  availableFrom: string;
+  minimumLeaseTerm: number;
+  maximumLeaseTerm: number | null;
+  floorArea: number;
+  landArea: number | null;
+  buildYear: number;
+  utilitiesIncluded: string[];
   additionalCosts: Array<{
-    name: string
-    amount: number
-    frequency: string
-  }>
-  contactName: string
-  contactPhone: string
-  contactEmail: string
-  agencyName: string
-  status: string
-  isActive: boolean
-  viewCount: number
-  createdAt: string
-  updatedAt: string
-  publishedAt: string
-  propertyConfig: string
+    name: string;
+    amount: number;
+    frequency: string;
+  }>;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  agencyName: string;
+  status: string;
+  isActive: boolean;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  propertyConfig: string;
 }
 
 // 查询参数接口
 export interface RentalHouseQueryParams {
-  page?: number
-  limit?: number
-  sortBy?: 'weeklyPrice' | 'createdAt' | 'viewCount'
-  sortOrder?: 'asc' | 'desc'
-  suburb?: string
-  minPrice?: number
-  maxPrice?: number
-  bedrooms?: number
-  bathrooms?: number
-  propertyType?: string
-  furnished?: boolean
-  petsAllowed?: boolean
-  smokingAllowed?: boolean
-  status?: string
+  page?: number;
+  limit?: number;
+  sortBy?: 'weeklyPrice' | 'createdAt' | 'viewCount';
+  sortOrder?: 'asc' | 'desc';
+  suburb?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  propertyType?: string;
+  furnished?: boolean;
+  petsAllowed?: boolean;
+  smokingAllowed?: boolean;
+  status?: string;
 }
 
 // API响应接口
 export interface RentalHouseResponse {
-  success: boolean
-  message: string
-  data: RentalHouse[]
+  success: boolean;
+  message: string;
+  data: RentalHouse[];
   pagination?: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-    hasNext: boolean
-    hasPrev: boolean
-  }
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export interface SingleRentalHouseResponse {
-  success: boolean
-  message: string
-  data: RentalHouse
+  success: boolean;
+  message: string;
+  data: RentalHouse;
 }
 
 // 租房API
@@ -95,23 +95,29 @@ export const rentalHouseApi = {
   // 获取所有租房信息
   getAllRentalHouses: async (params?: RentalHouseQueryParams): Promise<RentalHouseResponse> => {
     try {
-      const queryString = params ? '?' + new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
-          return acc
-        }, {} as Record<string, string>)
-      ).toString() : ''
-      
-      const response = await request({
+      const queryString = params
+        ? '?' +
+          new URLSearchParams(
+            Object.entries(params).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined && value !== null) {
+                  acc[key] = String(value);
+                }
+                return acc;
+              },
+              {} as Record<string, string>
+            )
+          ).toString()
+        : '';
+
+      const response = (await request({
         url: `/rental-houses${queryString}`,
-        method: 'GET'
-      }) as RentalHouseResponse
-      
-      return response || { success: false, message: '获取数据失败', data: [] }
+        method: 'GET',
+      })) as RentalHouseResponse;
+
+      return response || { success: false, message: '获取数据失败', data: [] };
     } catch (error) {
-      console.error('获取租房列表失败:', error)
+      console.error('获取租房列表失败:', error);
       // 返回模拟数据用于展示
       return {
         success: true,
@@ -123,58 +129,71 @@ export const rentalHouseApi = {
           total: 8,
           totalPages: 1,
           hasNext: false,
-          hasPrev: false
-        }
-      }
+          hasPrev: false,
+        },
+      };
     }
   },
 
   // 根据ID获取单个租房信息
   getRentalHouseById: async (id: number): Promise<RentalHouse | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rental-houses/${id}`,
-        method: 'GET'
-      }) as SingleRentalHouseResponse
-      
-      return response?.data || null
+        method: 'GET',
+      })) as SingleRentalHouseResponse;
+
+      return response?.data || null;
     } catch (error) {
-      console.error('获取租房详情失败:', error)
+      console.error('获取租房详情失败:', error);
       // 返回模拟数据
-      const mockHouses = getMockRentalHouses()
-      return mockHouses.find(house => house.id === id) || null
+      const mockHouses = getMockRentalHouses();
+      return mockHouses.find((house) => house.id === id) || null;
     }
   },
 
   // 创建新租房信息
-  createRentalHouse: async (houseData: Omit<RentalHouse, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'propertyConfig' | 'viewCount'>): Promise<RentalHouse | null> => {
+  createRentalHouse: async (
+    houseData: Omit<
+      RentalHouse,
+      'id' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'propertyConfig' | 'viewCount'
+    >
+  ): Promise<RentalHouse | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: '/rental-houses',
         method: 'POST',
-        data: houseData
-      }) as SingleRentalHouseResponse
-      
-      return response?.data || null
+        data: houseData,
+      })) as SingleRentalHouseResponse;
+
+      return response?.data || null;
     } catch (error) {
-      console.error('创建租房信息失败:', error)
-      throw error
+      console.error('创建租房信息失败:', error);
+      throw error;
     }
   },
 
   // 更新租房信息
-  updateRentalHouse: async (id: number, houseData: Partial<Omit<RentalHouse, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'propertyConfig' | 'viewCount'>>): Promise<RentalHouse | null> => {
+  updateRentalHouse: async (
+    id: number,
+    houseData: Partial<
+      Omit<
+        RentalHouse,
+        'id' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'propertyConfig' | 'viewCount'
+      >
+    >
+  ): Promise<RentalHouse | null> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rental-houses/${id}`,
         method: 'PUT',
-        data: houseData
-      }) as SingleRentalHouseResponse
-      
-      return response?.data || null
+        data: houseData,
+      })) as SingleRentalHouseResponse;
+
+      return response?.data || null;
     } catch (error) {
-      console.error('更新租房信息失败:', error)
-      throw error
+      console.error('更新租房信息失败:', error);
+      throw error;
     }
   },
 
@@ -183,61 +202,64 @@ export const rentalHouseApi = {
     try {
       const response = await request({
         url: `/rental-houses/${id}`,
-        method: 'DELETE'
-      })
-      
-      return response?.success || false
+        method: 'DELETE',
+      });
+
+      return response?.success || false;
     } catch (error) {
-      console.error('删除租房信息失败:', error)
-      throw error
+      console.error('删除租房信息失败:', error);
+      throw error;
     }
   },
 
   // 根据区域获取租房信息
   getRentalHousesBySuburb: async (suburb: string): Promise<RentalHouse[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rental-houses/suburb/${encodeURIComponent(suburb)}`,
-        method: 'GET'
-      }) as RentalHouseResponse
-      
-      return response?.data || []
+        method: 'GET',
+      })) as RentalHouseResponse;
+
+      return response?.data || [];
     } catch (error) {
-      console.error('根据区域获取租房信息失败:', error)
-      return []
+      console.error('根据区域获取租房信息失败:', error);
+      return [];
     }
   },
 
   // 根据价格范围获取租房信息
-  getRentalHousesByPriceRange: async (minPrice: number, maxPrice: number): Promise<RentalHouse[]> => {
+  getRentalHousesByPriceRange: async (
+    minPrice: number,
+    maxPrice: number
+  ): Promise<RentalHouse[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rental-houses/price-range/${minPrice}/${maxPrice}`,
-        method: 'GET'
-      }) as RentalHouseResponse
-      
-      return response?.data || []
+        method: 'GET',
+      })) as RentalHouseResponse;
+
+      return response?.data || [];
     } catch (error) {
-      console.error('根据价格范围获取租房信息失败:', error)
-      return []
+      console.error('根据价格范围获取租房信息失败:', error);
+      return [];
     }
   },
 
   // 搜索租房信息
   searchRentalHouses: async (keyword: string): Promise<RentalHouse[]> => {
     try {
-      const response = await request({
+      const response = (await request({
         url: `/rental-houses/search/${encodeURIComponent(keyword)}`,
-        method: 'GET'
-      }) as RentalHouseResponse
-      
-      return response?.data || []
+        method: 'GET',
+      })) as RentalHouseResponse;
+
+      return response?.data || [];
     } catch (error) {
-      console.error('搜索租房信息失败:', error)
-      return []
+      console.error('搜索租房信息失败:', error);
+      return [];
     }
-  }
-}
+  },
+};
 
 // 模拟数据（用于展示和测试）
 const getMockRentalHouses = (): RentalHouse[] => {
@@ -245,7 +267,8 @@ const getMockRentalHouses = (): RentalHouse[] => {
     {
       id: 1,
       title: '现代2卧公寓，城市景观',
-      description: '位于南布里斯班的现代化2卧室公寓，享有壮观的城市天际线景观。公寓设施齐全，包含健身房、游泳池和24小时礼宾服务。',
+      description:
+        '位于南布里斯班的现代化2卧室公寓，享有壮观的城市天际线景观。公寓设施齐全，包含健身房、游泳池和24小时礼宾服务。',
       weeklyPrice: '650.00',
       depositPrice: '2600.00',
       bondAmount: '1300.00',
@@ -285,12 +308,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-01-15T10:00:00.000Z',
       updatedAt: '2024-01-15T10:00:00.000Z',
       publishedAt: '2024-01-15T10:00:00.000Z',
-      propertyConfig: '2b2b1c'
+      propertyConfig: '2b2b1c',
     },
     {
       id: 2,
       title: '宽敞3卧别墅，带花园',
-      description: '位于Paddington的迷人家庭别墅，拥有现代化设施和私人花园。保留了历史建筑的特色，同时提供现代化的舒适生活。',
+      description:
+        '位于Paddington的迷人家庭别墅，拥有现代化设施和私人花园。保留了历史建筑的特色，同时提供现代化的舒适生活。',
       weeklyPrice: '850.00',
       depositPrice: '3400.00',
       bondAmount: '1700.00',
@@ -330,12 +354,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-01-20T14:30:00.000Z',
       updatedAt: '2024-01-20T14:30:00.000Z',
       publishedAt: '2024-01-20T14:30:00.000Z',
-      propertyConfig: '3b2b2c1s'
+      propertyConfig: '3b2b2c1s',
     },
     {
       id: 3,
       title: '温馨1卧公寓，近市中心',
-      description: '位于Fortitude Valley的现代1卧室公寓，步行即可到达市中心和各种娱乐设施。完美适合年轻专业人士或学生。',
+      description:
+        '位于Fortitude Valley的现代1卧室公寓，步行即可到达市中心和各种娱乐设施。完美适合年轻专业人士或学生。',
       weeklyPrice: '450.00',
       depositPrice: '1800.00',
       bondAmount: '900.00',
@@ -375,12 +400,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-01-25T09:15:00.000Z',
       updatedAt: '2024-01-25T09:15:00.000Z',
       publishedAt: '2024-01-25T09:15:00.000Z',
-      propertyConfig: '1b1b'
+      propertyConfig: '1b1b',
     },
     {
       id: 4,
       title: '豪华4卧别墅，河景',
-      description: '位于Bulimba的豪华4卧室别墅，享有布里斯班河的壮丽景色。拥有私人码头、游泳池和娱乐区域，是家庭生活的理想选择。',
+      description:
+        '位于Bulimba的豪华4卧室别墅，享有布里斯班河的壮丽景色。拥有私人码头、游泳池和娱乐区域，是家庭生活的理想选择。',
       weeklyPrice: '1200.00',
       depositPrice: '4800.00',
       bondAmount: '2400.00',
@@ -411,7 +437,7 @@ const getMockRentalHouses = (): RentalHouse[] => {
       utilitiesIncluded: ['water'],
       additionalCosts: [
         { name: 'Pool Maintenance', amount: 80, frequency: 'weekly' },
-        { name: 'Garden Maintenance', amount: 60, frequency: 'weekly' }
+        { name: 'Garden Maintenance', amount: 60, frequency: 'weekly' },
       ],
       contactName: 'David Thompson',
       contactPhone: '0445678901',
@@ -423,12 +449,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-02-01T11:20:00.000Z',
       updatedAt: '2024-02-01T11:20:00.000Z',
       publishedAt: '2024-02-01T11:20:00.000Z',
-      propertyConfig: '4b3b2c1s'
+      propertyConfig: '4b3b2c1s',
     },
     {
       id: 5,
       title: '学生公寓，近昆士兰大学',
-      description: '位于St Lucia的现代学生公寓，步行5分钟即可到达昆士兰大学。设施齐全，包含学习区域和公共休息室。',
+      description:
+        '位于St Lucia的现代学生公寓，步行5分钟即可到达昆士兰大学。设施齐全，包含学习区域和公共休息室。',
       weeklyPrice: '380.00',
       depositPrice: '1520.00',
       bondAmount: '760.00',
@@ -468,12 +495,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-02-05T16:45:00.000Z',
       updatedAt: '2024-02-05T16:45:00.000Z',
       publishedAt: '2024-02-05T16:45:00.000Z',
-      propertyConfig: '1b1b1s'
+      propertyConfig: '1b1b1s',
     },
     {
       id: 6,
       title: '海滨公寓，黄金海岸',
-      description: '位于Surfers Paradise的豪华海滨公寓，享有太平洋的无敌海景。设施包含度假村式游泳池、健身房和桑拿浴室。',
+      description:
+        '位于Surfers Paradise的豪华海滨公寓，享有太平洋的无敌海景。设施包含度假村式游泳池、健身房和桑拿浴室。',
       weeklyPrice: '950.00',
       depositPrice: '3800.00',
       bondAmount: '1900.00',
@@ -513,12 +541,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-02-10T13:30:00.000Z',
       updatedAt: '2024-02-10T13:30:00.000Z',
       publishedAt: '2024-02-10T13:30:00.000Z',
-      propertyConfig: '2b2b1c'
+      propertyConfig: '2b2b1c',
     },
     {
       id: 7,
       title: '工业风阁楼，West End',
-      description: '位于West End的独特工业风阁楼公寓，拥有高天花板和大窗户。周围有众多咖啡馆、餐厅和艺术画廊。',
+      description:
+        '位于West End的独特工业风阁楼公寓，拥有高天花板和大窗户。周围有众多咖啡馆、餐厅和艺术画廊。',
       weeklyPrice: '720.00',
       depositPrice: '2880.00',
       bondAmount: '1440.00',
@@ -558,12 +587,13 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-02-15T10:00:00.000Z',
       updatedAt: '2024-02-15T10:00:00.000Z',
       publishedAt: '2024-02-15T10:00:00.000Z',
-      propertyConfig: '2b1b1c'
+      propertyConfig: '2b1b1c',
     },
     {
       id: 8,
       title: '家庭别墅，安静社区',
-      description: '位于Carindale的宁静家庭别墅，拥有大后院和双车库。靠近优质学校和购物中心，是家庭生活的理想选择。',
+      description:
+        '位于Carindale的宁静家庭别墅，拥有大后院和双车库。靠近优质学校和购物中心，是家庭生活的理想选择。',
       weeklyPrice: '680.00',
       depositPrice: '2720.00',
       bondAmount: '1360.00',
@@ -603,9 +633,9 @@ const getMockRentalHouses = (): RentalHouse[] => {
       createdAt: '2024-02-20T14:15:00.000Z',
       updatedAt: '2024-02-20T14:15:00.000Z',
       publishedAt: '2024-02-20T14:15:00.000Z',
-      propertyConfig: '3b2b2c'
-    }
-  ]
-}
+      propertyConfig: '3b2b2c',
+    },
+  ];
+};
 
-export default rentalHouseApi
+export default rentalHouseApi;

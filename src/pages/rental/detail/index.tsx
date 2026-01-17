@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, Swiper, SwiperItem } from "@tarojs/components";
-import Taro, { useRouter } from "@tarojs/taro";
-import { rentalApi, RentalItem } from "../../../services/rental";
-import "./index.less";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, Swiper, SwiperItem } from '@tarojs/components';
+import Taro, { useRouter } from '@tarojs/taro';
+import { rentalApi, RentalItem } from '../../../services/rental';
+import './index.less';
 
 const RentalDetail: React.FC = () => {
   const router = useRouter();
@@ -24,8 +24,8 @@ const RentalDetail: React.FC = () => {
       const data = await rentalApi.getItemById(itemId);
       setItem(data);
     } catch (error) {
-      console.error("Failed to fetch detail:", error);
-      Taro.showToast({ title: "加载失败", icon: "none" });
+      console.error('Failed to fetch detail:', error);
+      Taro.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       setLoading(false);
     }
@@ -35,8 +35,7 @@ const RentalDetail: React.FC = () => {
     if (item?.contact_info) {
       Taro.setClipboardData({
         data: item.contact_info,
-        success: () =>
-          Taro.showToast({ title: "已复制联系方式", icon: "success" }),
+        success: () => Taro.showToast({ title: '已复制联系方式', icon: 'success' }),
       });
     }
   };
@@ -63,11 +62,11 @@ const RentalDetail: React.FC = () => {
     item.imageUrls?.length > 0
       ? item.imageUrls
       : item.images?.length && item.images.length > 0
-      ? item.images
-      : [
-          "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&q=80",
-        ];
+        ? item.images
+        : [
+            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+            'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&q=80',
+          ];
 
   return (
     <View className="rental-detail-container">
@@ -100,16 +99,11 @@ const RentalDetail: React.FC = () => {
               <Text className="currency">$</Text>
               <Text className="amount">{item.price}</Text>
               <Text className="unit">
-                /{" "}
-                {item.period === "day"
-                  ? "天"
-                  : item.period === "week"
-                  ? "周"
-                  : "月"}
+                / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
               </Text>
             </View>
             <View className={`status-badge ${item.status}`}>
-              {item.status === "available" ? "待租" : "已租"}
+              {item.status === 'available' ? '待租' : '已租'}
             </View>
           </View>
         </View>
@@ -131,9 +125,7 @@ const RentalDetail: React.FC = () => {
         {/* Description */}
         <View className="info-card">
           <Text className="section-title">租赁详情</Text>
-          <Text className="desc-text">
-            {item.description || "暂无详细描述"}
-          </Text>
+          <Text className="desc-text">{item.description || '暂无详细描述'}</Text>
         </View>
 
         {/* Contact Info */}

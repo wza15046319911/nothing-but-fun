@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '用户中心'
-}) 
+  navigationBarTitleText: '用户中心',
+});

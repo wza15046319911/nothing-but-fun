@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, Input } from '@tarojs/components'
+import React, { useState, useEffect } from 'react';
+import { View, Text, Input } from '@tarojs/components';
 
 interface SearchBarProps {
-  onSearch: (keyword: string) => void
-  placeholder?: string
-  value?: string
+  onSearch: (keyword: string) => void;
+  placeholder?: string;
+  value?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
-  onSearch,
-  placeholder = "搜索...",
-  value = ""
-}) => {
-  const [keyword, setKeyword] = useState<string>(value)
-  const [isFocused, setIsFocused] = useState(false)
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, placeholder = '搜索...', value = '' }) => {
+  const [keyword, setKeyword] = useState<string>(value);
+  const [isFocused, setIsFocused] = useState(false);
   // const [isInitialized, setIsInitialized] = useState(false)
 
   // Only trigger search after initial load and when user actually changes the keyword
@@ -32,17 +28,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   // Handle clear
   const handleClear = () => {
-    setKeyword('')
-    onSearch('')
-  }
+    setKeyword('');
+    onSearch('');
+  };
 
   return (
     <View className="px-4 mb-4">
       <View
         className={`relative flex items-center bg-white rounded-xl border transition-all duration-200 ${
-          isFocused
-            ? 'border-blue-400 shadow-md'
-            : 'border-gray-200 shadow-sm'
+          isFocused ? 'border-blue-400 shadow-md' : 'border-gray-200 shadow-sm'
         }`}
       >
         {/* Search Icon */}
@@ -74,19 +68,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
       {/* Search Status */}
       {keyword && (
         <View className="flex items-center justify-between mt-2 px-2">
-          <Text className="text-xs text-gray-500">
-            正在搜索: "{keyword}"
-          </Text>
-          <View
-            className="cursor-pointer"
-            onClick={handleClear}
-          >
+          <Text className="text-xs text-gray-500">正在搜索: "{keyword}"</Text>
+          <View className="cursor-pointer" onClick={handleClear}>
             <Text className="text-xs text-blue-500">清除</Text>
           </View>
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default SearchBar
+export default SearchBar;

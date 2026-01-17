@@ -1,4 +1,4 @@
 export default definePageConfig({
   navigationBarTitleText: '撰写评价',
-  enablePullDownRefresh: false
-})
+  enablePullDownRefresh: false,
+});

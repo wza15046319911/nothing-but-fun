@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Text } from "@tarojs/components";
-import Taro, { useLoad } from "@tarojs/taro";
-import { useAuth } from "../../context/auth";
-import "./index.less";
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text } from '@tarojs/components';
+import Taro, { useLoad } from '@tarojs/taro';
+import { useAuth } from '../../context/auth';
+import './index.less';
 
 const Loading: React.FC = () => {
   const { checkLoginStatus } = useAuth();
@@ -32,7 +32,7 @@ const Loading: React.FC = () => {
     try {
       await checkLoginStatus();
     } catch (e) {
-      console.error("Auth check failed", e);
+      console.error('Auth check failed', e);
     }
 
     const elapsed = Date.now() - start;
@@ -51,33 +51,24 @@ const Loading: React.FC = () => {
 
   const navigateToTarget = () => {
     const candidate = redirectRef.current ?? redirectUrl;
-    const url =
-      candidate && candidate.startsWith("/pages/")
-        ? candidate
-        : "/pages/index/index";
-    
+    const url = candidate && candidate.startsWith('/pages/') ? candidate : '/pages/index/index';
+
     Taro.reLaunch({ url }).catch((error) => {
-      console.error("跳转失败:", error);
-      if (url !== "/pages/index/index") {
-        Taro.reLaunch({ url: "/pages/index/index" });
+      console.error('跳转失败:', error);
+      if (url !== '/pages/index/index') {
+        Taro.reLaunch({ url: '/pages/index/index' });
       }
     });
   };
 
   useLoad((options) => {
     try {
-      const redirect = options?.redirect
-        ? decodeURIComponent(options.redirect as string)
-        : "";
+      const redirect = options?.redirect ? decodeURIComponent(options.redirect as string) : '';
       let finalUrl: string | null = null;
       if (redirect) {
         const otherParams: Record<string, string> = {};
         Object.keys(options || {}).forEach((key) => {
-          if (
-            key !== "redirect" &&
-            options[key] !== undefined &&
-            options[key] !== null
-          ) {
+          if (key !== 'redirect' && options[key] !== undefined && options[key] !== null) {
             otherParams[key] = String(options[key]);
           }
         });
@@ -85,17 +76,17 @@ const Loading: React.FC = () => {
         const queryPairs = Object.keys(otherParams).map(
           (k) => `${encodeURIComponent(k)}=${encodeURIComponent(otherParams[k])}`
         );
-        const hasQuery = redirect.includes("?");
+        const hasQuery = redirect.includes('?');
         const queryString = queryPairs.length
-          ? `${hasQuery ? "&" : "?"}${queryPairs.join("&")}`
-          : "";
+          ? `${hasQuery ? '&' : '?'}${queryPairs.join('&')}`
+          : '';
         finalUrl = `${redirect}${queryString}`;
       }
 
       redirectRef.current = finalUrl;
       setRedirectUrl(finalUrl);
     } catch (err) {
-      console.warn("解析 redirect 参数失败:", err);
+      console.warn('解析 redirect 参数失败:', err);
     } finally {
       initializeApp();
     }
@@ -105,7 +96,7 @@ const Loading: React.FC = () => {
     <View className="loading-screen">
       <View className="decorative-circle c1" />
       <View className="decorative-circle c2" />
-      
+
       <View className="content-wrapper">
         <View className="logo-area">
           <Text className="logo-text-en">NOTHING BUT FUN</Text>
@@ -119,10 +110,7 @@ const Loading: React.FC = () => {
 
       <View className="footer-area">
         <View className="progress-container">
-          <View 
-            className="progress-bar" 
-            style={{ width: `${Math.min(progress, 100)}%` }} 
-          />
+          <View className="progress-bar" style={{ width: `${Math.min(progress, 100)}%` }} />
         </View>
         <Text className="version-text">v1.0.0</Text>
       </View>
