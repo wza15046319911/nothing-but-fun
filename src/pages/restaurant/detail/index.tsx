@@ -3,15 +3,18 @@ import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { Swiper, SwiperItem, Popup, Rate, Button as NutButton } from '@nutui/nutui-react-taro';
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro';
 import { restaurantApi, Restaurant } from '../../../services/restaurant';
+import { useAuth } from '../../../context/auth';
 import './index.less';
 
 const RestaurantDetail: React.FC = () => {
   const router = useRouter();
+  const { state: authState } = useAuth();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [restaurantId, setRestaurantId] = useState<number>(0);
+  const [submitting, setSubmitting] = useState(false);
 
   // Review Sheet State
   const [showReviewSheet, setShowReviewSheet] = useState(false);
@@ -71,14 +74,54 @@ const RestaurantDetail: React.FC = () => {
   };
 
   const handleReviewSubmit = async () => {
-    Taro.showLoading({ title: 'Submitting...' });
-    // Simulate API call
-    setTimeout(() => {
+    // 检查用户是否登录
+    if (!authState.userInfo?.id) {
+      Taro.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    if (submitting) return;
+
+    try {
+      setSubmitting(true);
+      Taro.showLoading({ title: '提交中...' });
+
+      const result = await restaurantApi.rateRestaurant(restaurantId, {
+        userId: parseInt(authState.userInfo.id),
+        tasteRating: reviewForm.taste,
+        environmentRating: reviewForm.environment,
+        serviceRating: reviewForm.service,
+        priceRating: reviewForm.price,
+      });
+
       Taro.hideLoading();
-      Taro.showToast({ title: 'Review Submitted', icon: 'success' });
-      setShowReviewSheet(false);
-      // Reset form?
-    }, 1000);
+
+      if (result) {
+        Taro.showToast({ title: '评价成功', icon: 'success' });
+        setShowReviewSheet(false);
+
+        // 重置表单
+        setReviewForm({
+          overall: 5,
+          taste: 5,
+          service: 5,
+          environment: 5,
+          price: 5,
+          content: '',
+        });
+
+        // 刷新餐厅数据以显示更新后的评分
+        loadRestaurantDetail(restaurantId);
+      } else {
+        Taro.showToast({ title: '提交失败，请重试', icon: 'none' });
+      }
+    } catch (error) {
+      console.error('提交评价失败:', error);
+      Taro.hideLoading();
+      Taro.showToast({ title: '提交失败，请重试', icon: 'none' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Share
@@ -362,11 +405,8 @@ const RestaurantDetail: React.FC = () => {
 
           <View className="overall-rating-input">
             <Rate
-              modelValue={reviewForm.overall}
+              value={reviewForm.overall}
               onChange={(val) => setReviewForm({ ...reviewForm, overall: val })}
-              iconSize="32"
-              voidIcon="star"
-              icon="star-fill"
             />
             <Text className="rating-label-text">Overall</Text>
           </View>
@@ -375,7 +415,7 @@ const RestaurantDetail: React.FC = () => {
             <View className="dim-item">
               <Text className="dim-label">Taste</Text>
               <Rate
-                modelValue={reviewForm.taste}
+                value={reviewForm.taste}
                 count={5}
                 onChange={(val) => setReviewForm({ ...reviewForm, taste: val })}
               />
@@ -383,7 +423,7 @@ const RestaurantDetail: React.FC = () => {
             <View className="dim-item">
               <Text className="dim-label">Service</Text>
               <Rate
-                modelValue={reviewForm.service}
+                value={reviewForm.service}
                 count={5}
                 onChange={(val) => setReviewForm({ ...reviewForm, service: val })}
               />
@@ -391,7 +431,7 @@ const RestaurantDetail: React.FC = () => {
             <View className="dim-item">
               <Text className="dim-label">Environment</Text>
               <Rate
-                modelValue={reviewForm.environment}
+                value={reviewForm.environment}
                 count={5}
                 onChange={(val) => setReviewForm({ ...reviewForm, environment: val })}
               />
@@ -399,7 +439,7 @@ const RestaurantDetail: React.FC = () => {
             <View className="dim-item">
               <Text className="dim-label">Value</Text>
               <Rate
-                modelValue={reviewForm.price}
+                value={reviewForm.price}
                 count={5}
                 onChange={(val) => setReviewForm({ ...reviewForm, price: val })}
               />
