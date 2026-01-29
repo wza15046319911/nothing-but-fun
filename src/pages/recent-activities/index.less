@@ -137,10 +137,17 @@
       font-size: 28rpx;
       font-weight: 700;
       color: @accent-color;
+      flex-shrink: 0;
+    }
+
+    .scroll-wrapper {
+      flex: 1;
+      overflow: hidden;
+      width: 0; // Crucial for flex child scrollview
     }
 
     .date-scroll {
-      flex: 1;
+      width: 100%;
       white-space: nowrap;
 
       .date-item {
@@ -174,6 +181,46 @@
             color: #fff;
           }
         }
+      }
+    }
+
+    .back-to-today {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60rpx;
+      height: 60rpx;
+      margin-left: 8rpx;
+      border-radius: 50%;
+      background: @primary-gradient;
+      font-size: 24rpx;
+      font-weight: 700;
+      color: #fff;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.3);
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+
+    .calendar-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80rpx;
+      height: 90rpx;
+      margin-left: 12rpx;
+      border-radius: 20rpx;
+      background: rgba(255, 255, 255, 0.5);
+      font-size: 40rpx;
+      transition: all 0.3s;
+      flex-shrink: 0; // Prevent shrinking
+
+      &:active {
+        background: rgba(255, 255, 255, 0.8);
+        transform: scale(0.95);
       }
     }
   }

@@ -21,6 +21,7 @@ const UserLogin: React.FC = () => {
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [hasUploadedAvatar, setHasUploadedAvatar] = useState(false);
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
 
   // 处理头像选择
   const onChooseAvatar = async (e) => {
@@ -119,6 +120,9 @@ const UserLogin: React.FC = () => {
 
   // 完成头像昵称设置并创建用户
   const handleCompleteProfile = async () => {
+    if (isSubmittingProfile || isLoading) {
+      return;
+    }
     if (!wechatCode) {
       Taro.showToast({ title: '请先进行微信登录', icon: 'none' });
       return;
@@ -135,6 +139,7 @@ const UserLogin: React.FC = () => {
     // }
 
     try {
+      setIsSubmittingProfile(true);
       const success = await createUser(wechatCode, {
         nickname: nickname,
         avatarUrl: avatarUrl,
@@ -155,6 +160,8 @@ const UserLogin: React.FC = () => {
       }
     } catch (error) {
       console.error('创建用户失败:', error);
+    } finally {
+      setIsSubmittingProfile(false);
     }
   };
 
@@ -166,6 +173,7 @@ const UserLogin: React.FC = () => {
     setNickname('');
     setHasUploadedAvatar(false);
     setIsUploadingAvatar(false);
+    setIsSubmittingProfile(false);
   };
 
   // 处理菜单项点击
@@ -242,19 +250,11 @@ const UserLogin: React.FC = () => {
             <Text className="menu-text">我的发布</Text>
             <Text className="menu-arrow">›</Text>
           </View>
-          <View className="menu-item" onClick={() => handleMenuClick('favorites')}>
+          {/* <View className="menu-item" onClick={() => handleMenuClick('favorites')}>
             <Text className="menu-icon">❤️</Text>
             <Text className="menu-text">我的收藏</Text>
             <Text className="menu-arrow">›</Text>
-          </View>
-        </View>
-
-        <View className="card menu-list">
-          <View className="menu-item" onClick={() => handleMenuClick('phone')}>
-            <Text className="menu-icon">📱</Text>
-            <Text className="menu-text">绑定手机</Text>
-            <Text className="menu-arrow">›</Text>
-          </View>
+          </View> */}
           <View className="menu-item" onClick={() => handleMenuClick('contact')}>
             <Text className="menu-icon">📧</Text>
             <Text className="menu-text">联系我</Text>
@@ -266,6 +266,11 @@ const UserLogin: React.FC = () => {
       {/* Profile Form Modal Component */}
       {showProfileForm && wechatCode && (
         <View className="profile-form-container">
+          {(isSubmittingProfile || isLoading) && (
+            <View className="profile-form-blocker">
+              <View className="profile-form-blocker-text">处理中...</View>
+            </View>
+          )}
           <View className="profile-form">
             <View className="form-title">完善个人资料</View>
             <View className="form-desc">为了更好的体验，请完善您的信息</View>
@@ -302,10 +307,10 @@ const UserLogin: React.FC = () => {
                 取消
               </View>
               <View
-                className={`complete-button ${isLoading ? 'loading' : ''}`}
-                onClick={handleCompleteProfile}
+                className={`complete-button ${isLoading || isSubmittingProfile ? 'loading' : ''}`}
+                onClick={isSubmittingProfile || isLoading ? undefined : handleCompleteProfile}
               >
-                {isLoading ? '处理中...' : '完成注册'}
+                {isLoading || isSubmittingProfile ? '处理中...' : '完成注册'}
               </View>
             </View>
           </View>

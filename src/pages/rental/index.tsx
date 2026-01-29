@@ -123,55 +123,57 @@ const RentalPage: React.FC = () => {
 
       {/* Rental List */}
       <View className="rental-list">
-        {loading ? (
-          renderLoading()
-        ) : items.length === 0 ? (
-          renderEmpty()
-        ) : (
-          <View className="rental-grid">
-            {items.map((item) => (
-              <View key={item.id} className="rental-card" onClick={() => handleItemClick(item.id)}>
-                <View className="card-image-wrapper">
-                  <Image
-                    className="card-image"
-                    src={
-                      item.imageUrls && item.imageUrls.length > 0
-                        ? item.imageUrls[0]
-                        : item.images && item.images.length > 0
-                          ? item.images[0]
-                          : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'
-                    }
-                    mode="aspectFill"
-                    lazyLoad
-                  />
-                  <View className="category-tag">
-                    {categories.find((c) => c.slug === item.category)?.name || item.category}
-                  </View>
-                  <View className={`status-badge ${item.status}`} />
-                </View>
-
-                <View className="card-content">
-                  <Text className="card-title">{item.title}</Text>
-
-                  <View className="card-price-row">
-                    <Text className="currency">$</Text>
-                    <Text className="price">{item.price}</Text>
-                    <Text className="period">
-                      / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
-                    </Text>
+        <ScrollView className="rental-list-scroll" scrollY showScrollbar={false}>
+          {loading ? (
+            renderLoading()
+          ) : items.length === 0 ? (
+            renderEmpty()
+          ) : (
+            <View className="rental-grid">
+              {items.map((item) => (
+                <View key={item.id} className="rental-card" onClick={() => handleItemClick(item.id)}>
+                  <View className="card-image-wrapper">
+                    <Image
+                      className="card-image"
+                      src={
+                        item.imageUrls && item.imageUrls.length > 0
+                          ? item.imageUrls[0]
+                          : item.images && item.images.length > 0
+                            ? item.images[0]
+                            : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'
+                      }
+                      mode="aspectFill"
+                      lazyLoad
+                    />
+                    <View className="category-tag">
+                      {categories.find((c) => c.slug === item.category)?.name || item.category}
+                    </View>
+                    <View className={`status-badge ${item.status}`} />
                   </View>
 
-                  <View className="card-footer">
-                    <View className="seller-info">
-                      <View className="seller-avatar" />
-                      <Text className="seller-name">{item.contact_info || '布好玩管家'}</Text>
+                  <View className="card-content">
+                    <Text className="card-title">{item.title}</Text>
+
+                    <View className="card-price-row">
+                      <Text className="currency">$</Text>
+                      <Text className="price">{item.price}</Text>
+                      <Text className="period">
+                        / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
+                      </Text>
+                    </View>
+
+                    <View className="card-footer">
+                      <View className="seller-info">
+                        <View className="seller-avatar" />
+                        <Text className="seller-name">{item.contact_info || '布好玩管家'}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
+        </ScrollView>
       </View>
     </View>
   );

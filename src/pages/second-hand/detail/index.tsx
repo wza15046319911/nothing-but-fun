@@ -260,7 +260,7 @@ const SecondHandDetail: React.FC = () => {
         <View className="info-card">
           <View className="title-section">
             <View className="price-row">
-              <Text className="item-price">¥{item.price}</Text>
+              <Text className="item-price">${item.price}</Text>
               <View
                 className="status-tag"
                 style={{ backgroundColor: statusMap[item.status || 'available'].color }}

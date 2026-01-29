@@ -1,29 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import { Toast } from '@nutui/nutui-react-taro';
+import { Toast, Calendar } from '@nutui/nutui-react-taro';
 import Taro from '@tarojs/taro';
 import { eventsApi, Event, EventFilters } from '../../services/events';
 import Pagination from '../../components/Pagination';
 import { useEventTypes } from '../../hooks/useTypes';
 import './index.less';
 
-// Helper function to generate dates for the next 7 days
-const generateDates = () => {
+// Helper function to format date to YYYY-MM-DD
+const formatDateString = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+// Get today's date string
+const getTodayString = () => formatDateString(new Date());
+
+// Get date range (7 days) starting from base date
+const getWeekRangeStrings = (baseDate: Date) => {
+  const start = new Date(baseDate);
+  const end = new Date(baseDate);
+  end.setDate(start.getDate() + 6);
+  return {
+    startDate: formatDateString(start),
+    endDate: formatDateString(end),
+  };
+};
+
+// Helper function to generate dates for a week starting from a base date
+const generateDatesFromBase = (baseDate: Date) => {
   const dates: any = [];
   const days = ['日', '一', '二', '三', '四', '五', '六'];
   const today = new Date();
+  const todayString = formatDateString(today);
 
   for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+    const date = new Date(baseDate);
+    date.setDate(baseDate.getDate() + i);
+
+    const dateString = formatDateString(date);
 
     dates.push({
       date: date,
       day: date.getDate(),
       weekday: days[date.getDay()],
-      isToday: i === 0,
+      isToday: dateString === todayString,
       month: date.getMonth() + 1,
-      dateString: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+      dateString: dateString,
     });
   }
 
@@ -32,11 +54,15 @@ const generateDates = () => {
 
 const RecentActivities: React.FC = () => {
   const { getEventTypeName } = useEventTypes();
-  const dates = generateDates();
-
+  
   // State
+  const [baseDate, setBaseDate] = useState<Date>(new Date()); // 横向日期列表的起始日期
   const [selectedDate, setSelectedDate] = useState<string | null>(null); // 初始为 null，等数据加载后再设置
+  const [calendarVisible, setCalendarVisible] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
+
+  // 根据 baseDate 动态生成横向日期列表
+  const dates = useMemo(() => generateDatesFromBase(baseDate), [baseDate]);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -50,10 +76,13 @@ const RecentActivities: React.FC = () => {
   });
 
   // Filters
+  const initialWeekRange = getWeekRangeStrings(new Date());
   const [currentFilters, setCurrentFilters] = useState<EventFilters>({
     isHistorical: false,
     page: 1,
-    limit: 10,
+    limit: 50, // 增加数量以涵盖更多未来活动
+    startDate: initialWeekRange.startDate,
+    endDate: initialWeekRange.endDate,
   });
 
   // 找到第一个有活动的日期
@@ -112,10 +141,11 @@ const RecentActivities: React.FC = () => {
 
   const handleFiltersChange = (filters: EventFilters) => {
     const newFilters = {
+      ...currentFilters,
       ...filters,
       isHistorical: false,
       page: 1,
-      limit: 10,
+      limit: 50,
     };
     setCurrentFilters(newFilters);
     fetchUpcomingEvents(true, newFilters);
@@ -133,6 +163,22 @@ const RecentActivities: React.FC = () => {
   const showToastMessage = (message: string) => {
     setToastMessage(message);
     setShowToast(true);
+  };
+
+  const applyWeekRange = (date: Date, dateString?: string, showLoading = true) => {
+    const range = getWeekRangeStrings(date);
+    const newFilters = {
+      ...currentFilters,
+      isHistorical: false,
+      page: 1,
+      limit: 50,
+      startDate: range.startDate,
+      endDate: range.endDate,
+    };
+    setCurrentFilters(newFilters);
+    setBaseDate(date);
+    setSelectedDate(dateString || formatDateString(date));
+    fetchUpcomingEvents(showLoading, newFilters);
   };
 
   useEffect(() => {
@@ -162,8 +208,52 @@ const RecentActivities: React.FC = () => {
     });
   };
 
-  const selectedDateInfo =
-    (selectedDate && dates.find((date) => date.dateString === selectedDate)) || dates[0];
+  const onConfirmCalendar = (date: any) => {
+    // NutUI Calendar returns date in format: YYYY-MM-DD string or Date object
+    let selectedDateObj: Date;
+    
+    if (typeof date === 'string') {
+      selectedDateObj = new Date(date);
+    } else if (date instanceof Date) {
+      selectedDateObj = date;
+    } else if (Array.isArray(date) && date.length > 3) {
+      // sometimes returns [d, m, y, 'yyyy-mm-dd']
+      selectedDateObj = new Date(date[3]);
+    } else {
+      // Fallback: try to convert to string
+      selectedDateObj = new Date(String(date));
+    }
+    const dateString = formatDateString(selectedDateObj);
+    
+    // 更新选中的日期并按周拉取活动
+    applyWeekRange(selectedDateObj, dateString);
+    
+    setCalendarVisible(false);
+  };
+
+  const getSelectedDateInfo = () => {
+    if (!selectedDate) return dates[0];
+    
+    // Check if in generated 7 days
+    const found = dates.find((date) => date.dateString === selectedDate);
+    if (found) return found;
+
+    // Create info for date outside 7-day range
+    const date = new Date(selectedDate);
+    if (isNaN(date.getTime())) return dates[0]; // Invalid date fallback
+
+    const days = ['日', '一', '二', '三', '四', '五', '六'];
+    return {
+      date: date,
+      day: date.getDate(),
+      weekday: days[date.getDay()],
+      isToday: false,
+      month: date.getMonth() + 1,
+      dateString: selectedDate,
+    };
+  };
+
+  const selectedDateInfo = getSelectedDateInfo();
 
   return (
     <View className="enhanced-events-container">
@@ -180,25 +270,42 @@ const RecentActivities: React.FC = () => {
       {/* Date Navigation (Sticky) */}
       <View className="enhanced-date-nav">
         <Text className="month-text">{selectedDateInfo.month}月</Text>
-        <ScrollView className="date-scroll" scrollX showScrollbar={false}>
-          {dates.map((date, index) => (
-            <View
-              key={index}
-              className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
-              onClick={() => setSelectedDate(date.dateString)}
-            >
-              <Text className="day-number">{date.day}</Text>
-              <Text className="day-name">{date.isToday ? '今天' : `周${date.weekday}`}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        <View className="scroll-wrapper">
+          <ScrollView className="date-scroll" scrollX showScrollbar={false}>
+            {dates.map((date, index) => (
+              <View
+                key={index}
+                className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
+                onClick={() => setSelectedDate(date.dateString)}
+              >
+                <Text className="day-number">{date.day}</Text>
+                <Text className="day-name">{date.isToday ? '今天' : `周${date.weekday}`}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+        {/* 如果当前周不包含今天，显示回到今天按钮 */}
+        {!dates.some(d => d.isToday) && (
+          <View 
+            className="back-to-today" 
+            onClick={() => {
+              const today = new Date();
+              applyWeekRange(today);
+            }}
+          >
+            <Text>今</Text>
+          </View>
+        )}
+        <View className="calendar-trigger" onClick={() => setCalendarVisible(true)}>
+          <Text>📅</Text>
+        </View>
       </View>
 
       {/* Main Content */}
       <ScrollView className="enhanced-content" scrollY>
         <View className="activity-section">
           <View className="section-title">
-            {selectedDate === dates[0].dateString
+            {selectedDate === getTodayString()
               ? '今日活动'
               : `${selectedDateInfo.month}月${selectedDateInfo.day}日 · 周${selectedDateInfo.weekday}`}
           </View>
@@ -292,7 +399,9 @@ const RecentActivities: React.FC = () => {
           ) : (
             <View className="enhanced-empty-container">
               <Text className="empty-icon">🍃</Text>
-              <Text className="empty-title">今日暂无活动</Text>
+              <Text className="empty-title">
+                {selectedDate === getTodayString() ? '今日暂无活动' : '当日暂无活动'}
+              </Text>
               <Text className="empty-subtitle">去看看其他日期的精彩吧</Text>
             </View>
           )}
@@ -320,6 +429,16 @@ const RecentActivities: React.FC = () => {
         type="text"
         onClose={() => setShowToast(false)}
       />
+
+      {calendarVisible && (
+        <Calendar
+          visible={calendarVisible}
+          defaultValue={selectedDate || undefined}
+          startDate={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`}
+          onClose={() => setCalendarVisible(false)}
+          onConfirm={onConfirmCalendar}
+        />
+      )}
     </View>
   );
 };

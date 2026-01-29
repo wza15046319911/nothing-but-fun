@@ -163,14 +163,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // 创建用户
   const createUser = async (
-    code: string,
+    _code: string,
     userInfo: { nickname: string; avatarUrl: string }
   ): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
 
-      // 首先获取openid
-      const loginResponse = await authApi.wechatLogin({ code });
+      // 获取新的微信code，确保code是有效的
+      const loginRes = await Taro.login();
+      if (!loginRes.code) {
+        throw new Error('获取微信登录code失败');
+      }
+
+      // 使用新获取的code来获取openid
+      const loginResponse = await authApi.wechatLogin({ code: loginRes.code });
 
       if (!loginResponse.success || !loginResponse.data.openid) {
         throw new Error('获取用户openid失败');

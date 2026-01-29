@@ -17,11 +17,11 @@ const presetRatings = [
 ];
 
 const presetPriceRanges = [
-  { label: '¥20以下', to: 20 },
-  { label: '¥20-40', from: 20, to: 40 },
-  { label: '¥40-80', from: 40, to: 80 },
-  { label: '¥80-150', from: 80, to: 150 },
-  { label: '¥150+', from: 150 },
+  { label: '$20以下', to: 20 },
+  { label: '$20-40', from: 20, to: 40 },
+  { label: '$40-80', from: 40, to: 80 },
+  { label: '$80-150', from: 80, to: 150 },
+  { label: '$150+', from: 150 },
 ];
 
 type SortOptionKey =

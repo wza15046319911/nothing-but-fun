@@ -27,10 +27,10 @@ interface EventFiltersProps {
 
 const presetPriceRanges = [
   { label: '免费', isFree: true },
-  { label: '¥30以下', to: 30 },
-  { label: '¥30-60', from: 30, to: 60 },
-  { label: '¥60-100', from: 60, to: 100 },
-  { label: '¥100+', from: 100 },
+  { label: '$30以下', to: 30 },
+  { label: '$30-60', from: 30, to: 60 },
+  { label: '$60-100', from: 60, to: 100 },
+  { label: '$100+', from: 100 },
 ];
 
 const buildFilterPayload = (

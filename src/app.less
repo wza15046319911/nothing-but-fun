@@ -15,3 +15,32 @@ page {
 .taro_page {
   min-height: 100vh;
 }
+
+// NutUI Calendar Green Theme Override
+// Calendar popup renders at root level, so must override globally
+.nut-calendar {
+  .nut-calendar__footer {
+    .nut-button--primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      border-color: #059669 !important;
+    }
+  }
+  
+  .nut-calendar-day.active,
+  .nut-calendar-day.choose {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-radius: 8px !important;
+  }
+  
+  .nut-calendar-day.weekend {
+    color: #059669 !important;
+  }
+}
+
+// Fallback: Override all primary buttons in popup context
+.nut-popup {
+  .nut-button--primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: #059669 !important;
+  }
+}

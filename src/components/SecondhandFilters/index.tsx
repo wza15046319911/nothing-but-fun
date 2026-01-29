@@ -13,11 +13,11 @@ interface SecondhandFiltersProps {
 }
 
 const presetRanges = [
-  { label: '¥0-50', from: 0, to: 50 },
-  { label: '¥50-100', from: 50, to: 100 },
-  { label: '¥100-300', from: 100, to: 300 },
-  { label: '¥300-500', from: 300, to: 500 },
-  { label: '¥500+', from: 500 },
+  { label: '$0-50', from: 0, to: 50 },
+  { label: '$50-100', from: 50, to: 100 },
+  { label: '$100-300', from: 100, to: 300 },
+  { label: '$300-500', from: 300, to: 500 },
+  { label: '$500+', from: 500 },
 ];
 
 const listingStatusOptions = [

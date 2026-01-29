@@ -3,12 +3,14 @@ import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { Swiper, SwiperItem, Popup, Rate, Button as NutButton } from '@nutui/nutui-react-taro';
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro';
 import { restaurantApi, Restaurant } from '../../../services/restaurant';
+import { useRestaurantTypes } from '../../../hooks/useTypes';
 import { useAuth } from '../../../context/auth';
 import './index.less';
 
 const RestaurantDetail: React.FC = () => {
   const router = useRouter();
   const { state: authState } = useAuth();
+  const { getPriceRangeName } = useRestaurantTypes();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +65,28 @@ const RestaurantDetail: React.FC = () => {
     if (!restaurant) return [];
     if (restaurant.imageUrls && restaurant.imageUrls.length > 0) return restaurant.imageUrls;
     return restaurant.image ? [restaurant.image] : [];
+  };
+
+  const getPriceDisplay = () => {
+    if (!restaurant) return 'Price on request';
+    if (restaurant.pricingDetails) return restaurant.pricingDetails;
+    const hasFrom = restaurant.priceFrom !== undefined && restaurant.priceFrom !== null;
+    const hasTo = restaurant.priceTo !== undefined && restaurant.priceTo !== null;
+    if (hasFrom && hasTo) {
+      if (restaurant.priceFrom === restaurant.priceTo) return `$${restaurant.priceFrom}`;
+      return `$${restaurant.priceFrom} - $${restaurant.priceTo}`;
+    }
+    if (hasFrom) return `$${restaurant.priceFrom}+`;
+    if (hasTo) return `Up to $${restaurant.priceTo}`;
+    if (restaurant.priceRangeRid) return getPriceRangeName(restaurant.priceRangeRid);
+    return 'Price on request';
+  };
+
+  const getSuburbDisplay = () => {
+    if (!restaurant) return '';
+    const suburb = (restaurant.suburb || '').trim();
+    if (suburb) return suburb;
+    return restaurant.state || restaurant.postcode || '';
   };
 
   const handlePreview = (index: number) => {
@@ -263,23 +287,18 @@ const RestaurantDetail: React.FC = () => {
           </Swiper>
           {/* Hero Content (Overlaid) */}
           <View className="hero-content">
-            <View className="image-counter">
-              <Text>
-                {currentImageIndex + 1} / {images.length}
-              </Text>
-            </View>
 
             <Text className="restaurant-name">{restaurant.name}</Text>
 
             <View className="hero-meta">
               <View className="meta-item">
                 <Text className="icon">📍</Text>
-                <Text>{restaurant.suburb}</Text>
+                <Text>{getSuburbDisplay()}</Text>
               </View>
               <View className="divider"></View>
               <View className="meta-item">
                 <Text className="icon">💲</Text>
-                <Text>{restaurant.pricingDetails || 'Price on request'}</Text>
+                <Text>{getPriceDisplay()}</Text>
               </View>
             </View>
           </View>
@@ -406,6 +425,8 @@ const RestaurantDetail: React.FC = () => {
           <View className="overall-rating-input">
             <Rate
               value={reviewForm.overall}
+              count={5}
+              touchable
               onChange={(val) => setReviewForm({ ...reviewForm, overall: val })}
             />
             <Text className="rating-label-text">Overall</Text>
@@ -417,6 +438,7 @@ const RestaurantDetail: React.FC = () => {
               <Rate
                 value={reviewForm.taste}
                 count={5}
+                touchable
                 onChange={(val) => setReviewForm({ ...reviewForm, taste: val })}
               />
             </View>
@@ -425,6 +447,7 @@ const RestaurantDetail: React.FC = () => {
               <Rate
                 value={reviewForm.service}
                 count={5}
+                touchable
                 onChange={(val) => setReviewForm({ ...reviewForm, service: val })}
               />
             </View>
@@ -433,6 +456,7 @@ const RestaurantDetail: React.FC = () => {
               <Rate
                 value={reviewForm.environment}
                 count={5}
+                touchable
                 onChange={(val) => setReviewForm({ ...reviewForm, environment: val })}
               />
             </View>
@@ -441,6 +465,7 @@ const RestaurantDetail: React.FC = () => {
               <Rate
                 value={reviewForm.price}
                 count={5}
+                touchable
                 onChange={(val) => setReviewForm({ ...reviewForm, price: val })}
               />
             </View>

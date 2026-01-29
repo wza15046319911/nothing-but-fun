@@ -50,6 +50,8 @@ export interface EventFilters {
   isFree?: boolean; // Legacy field, mapped to free
   priceFrom?: number;
   priceTo?: number;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
   page?: number;
   limit?: number;
 }
@@ -126,6 +128,12 @@ export const eventsApi = {
       }
       if (filters?.priceTo !== undefined) {
         params.append('priceTo', filters.priceTo.toString());
+      }
+      if (filters?.startDate) {
+        params.append('startDate', filters.startDate);
+      }
+      if (filters?.endDate) {
+        params.append('endDate', filters.endDate);
       }
       if (filters?.page !== undefined) {
         params.append('page', filters.page.toString());
