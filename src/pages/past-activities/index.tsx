@@ -27,6 +27,8 @@ const PastActivities: React.FC = () => {
     isHistorical: true,
     page: 1,
     limit: 10,
+    sortBy: 'sort',
+    sortOrder: 'asc',
   });
 
   const fetchPastEvents = async (showLoading = true, filters: EventFilters = currentFilters) => {
@@ -35,12 +37,7 @@ const PastActivities: React.FC = () => {
 
       const response = await eventsApi.getAllEvents(filters);
 
-      // Sort: most recent first
-      const sortedEvents = response.data.sort(
-        (a: Event, b: Event) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
-      );
-
-      setEvents(sortedEvents);
+      setEvents(response.data);
       setPagination({
         page: response.page,
         limit: response.limit,

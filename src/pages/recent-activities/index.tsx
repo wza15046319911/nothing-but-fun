@@ -83,6 +83,8 @@ const RecentActivities: React.FC = () => {
     limit: 50, // 增加数量以涵盖更多未来活动
     startDate: initialWeekRange.startDate,
     endDate: initialWeekRange.endDate,
+    sortBy: 'sort',
+    sortOrder: 'asc',
   });
 
   // 找到第一个有活动的日期

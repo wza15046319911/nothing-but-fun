@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import { Swiper, SwiperItem, Popup, Rate, Button as NutButton } from '@nutui/nutui-react-taro';
+import { Swiper } from '@taroify/core';
+import { Popup, Rate, Button as NutButton } from '@nutui/nutui-react-taro';
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro';
 import { restaurantApi, Restaurant } from '../../../services/restaurant';
 import { useRestaurantTypes } from '../../../hooks/useTypes';
 import { useAuth } from '../../../context/auth';
+import '@taroify/core/swiper/style';
 import './index.less';
 
 const RestaurantDetail: React.FC = () => {
@@ -267,27 +269,25 @@ const RestaurantDetail: React.FC = () => {
         <View className="hero-section">
           <Swiper
             className="hero-swiper"
-            defaultValue={0}
-            onChange={(e) => setCurrentImageIndex(e.detail.current)}
-            indicatorDots={false}
-            autoPlay
-            interval={5000}
+            lazyRender
+            autoplay={5000}
+            onChange={(value) => setCurrentImageIndex(value)}
           >
+            <Swiper.Indicator />
             {images.map((url, idx) => (
-              <SwiperItem key={idx}>
+              <Swiper.Item key={idx}>
                 <Image
                   className="hero-image"
                   src={url}
-                  mode="aspectFill"
+                  // mode="aspectFill"
                   onClick={() => handlePreview(idx)}
                 />
                 <View className="hero-gradient"></View>
-              </SwiperItem>
+              </Swiper.Item>
             ))}
           </Swiper>
           {/* Hero Content (Overlaid) */}
           <View className="hero-content">
-
             <Text className="restaurant-name">{restaurant.name}</Text>
 
             <View className="hero-meta">

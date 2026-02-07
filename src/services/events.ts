@@ -52,6 +52,8 @@ export interface EventFilters {
   priceTo?: number;
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
+  sortBy?: 'sort' | 'startTime' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 }
@@ -134,6 +136,12 @@ export const eventsApi = {
       }
       if (filters?.endDate) {
         params.append('endDate', filters.endDate);
+      }
+      if (filters?.sortBy) {
+        params.append('sortBy', filters.sortBy);
+      }
+      if (filters?.sortOrder) {
+        params.append('sortOrder', filters.sortOrder);
       }
       if (filters?.page !== undefined) {
         params.append('page', filters.page.toString());

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import { Swiper, SwiperItem } from '@nutui/nutui-react-taro';
 import Taro, { usePullDownRefresh } from '@tarojs/taro';
 import { restaurantApi, Restaurant, RestaurantFilters } from '../../services/restaurant';
 import { useRestaurantTypes } from '../../hooks/useTypes';
@@ -9,7 +8,7 @@ import Pagination from '../../components/Pagination';
 import './index.less';
 
 const RestaurantList: React.FC = () => {
-  const { getRestaurantTypeName } = useRestaurantTypes();
+  const { getRestaurantTypeName, getPriceRangeName } = useRestaurantTypes();
 
   // State
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -26,7 +25,7 @@ const RestaurantList: React.FC = () => {
   const [currentFilters, setCurrentFilters] = useState<RestaurantFilters>({
     page: 1,
     limit: 10,
-    sortBy: 'createdAt',
+    sortBy: 'sort',
     sortOrder: 'asc',
   });
 
@@ -61,7 +60,7 @@ const RestaurantList: React.FC = () => {
       page: 1,
       limit: 10,
     };
-    if (!newFilters.sortBy) newFilters.sortBy = 'createdAt';
+    if (!newFilters.sortBy) newFilters.sortBy = 'sort';
     if (!newFilters.sortOrder) newFilters.sortOrder = 'asc';
 
     setCurrentFilters(newFilters);
@@ -149,7 +148,28 @@ const RestaurantList: React.FC = () => {
         ) : (
           <View className="enhanced-restaurants-list">
             {restaurants.map((restaurant, index) => {
+              console.log(restaurant);
               const images = getAllImages(restaurant);
+              // 完全按照 detail 页面的逻辑
+              let priceDisplay = '';
+              if (restaurant.pricingDetails) {
+                priceDisplay = restaurant.pricingDetails;
+              } else {
+                const hasFrom = restaurant.priceFrom !== undefined && restaurant.priceFrom !== null;
+                const hasTo = restaurant.priceTo !== undefined && restaurant.priceTo !== null;
+                if (hasFrom && hasTo) {
+                  priceDisplay =
+                    restaurant.priceFrom === restaurant.priceTo
+                      ? `$${restaurant.priceFrom}`
+                      : `$${restaurant.priceFrom} - $${restaurant.priceTo}`;
+                } else if (hasFrom) {
+                  priceDisplay = `$${restaurant.priceFrom}+`;
+                } else if (hasTo) {
+                  priceDisplay = `Up to $${restaurant.priceTo}`;
+                } else if (restaurant.priceRangeRid) {
+                  priceDisplay = getPriceRangeName(restaurant.priceRangeRid);
+                }
+              }
               return (
                 <View
                   key={restaurant.id}
@@ -168,8 +188,15 @@ const RestaurantList: React.FC = () => {
 
                     {/* Top Badges */}
                     <View className="card-badges">
-                      <View className="badge type-badge">
-                        <Text>{getRestaurantTypeName(restaurant.restaurantTypeRid)}</Text>
+                      <View className="badges-left" style={{ display: 'flex', gap: '12rpx' }}>
+                        <View className="badge type-badge">
+                          <Text>{getRestaurantTypeName(restaurant.restaurantTypeRid)}</Text>
+                        </View>
+                        {priceDisplay && (
+                          <View className="badge price-badge">
+                            <Text>{priceDisplay}</Text>
+                          </View>
+                        )}
                       </View>
                       <View className="badge rating-badge">
                         <Text className="star">⭐</Text>

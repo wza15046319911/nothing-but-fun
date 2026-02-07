@@ -25,6 +25,7 @@ const presetPriceRanges = [
 ];
 
 type SortOptionKey =
+  | 'default'
   | 'priceLow'
   | 'priceHigh'
   | 'ratingOverall'
@@ -40,6 +41,13 @@ const sortOptions: Array<{
   sortBy: RestaurantFilters['sortBy'];
   sortOrder: RestaurantFilters['sortOrder'];
 }> = [
+  {
+    key: 'default',
+    label: '默认排序',
+    description: '按后台设置顺序展示',
+    sortBy: 'sort',
+    sortOrder: 'asc',
+  },
   {
     key: 'priceLow',
     label: '价格从低到高',
@@ -98,6 +106,9 @@ const resolveSortKey = (
   sortBy?: RestaurantFilters['sortBy'],
   sortOrder?: RestaurantFilters['sortOrder']
 ): SortOptionKey => {
+  if (sortBy === 'sort' && (sortOrder === undefined || sortOrder === 'asc')) {
+    return 'default';
+  }
   if (sortBy === 'priceLow' && sortOrder === 'asc') {
     return 'priceLow';
   }
@@ -119,7 +130,7 @@ const resolveSortKey = (
   if (sortBy === 'ratingValue' && (sortOrder === undefined || sortOrder === 'desc')) {
     return 'ratingValue';
   }
-  return 'priceLow';
+  return 'default';
 };
 
 const buildFilterPayload = (
@@ -299,11 +310,11 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
     setPriceFrom('');
     setPriceTo('');
     setSelectedRestaurantTypeRid(undefined);
-    setSelectedSortKey('priceLow');
+    setSelectedSortKey('default');
     setShowSortOptions(false);
     setError('');
 
-    const defaultSort = getSortOption('priceLow');
+    const defaultSort = getSortOption('default');
     const payload = buildFilterPayload(
       initialFilters,
       '',

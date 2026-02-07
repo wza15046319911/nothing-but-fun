@@ -31,8 +31,8 @@ const SecondHand: React.FC = () => {
   const [currentFilters, setCurrentFilters] = useState<SecondhandFilters>({
     page: 1,
     limit: 10,
-    sortBy: 'dateCreated',
-    sortOrder: 'desc',
+    sortBy: 'sort',
+    sortOrder: 'asc',
   });
 
   // Load secondhand items
@@ -67,11 +67,11 @@ const SecondHand: React.FC = () => {
     };
 
     if (!newFilters.sortBy) {
-      newFilters.sortBy = 'dateCreated';
+      newFilters.sortBy = 'sort';
     }
 
     if (!newFilters.sortOrder) {
-      newFilters.sortOrder = 'desc';
+      newFilters.sortOrder = 'asc';
     }
     setCurrentFilters(newFilters);
     loadItems(true, newFilters);

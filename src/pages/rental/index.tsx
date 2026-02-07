@@ -18,8 +18,8 @@ const RentalPage: React.FC = () => {
       const filters: RentalFilters = {
         limit: 20,
         page: 1,
-        sortOrder: 'desc',
-        sortBy: 'date_created',
+        sortOrder: 'asc',
+        sortBy: 'sort',
       };
 
       if (category && category !== 'all') {

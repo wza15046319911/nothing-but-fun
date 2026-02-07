@@ -112,7 +112,7 @@ export interface SecondhandFilters {
   subCategoryId?: number;
   productStatusId?: number;
   status?: 'available' | 'sold' | 'reserved';
-  sortBy?: 'dateCreated';
+  sortBy?: 'dateCreated' | 'price' | 'condition' | 'sort';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;

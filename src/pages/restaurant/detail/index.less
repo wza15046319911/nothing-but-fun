@@ -30,14 +30,23 @@
     .hero-swiper {
       height: 55vh;
       width: 100%;
+      position: relative;
 
-      // Force NutUI swiper to fill height
-      .nut-swiper,
-      .swiper-container,
-      .nut-swiper-inner,
-      .nut-swiper-item {
+      // Taroify swiper container styles
+      .taroify-swiper {
         height: 100% !important;
+        // width: 100% !important;
       }
+
+      // .taroify-swiper__track {
+      //   height: 100% !important;
+      // }
+
+      // .taroify-swiper-item {
+      //   height: 100% !important;
+      //   width: 100% !important;
+      //   position: relative;
+      // }
 
       .hero-image {
         width: 100%;
@@ -48,6 +57,32 @@
         filter: saturate(1.05) contrast(1.02);
       }
 
+      // Custom indicator style
+      .hero-indicator {
+        position: absolute;
+        right: 24rpx;
+        bottom: 24rpx;
+        padding: 8rpx 20rpx;
+        font-size: 24rpx;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 100rpx;
+        backdrop-filter: blur(8px);
+        font-weight: 600;
+        letter-spacing: 1px;
+        z-index: 10;
+      }
+
+      // Hero gradient for text visibility
+      .hero-gradient {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+        pointer-events: none;
+      }
     }
 
     .nav-bar {

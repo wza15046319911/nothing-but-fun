@@ -105,7 +105,12 @@ export interface RestaurantQueryParams {
     | 'createdAt'
     | 'priceLow'
     | 'priceHigh'
-    | 'rating';
+    | 'rating'
+    | 'ratingTaste'
+    | 'ratingService'
+    | 'ratingEnvironment'
+    | 'ratingValue'
+    | 'sort';
   sortOrder?: 'asc' | 'desc';
   name?: string;
   suburb?: string;
@@ -127,7 +132,12 @@ export interface RestaurantFilters {
     | 'createdAt'
     | 'priceLow'
     | 'priceHigh'
-    | 'rating';
+    | 'rating'
+    | 'ratingTaste'
+    | 'ratingService'
+    | 'ratingEnvironment'
+    | 'ratingValue'
+    | 'sort';
   sortOrder?: 'asc' | 'desc';
   name?: string;
   suburb?: string;

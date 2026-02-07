@@ -26,7 +26,7 @@ export interface RentalFilters {
   keyword?: string;
   category?: string;
   status?: 'available' | 'rented';
-  sortBy?: 'date_created' | 'price';
+  sortBy?: 'date_created' | 'price' | 'sort';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;

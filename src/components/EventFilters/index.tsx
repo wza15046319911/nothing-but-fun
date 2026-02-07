@@ -14,8 +14,11 @@ export interface EventFilters {
   event_type?: string;
   eventTypeRid?: number;
   isFree?: boolean;
+  free?: boolean;
   priceFrom?: number;
   priceTo?: number;
+  sortBy?: 'sort' | 'startTime' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 }

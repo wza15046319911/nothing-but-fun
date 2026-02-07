@@ -129,13 +129,13 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     initialFilters.status
   );
   const [sortOrder, setSortOrder] = useState<SecondhandFilters['sortOrder']>(
-    initialFilters.sortOrder ?? 'desc'
+    initialFilters.sortOrder ?? 'asc'
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState<SecondhandFilters['sortBy']>(
-    initialFilters.sortBy ?? 'dateCreated'
+    initialFilters.sortBy ?? 'sort'
   );
 
   // Reflect upstream filter changes (e.g. external reset/pagination updates)
@@ -337,9 +337,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setSelectedCategoryId(undefined);
     setSelectedSubCategoryId(undefined);
     setSelectedProductStatusId(undefined);
-    setSelectedProductStatusId(undefined);
-    setSortBy('dateCreated');
-    setSortOrder('desc');
+    setSortBy('sort');
+    setSortOrder('asc');
     setError('');
 
     const payload = buildFilterPayload(
@@ -351,9 +350,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       undefined,
       undefined,
       undefined,
-      undefined,
-      'dateCreated',
-      'desc'
+      'sort',
+      'asc'
     );
     if (payload) {
       onFiltersChange(payload);
@@ -371,6 +369,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   };
 
   type SortOptionKey =
+    | 'default'
     | 'latest'
     | 'oldest'
     | 'priceLow'
@@ -385,6 +384,13 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     sortBy: SecondhandFilters['sortBy'];
     sortOrder: SecondhandFilters['sortOrder'];
   }> = [
+    {
+      key: 'default',
+      label: '默认排序',
+      description: '按后台设置顺序展示',
+      sortBy: 'sort',
+      sortOrder: 'asc',
+    },
     {
       key: 'latest',
       label: '最新发布',
@@ -431,6 +437,9 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
 
   const getCurrentSortKey = (): SortOptionKey => {
     // 根据当前的 sortBy 和 sortOrder 确定选中的排序键
+    if (sortBy === 'sort') {
+      return 'default';
+    }
     if (sortBy === 'dateCreated') {
       return sortOrder === 'desc' ? 'latest' : 'oldest';
     }
