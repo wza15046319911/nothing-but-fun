@@ -103,7 +103,18 @@ const mainFeatures: FeatureEntry[] = [
     iconType: 'svg',
     path: '/pages/contact-us/index',
   },
+  {
+    id: 9,
+    title: '关于开发者',
+    subtitle: 'UQ EECS 8年教学经验导师',
+    description: '课程辅导 / 选课建议 / 校园答疑',
+    icon: MapIcon,
+    iconType: 'svg',
+    path: '/pages/profile/index',
+  },
 ];
+
+let hasRegisteredUpdateManager = false;
 
 const Index: React.FC = () => {
   const [heroImages, setHeroImages] = useState<string[]>(HERO_IMAGES);
@@ -118,7 +129,51 @@ const Index: React.FC = () => {
     query: 'fromShare=1',
   }));
 
+  const forceCheckUpdate = () => {
+    if (process.env.TARO_ENV !== 'weapp' || typeof Taro.getUpdateManager !== 'function') {
+      return;
+    }
+
+    const updateManager = Taro.getUpdateManager();
+    updateManager.onCheckForUpdate((res) => {
+      if (res.hasUpdate) {
+        Taro.showLoading({
+          title: '检测到新版本',
+          mask: true,
+        });
+      }
+    });
+
+    updateManager.onUpdateReady(() => {
+      Taro.hideLoading();
+      Taro.showModal({
+        title: '更新提示',
+        content: '新版本已准备好，是否立即重启应用？',
+        confirmText: '立即更新',
+        cancelText: '稍后',
+        success: (modalRes) => {
+          if (modalRes.confirm) {
+            updateManager.applyUpdate();
+          }
+        },
+      });
+    });
+
+    updateManager.onUpdateFailed(() => {
+      Taro.hideLoading();
+      Taro.showToast({
+        title: '新版本下载失败，请稍后重试',
+        icon: 'none',
+      });
+    });
+  };
+
   useLoad(async (options) => {
+    if (!hasRegisteredUpdateManager) {
+      forceCheckUpdate();
+      hasRegisteredUpdateManager = true;
+    }
+
     if (options && options.fromShare === '1') {
       Taro.reLaunch({ url: '/pages/loading/index' });
     }
@@ -256,14 +311,36 @@ const Index: React.FC = () => {
         {/* Row 5: Support/Contact - Full Width Minimal */}
         {getFeature(7) && (
           <View
-            className="card minimal-card full-width"
+            className="card profile-entry-card full-width"
             onClick={() => handleEntryClick(getFeature(7)!)}
           >
             <View className="card-content horizontal-center">
               <View className="icon-wrapper mini">
                 <Image src={getFeature(7)!.icon} className="icon-svg mini" mode="aspectFit" />
               </View>
-              <Text className="card-title ml-2">{getFeature(7)!.title}</Text>
+              <View className="profile-text-group">
+                <Text className="card-title">{getFeature(7)!.title}</Text>
+                <Text className="card-subtitle">{getFeature(7)!.subtitle}</Text>
+              </View>
+              <Text className="arrow-icon ml-auto">→</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Row 6: Personal Profile - Full Width Minimal */}
+        {getFeature(9) && (
+          <View
+            className="card profile-entry-card full-width"
+            onClick={() => handleEntryClick(getFeature(9)!)}
+          >
+            <View className="card-content horizontal-center">
+              <View className="icon-wrapper mini">
+                <Image src={getFeature(9)!.icon} className="icon-svg mini" mode="aspectFit" />
+              </View>
+              <View className="profile-text-group">
+                <Text className="card-title">{getFeature(9)!.title}</Text>
+                <Text className="card-subtitle">{getFeature(9)!.subtitle}</Text>
+              </View>
               <Text className="arrow-icon ml-auto">→</Text>
             </View>
           </View>

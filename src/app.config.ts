@@ -6,6 +6,7 @@ export default defineAppConfig({
     'pages/past-activities/index',
     'pages/update-phone/index',
     'pages/index/index',
+    'pages/profile/index',
     'pages/course/write-review/index',
     'pages/second-hand/index',
     'pages/restaurant/index',

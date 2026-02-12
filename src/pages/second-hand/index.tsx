@@ -19,6 +19,7 @@ const SecondHand: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const requestIdRef = useRef(0);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   // State for pagination
   const [pagination, setPagination] = useState({
@@ -160,7 +161,7 @@ const SecondHand: React.FC = () => {
   }, []);
 
   return (
-    <ScrollView scrollY className="premium-container" style={{ height: '100vh' }}>
+    <ScrollView scrollY={!isOverlayOpen} className="premium-container" style={{ height: '100vh' }}>
       <View className="premium-header">
         <View className="header-top">
           <Text className="main-title">布村换换乐</Text>
@@ -190,6 +191,7 @@ const SecondHand: React.FC = () => {
       <SecondhandFiltersComponent
         onFiltersChange={handleFiltersChange}
         initialFilters={currentFilters}
+        onOverlayVisibilityChange={setIsOverlayOpen}
       />
 
       <View className="content-scroll">

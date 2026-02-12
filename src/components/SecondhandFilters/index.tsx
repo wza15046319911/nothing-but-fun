@@ -10,6 +10,7 @@ import {
 interface SecondhandFiltersProps {
   onFiltersChange: (filters: SecondhandFilters) => void;
   initialFilters?: SecondhandFilters;
+  onOverlayVisibilityChange?: (visible: boolean) => void;
 }
 
 const presetRanges = [
@@ -105,6 +106,7 @@ const buildFilterPayload = (
 const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   onFiltersChange,
   initialFilters = {},
+  onOverlayVisibilityChange,
 }) => {
   const [keyword, setKeyword] = useState(initialFilters.keyword ?? '');
   const [priceFrom, setPriceFrom] = useState(
@@ -137,6 +139,17 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   const [sortBy, setSortBy] = useState<SecondhandFilters['sortBy']>(
     initialFilters.sortBy ?? 'sort'
   );
+
+  useEffect(() => {
+    const isOverlayVisible = showAdvanced || showSortOptions;
+    onOverlayVisibilityChange?.(isOverlayVisible);
+  }, [showAdvanced, showSortOptions, onOverlayVisibilityChange]);
+
+  useEffect(() => {
+    return () => {
+      onOverlayVisibilityChange?.(false);
+    };
+  }, [onOverlayVisibilityChange]);
 
   // Reflect upstream filter changes (e.g. external reset/pagination updates)
   useEffect(() => {
@@ -537,7 +550,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
   };
 
   return (
-    <View className="flex flex-col gap-4 px-4 mt-2 mb-2 sticky top-[100px] z-[99]">
+    <View className="flex flex-col gap-4 px-4 mt-2 mb-2">
       {/* 1. Floating Capsule Search Bar */}
       <View className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-[0_8px_20px_-6px_rgba(31,38,135,0.15)] rounded-full p-2 border border-white/60 transition-all hover:shadow-[0_8px_24px_-4px_rgba(99,102,241,0.2)]">
         <View className="flex-1 flex items-center pl-4 bg-transparent">
