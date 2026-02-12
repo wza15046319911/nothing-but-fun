@@ -47,7 +47,11 @@
   z-index: 1;
   box-sizing: border-box;
   // Keep content fully visible above fixed action dock + safe area.
-  padding-bottom: calc(env(safe-area-inset-bottom) + 240rpx);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 80rpx);
+}
+
+.detail-bottom-spacer {
+  height: calc(env(safe-area-inset-bottom) + 220rpx);
 }
 
 // Immersive Image Section
@@ -199,7 +203,7 @@
 
     .description-text {
       font-size: 28rpx;
-      color: mix(@text-primary, @text-secondary, 80%);
+      color: #334155;
       line-height: 1.8;
       white-space: pre-wrap;
     }

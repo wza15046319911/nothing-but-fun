@@ -193,6 +193,14 @@ const SecondHandDetail: React.FC = () => {
     loadItemDetail();
   }, [id]);
 
+  const getContactSummary = (target: SecondhandItem) => {
+    const parts: string[] = [];
+    if (target.sellerWechatId) parts.push(`微信: ${target.sellerWechatId}`);
+    if (target.sellerContact) parts.push(`电话: ${target.sellerContact}`);
+    if (target.sellerEmail) parts.push(`邮箱: ${target.sellerEmail}`);
+    return parts.length > 0 ? parts.join('  ·  ') : '卖家暂未公开联系方式，请点击底部按钮联系';
+  };
+
   if (loading) {
     return (
       <View className="detail-container">
@@ -218,7 +226,7 @@ const SecondHandDetail: React.FC = () => {
 
   return (
     <View className="detail-container">
-      <ScrollView className="detail-content" scrollY>
+      <ScrollView className="detail-content" scrollY style={{ height: '100vh' }}>
         {/* Immersive Image Section */}
         <View className="image-section">
           {item?.imageUrls && item?.imageUrls.length > 0 ? (
@@ -309,31 +317,13 @@ const SecondHandDetail: React.FC = () => {
           </View>
 
           {/* Description */}
-          {item.description && (
-            <View className="description-section">
-              <Text className="description-title">商品详情</Text>
-              <Text className="description-text">{item.description}</Text>
-            </View>
-          )}
+          <View className="description-section">
+            <Text className="description-title">商品详情</Text>
+            <Text className="description-text">{item.description?.trim() || '卖家暂未填写商品描述'}</Text>
+          </View>
         </View>
 
-        {/* Action Bar */}
-        {!isOwner() && (
-          <View className="action-section">
-            <Button className="contact-btn" onClick={handleContactSeller} block>
-              联系卖家
-            </Button>
-          </View>
-        )}
-
-        {/* Owner Floating Actions */}
-        {isOwner() && (
-          <View className="owner-actions">
-            <View className="delete-btn" onClick={() => setShowDeleteDialog(true)}>
-              删除
-            </View>
-          </View>
-        )}
+        <View className="detail-bottom-spacer" />
 
         {/* Delete Dialog */}
         <Dialog
@@ -352,6 +342,24 @@ const SecondHandDetail: React.FC = () => {
           onClose={() => setShowToast(false)}
         />
       </ScrollView>
+
+      {/* Action Bar */}
+      {!isOwner() && (
+        <View className="action-section">
+          <Button className="contact-btn" onClick={handleContactSeller} block>
+            联系卖家
+          </Button>
+        </View>
+      )}
+
+      {/* Owner Floating Actions */}
+      {isOwner() && (
+        <View className="owner-actions">
+          <View className="delete-btn" onClick={() => setShowDeleteDialog(true)}>
+            删除
+          </View>
+        </View>
+      )}
     </View>
   );
 };
