@@ -313,7 +313,8 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
       {error && <Text className="block text-xs font-medium text-rose-500 px-2">{error}</Text>}
 
       {/* Filter Popup Modal */}
-      <View className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} catchMove>
+      {showAdvanced && (
+        <View className="fixed inset-0 z-[1000]" catchMove>
         {/* Backdrop */}
         <View
           className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
@@ -451,7 +452,8 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
             </View>
           </View>
         </View>
-      </View>
+        </View>
+      )}
     </View>
   );
 };

@@ -30,6 +30,7 @@
     background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg 25s infinite alternate ease-in-out;
   }
 
@@ -45,6 +46,7 @@
     background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
     filter: blur(70px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
 
@@ -137,6 +139,7 @@
 
   // Content
   .enhanced-content {
+    position: relative;
     z-index: 1;
     padding: 0 32rpx;
     box-sizing: border-box;

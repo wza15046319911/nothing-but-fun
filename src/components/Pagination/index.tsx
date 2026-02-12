@@ -54,6 +54,7 @@ const Pagination: React.FC<PaginationProps> = ({
           size="small"
           disabled={currentPage <= 1 || loading}
           onClick={handlePrevious}
+          onTap={handlePrevious}
           className="pagination-button"
         >
           上一页
@@ -70,6 +71,7 @@ const Pagination: React.FC<PaginationProps> = ({
           size="small"
           disabled={currentPage >= totalPages || loading}
           onClick={handleNext}
+          onTap={handleNext}
           className="pagination-button"
         >
           下一页

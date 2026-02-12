@@ -21,7 +21,7 @@ const PROFILE_DATA = {
   tagLine: '前字节研发 | Senior Backend Dev',
   experience: '8年 UQ EECS 辅导经验',
   courseTitle: '核心课程',
-  courses: ['CSSE1001', 'COMP3506', 'INFS3202'],
+  courses: ['CSSE1001', 'COMP3506', 'INFS3202', 'COMP2140', 'CSSE7030', 'INFS7202', 'COMP7505', 'DECO3801', 'DECO7381'],
   summary: '精通 EECS 体系，覆盖课程重难点与作业思路，目标是帮助你更稳地冲击高分。',
   principles: ['不灌水，只讲关键', '按个人基础制定计划', '课后可持续答疑'],
   services: [
@@ -131,7 +131,7 @@ const ProfilePage: React.FC = () => {
           </View>
           <View className="stat-divider" />
           <View className="stat-item">
-            <Text className="stat-num">3门</Text>
+            <Text className="stat-num">9门</Text>
             <Text className="stat-label">核心课</Text>
           </View>
         </View>
@@ -180,7 +180,7 @@ const ProfilePage: React.FC = () => {
 
       <View className="card section-card">
         <Text className="section-title">联系开发者</Text>
-        <Text className="qr-hint">{PROFILE_DATA.qrHint}</Text>
+        {/* <Text className="qr-hint">{PROFILE_DATA.qrHint}</Text> */}
         <View className="qr-wrapper">
           <Image
             className="qr-image"

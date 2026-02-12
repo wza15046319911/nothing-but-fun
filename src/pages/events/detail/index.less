@@ -10,11 +10,11 @@
 @card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
 .event-detail-page {
-  min-height: 100vh;
+  height: 100vh;
   background: @bg-base;
   color: @text-primary;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
 
   // Background Mesh Gradients
@@ -63,7 +63,7 @@
     position: relative;
     z-index: 2;
     padding-bottom: 200rpx;
-    min-height: 100vh;
+    box-sizing: border-box;
   }
 
   // Immersive Media Section

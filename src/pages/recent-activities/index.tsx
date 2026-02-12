@@ -210,21 +210,32 @@ const RecentActivities: React.FC = () => {
     });
   };
 
-  const onConfirmCalendar = (date: any) => {
-    // NutUI Calendar returns date in format: YYYY-MM-DD string or Date object
-    let selectedDateObj: Date;
-
+  const parseCalendarDate = (date: any): Date => {
+    // Prefer local-date parsing for YYYY-MM-DD to avoid timezone shift.
     if (typeof date === 'string') {
-      selectedDateObj = new Date(date);
-    } else if (date instanceof Date) {
-      selectedDateObj = date;
-    } else if (Array.isArray(date) && date.length > 3) {
-      // sometimes returns [d, m, y, 'yyyy-mm-dd']
-      selectedDateObj = new Date(date[3]);
-    } else {
-      // Fallback: try to convert to string
-      selectedDateObj = new Date(String(date));
+      const matched = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (matched) {
+        const year = Number(matched[1]);
+        const month = Number(matched[2]);
+        const day = Number(matched[3]);
+        return new Date(year, month - 1, day);
+      }
+      return new Date(date);
     }
+
+    if (date instanceof Date) {
+      return date;
+    }
+
+    if (Array.isArray(date) && date.length > 3) {
+      return parseCalendarDate(date[3]);
+    }
+
+    return new Date(String(date));
+  };
+
+  const onConfirmCalendar = (date: any) => {
+    const selectedDateObj = parseCalendarDate(date);
     const dateString = formatDateString(selectedDateObj);
 
     // 更新选中的日期并按周拉取活动
@@ -258,172 +269,174 @@ const RecentActivities: React.FC = () => {
   const selectedDateInfo = getSelectedDateInfo();
 
   return (
-    <ScrollView className="enhanced-events-container" scrollY style={{ height: '100vh' }}>
-      {/* Immersive Header */}
-      <View className="enhanced-header">
-        <View className="header-content">
-          <View className="title-section">
-            <Text className="enhanced-title">布玩新鲜事</Text>
-            <Text className="enhanced-subtitle">精选活动日历，发现玩乐灵感</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Date Navigation (Sticky) */}
-      <View className="enhanced-date-nav">
-        <Text className="month-text">{selectedDateInfo.month}月</Text>
-        <View className="scroll-wrapper">
-          <ScrollView className="date-scroll" scrollX showScrollbar={false}>
-            {dates.map((date, index) => (
-              <View
-                key={index}
-                className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
-                onClick={() => setSelectedDate(date.dateString)}
-              >
-                <Text className="day-number">{date.day}</Text>
-                <Text className="day-name">{date.isToday ? '今天' : `周${date.weekday}`}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-        {/* 如果当前周不包含今天，显示回到今天按钮 */}
-        {!dates.some((d) => d.isToday) && (
-          <View
-            className="back-to-today"
-            onClick={() => {
-              const today = new Date();
-              applyWeekRange(today);
-            }}
-          >
-            <Text>今</Text>
-          </View>
-        )}
-        <View className="calendar-trigger" onClick={() => setCalendarVisible(true)}>
-          <Text>📅</Text>
-        </View>
-      </View>
-
-      {/* Main Content */}
-      <View className="enhanced-content">
-        <View className="activity-section">
-          <View className="section-title">
-            {selectedDate === getTodayString()
-              ? '今日活动'
-              : `${selectedDateInfo.month}月${selectedDateInfo.day}日 · 周${selectedDateInfo.weekday}`}
-          </View>
-
-          {loading ? (
-            <View className="enhanced-loading-container">
-              <View className="loading-dots">
-                <View className="dot dot-1"></View>
-                <View className="dot dot-2"></View>
-                <View className="dot dot-3"></View>
-              </View>
-              <Text>正在加载活动...</Text>
+    <>
+      <ScrollView className="enhanced-events-container" scrollY style={{ height: '100vh' }}>
+        {/* Immersive Header */}
+        <View className="enhanced-header">
+          <View className="header-content">
+            <View className="title-section">
+              <Text className="enhanced-title">布玩新鲜事</Text>
+              <Text className="enhanced-subtitle">精选活动日历，发现玩乐灵感</Text>
             </View>
-          ) : filteredEvents.length > 0 ? (
-            <View className="events-list">
-              {filteredEvents.map((event, index) => (
+          </View>
+        </View>
+  
+        {/* Date Navigation (Sticky) */}
+        <View className="enhanced-date-nav">
+          <Text className="month-text">{selectedDateInfo.month}月</Text>
+          <View className="scroll-wrapper">
+            <ScrollView className="date-scroll" scrollX showScrollbar={false}>
+              {dates.map((date, index) => (
                 <View
-                  key={event.id}
-                  className="enhanced-event-card"
-                  onClick={() => handleEventClick(event)}
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  key={index}
+                  className={`date-item ${date.dateString === selectedDate ? 'active' : ''}`}
+                  onClick={() => setSelectedDate(date.dateString)}
                 >
-                  <View className="enhanced-event-image-container">
-                    <Image
-                      className="enhanced-event-image"
-                      src={
-                        event.imageUrls?.[0] ||
-                        event.image ||
-                        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop'
-                      }
-                      mode="aspectFill"
-                      lazyLoad
-                    />
-                    <View className="image-overlay"></View>
-
-                    <View className={`price-badge-floating ${event.free ? 'free' : ''}`}>
-                      <Text>
-                        {event.free
-                          ? '免费'
-                          : (() => {
-                              if (event.priceFrom !== undefined && event.priceFrom !== null) {
-                                if (
-                                  event.priceTo !== undefined &&
-                                  event.priceTo !== null &&
-                                  event.priceTo !== event.priceFrom
-                                ) {
-                                  return `$${event.priceFrom}-${event.priceTo}`;
-                                }
-                                return `$${event.priceFrom}`;
-                              }
-                              if (event.price !== undefined && event.price !== null) {
-                                return `$${event.price}`;
-                              }
-                              return '待定';
-                            })()}
-                      </Text>
-                    </View>
-
-                    {event.eventTypeRid && (
-                      <View className="event-type-badge">
-                        <Text>{getEventTypeName(event.eventTypeRid)}</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View className="enhanced-event-info">
-                    <View className="info-header">
-                      <Text className="enhanced-event-title">{event.title}</Text>
-                      <Text className="meta-time">{formatTime(event.startTime)}</Text>
-                    </View>
-
-                    <View className="info-content">
-                      <View className="event-time-location">
-                        <View className="time-location-item">
-                          <Text>📍</Text>
-                          <Text>{event.location || '线上活动'}</Text>
-                        </View>
-                        <View className="time-location-item">
-                          <Text>👥</Text>
-                          <Text>{event.capacity ? `${event.capacity}人` : '不限'}</Text>
-                        </View>
-                      </View>
-                      <Text className="enhanced-event-description">
-                        {event.description || '暂无描述'}
-                      </Text>
-                    </View>
-                  </View>
+                  <Text className="day-number">{date.day}</Text>
+                  <Text className="day-name">{date.isToday ? '今天' : `周${date.weekday}`}</Text>
                 </View>
               ))}
-            </View>
-          ) : (
-            <View className="enhanced-empty-container">
-              <Text className="empty-icon">🍃</Text>
-              <Text className="empty-title">
-                {selectedDate === getTodayString() ? '今日暂无活动' : '当日暂无活动'}
-              </Text>
-              <Text className="empty-subtitle">去看看其他日期的精彩吧</Text>
-            </View>
-          )}
-
-          {!loading && events.length > 0 && pagination.totalPages > 1 && (
-            <View style={{ marginTop: '40rpx' }}>
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                total={pagination.total}
-                pageSize={pagination.limit}
-                onPageChange={handlePageChange}
-                loading={loading}
-              />
+            </ScrollView>
+          </View>
+          {/* 如果当前周不包含今天，显示回到今天按钮 */}
+          {!dates.some((d) => d.isToday) && (
+            <View
+              className="back-to-today"
+              onClick={() => {
+                const today = new Date();
+                applyWeekRange(today);
+              }}
+            >
+              <Text>今</Text>
             </View>
           )}
+          <View className="calendar-trigger" onClick={() => setCalendarVisible(true)}>
+            <Text>📅</Text>
+          </View>
         </View>
 
-        <View style={{ height: '60rpx' }}></View>
-      </View>
+        {/* Main Content */}
+        <View className="enhanced-content">
+          <View className="activity-section">
+            <View className="section-title">
+              {selectedDate === getTodayString()
+                ? '今日活动'
+                : `${selectedDateInfo.month}月${selectedDateInfo.day}日 · 周${selectedDateInfo.weekday}`}
+            </View>
+
+            {loading ? (
+              <View className="enhanced-loading-container">
+                <View className="loading-dots">
+                  <View className="dot dot-1"></View>
+                  <View className="dot dot-2"></View>
+                  <View className="dot dot-3"></View>
+                </View>
+                <Text>正在加载活动...</Text>
+              </View>
+            ) : filteredEvents.length > 0 ? (
+              <View className="events-list">
+                {filteredEvents.map((event, index) => (
+                  <View
+                    key={event.id}
+                    className="enhanced-event-card"
+                    onClick={() => handleEventClick(event)}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <View className="enhanced-event-image-container">
+                      <Image
+                        className="enhanced-event-image"
+                        src={
+                          event.imageUrls?.[0] ||
+                          event.image ||
+                          'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=400&fit=crop'
+                        }
+                        mode="aspectFill"
+                        lazyLoad
+                      />
+                      <View className="image-overlay"></View>
+
+                      <View className={`price-badge-floating ${event.free ? 'free' : ''}`}>
+                        <Text>
+                          {event.free
+                            ? '免费'
+                            : (() => {
+                                if (event.priceFrom !== undefined && event.priceFrom !== null) {
+                                  if (
+                                    event.priceTo !== undefined &&
+                                    event.priceTo !== null &&
+                                    event.priceTo !== event.priceFrom
+                                  ) {
+                                    return `$${event.priceFrom}-${event.priceTo}`;
+                                  }
+                                  return `$${event.priceFrom}`;
+                                }
+                                if (event.price !== undefined && event.price !== null) {
+                                  return `$${event.price}`;
+                                }
+                                return '待定';
+                              })()}
+                        </Text>
+                      </View>
+
+                      {event.eventTypeRid && (
+                        <View className="event-type-badge">
+                          <Text>{getEventTypeName(event.eventTypeRid)}</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <View className="enhanced-event-info">
+                      <View className="info-header">
+                        <Text className="enhanced-event-title">{event.title}</Text>
+                        <Text className="meta-time">{formatTime(event.startTime)}</Text>
+                      </View>
+
+                      <View className="info-content">
+                        <View className="event-time-location">
+                          <View className="time-location-item">
+                            <Text>📍</Text>
+                            <Text>{event.location || '线上活动'}</Text>
+                          </View>
+                          <View className="time-location-item">
+                            <Text>👥</Text>
+                            <Text>{event.capacity ? `${event.capacity}人` : '不限'}</Text>
+                          </View>
+                        </View>
+                        <Text className="enhanced-event-description">
+                          {event.description || '暂无描述'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className="enhanced-empty-container">
+                <Text className="empty-icon">🍃</Text>
+                <Text className="empty-title">
+                  {selectedDate === getTodayString() ? '今日暂无活动' : '当日暂无活动'}
+                </Text>
+                <Text className="empty-subtitle">去看看其他日期的精彩吧</Text>
+              </View>
+            )}
+
+            {!loading && events.length > 0 && pagination.totalPages > 1 && (
+              <View style={{ marginTop: '40rpx' }}>
+                <Pagination
+                  currentPage={pagination.page}
+                  totalPages={pagination.totalPages}
+                  total={pagination.total}
+                  pageSize={pagination.limit}
+                  onPageChange={handlePageChange}
+                  loading={loading}
+                />
+              </View>
+            )}
+          </View>
+
+          <View style={{ height: '60rpx' }}></View>
+        </View>
+      </ScrollView>
 
       <Toast
         content={toastMessage}
@@ -439,9 +452,10 @@ const RecentActivities: React.FC = () => {
           startDate={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`}
           onClose={() => setCalendarVisible(false)}
           onConfirm={onConfirmCalendar}
+          onDayClick={onConfirmCalendar}
         />
       )}
-    </ScrollView>
+    </>
   );
 };
 

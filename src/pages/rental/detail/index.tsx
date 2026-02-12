@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Swiper, SwiperItem } from '@tarojs/components';
+import { View, Text, Image, Swiper, SwiperItem, ScrollView } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import { rentalApi, RentalItem } from '../../../services/rental';
 import './index.less';
@@ -79,82 +79,86 @@ const RentalDetail: React.FC = () => {
 
   return (
     <View className="rental-detail-container">
-      {/* Immersive Image Carousel */}
-      <View className="image-carousel">
-        <Swiper
-          className="swiper-container"
-          circular
-          autoplay
-          onChange={(e) => setCurrentImage(e.detail.current)}
-        >
-          {images.map((img, idx) => (
-            <SwiperItem key={idx}>
-              <Image
-                src={img}
-                className="swiper-item-img"
-                mode="aspectFit"
-                onClick={() => handleImagePreview(idx)}
-              />
-            </SwiperItem>
-          ))}
-        </Swiper>
-        <View className="carousel-indicator">
-          {currentImage + 1} / {images.length}
-        </View>
-      </View>
-
-      {/* Content Body with Glass Cards */}
-      <View className="content-body">
-        {/* Main Head Card */}
-        <View className="head-card">
-          <Text className="title">{item.title}</Text>
-          <View className="price-row">
-            <View className="price-block">
-              <Text className="currency">$</Text>
-              <Text className="amount">{item.price}</Text>
-              <Text className="unit">
-                / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
-              </Text>
-            </View>
-            <View className={`status-badge ${item.status}`}>
-              {item.status === 'available' ? '待租' : '已租'}
-            </View>
+      <ScrollView className="rental-detail-scroll" scrollY style={{ height: '100vh' }}>
+        {/* Immersive Image Carousel */}
+        <View className="image-carousel">
+          <Swiper
+            className="swiper-container"
+            circular
+            autoplay
+            onChange={(e) => setCurrentImage(e.detail.current)}
+          >
+            {images.map((img, idx) => (
+              <SwiperItem key={idx}>
+                <Image
+                  src={img}
+                  className="swiper-item-img"
+                  mode="aspectFit"
+                  onClick={() => handleImagePreview(idx)}
+                />
+              </SwiperItem>
+            ))}
+          </Swiper>
+          <View className="carousel-indicator">
+            {currentImage + 1} / {images.length}
           </View>
         </View>
 
-        {/* Features Tag Cloud */}
-        {item.features && item.features.length > 0 && (
+        {/* Content Body with Glass Cards */}
+        <View className="content-body">
+          {/* Main Head Card */}
+          <View className="head-card">
+            <Text className="title">{item.title}</Text>
+            <View className="price-row">
+              <View className="price-block">
+                <Text className="currency">$</Text>
+                <Text className="amount">{item.price}</Text>
+                <Text className="unit">
+                  / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
+                </Text>
+              </View>
+              <View className={`status-badge ${item.status}`}>
+                {item.status === 'available' ? '待租' : '已租'}
+              </View>
+            </View>
+          </View>
+
+          {/* Features Tag Cloud */}
+          {item.features && item.features.length > 0 && (
+            <View className="info-card">
+              <Text className="section-title">特点</Text>
+              <View className="features-grid">
+                {item.features.map((feat, idx) => (
+                  <View key={idx} className="feature-tag">
+                    {feat}
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Description */}
           <View className="info-card">
-            <Text className="section-title">特点</Text>
-            <View className="features-grid">
-              {item.features.map((feat, idx) => (
-                <View key={idx} className="feature-tag">
-                  {feat}
-                </View>
-              ))}
+            <Text className="section-title">租赁详情</Text>
+            <Text className="desc-text">{item.description || '暂无详细描述'}</Text>
+          </View>
+
+          {/* Contact Info */}
+          <View className="info-card">
+            <Text className="section-title">联系方式</Text>
+            <View className="contact-block">
+              <View className="contact-icon">💬</View>
+              <View className="contact-details">
+                <Text className="label">微信号 / 电话</Text>
+                <Text className="value">{item.contact_info}</Text>
+              </View>
+              {/* Optional inline copy button if preferred, but dock handles primary action */}
             </View>
           </View>
-        )}
 
-        {/* Description */}
-        <View className="info-card">
-          <Text className="section-title">租赁详情</Text>
-          <Text className="desc-text">{item.description || '暂无详细描述'}</Text>
+          <View style={{ height: '40rpx' }}></View>
         </View>
-
-        {/* Contact Info */}
-        <View className="info-card">
-          <Text className="section-title">联系方式</Text>
-          <View className="contact-block">
-            <View className="contact-icon">💬</View>
-            <View className="contact-details">
-              <Text className="label">微信号 / 电话</Text>
-              <Text className="value">{item.contact_info}</Text>
-            </View>
-            {/* Optional inline copy button if preferred, but dock handles primary action */}
-          </View>
-        </View>
-      </View>
+      </ScrollView>
 
       {/* Floating Glass Dock */}
       <View className="floating-dock">

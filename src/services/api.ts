@@ -4,10 +4,9 @@ import Taro from '@tarojs/taro';
 
 const API_BASE_URL =
   process.env.NODE_ENV === 'development'
-    ? 'http://192.168.0.249:3000/api'
+    ? 'http://192.168.15.95:3000/api'
     : 'https://nothing-but-fun-backend-production.up.railway.app/api';
-// const API_BASE_URL = "https://nothing-but-fun-backend-production.up.railway.app/api";
-// 请求拦截器
+
 const requestInterceptor = (params) => {
   // 添加token到header
   const token = Taro.getStorageSync('token');
@@ -68,7 +67,7 @@ const request = (options: {
     method,
     data,
     header,
-    timeout: 10000,
+    timeout: 60000,
   };
 
   // 应用请求拦截器

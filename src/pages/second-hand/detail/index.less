@@ -1,10 +1,11 @@
 @import '../index.less';
 
 .detail-container {
-  min-height: 100vh;
+  height: 100vh;
   background: @bg-base;
   position: relative;
   overflow-x: hidden;
+  overflow-y: hidden;
 
   // Background Mesh Gradients (Inherited from parent via shared bg or re-declared)
   &::before {
@@ -19,6 +20,7 @@
     background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, rgba(251, 191, 36, 0.15) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg 25s infinite alternate ease-in-out;
   }
 
@@ -34,6 +36,7 @@
     background: radial-gradient(circle, rgba(167, 243, 208, 0.3) 0%, rgba(255, 255, 255, 0.4) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
 }
@@ -42,7 +45,9 @@
   height: 100vh;
   position: relative;
   z-index: 1;
-  padding-bottom: 140rpx; // Space for bottom dock
+  box-sizing: border-box;
+  // Keep content fully visible above fixed action dock + safe area.
+  padding-bottom: calc(env(safe-area-inset-bottom) + 240rpx);
 }
 
 // Immersive Image Section

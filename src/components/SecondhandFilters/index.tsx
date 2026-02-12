@@ -613,7 +613,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
       </View>
 
       {/* Filter Popup Modal */}
-      <View className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} catchMove>
+      {showAdvanced && (
+        <View className="fixed inset-0 z-[1000]" catchMove>
         {/* Backdrop */}
         <View
           className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
@@ -932,13 +933,12 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
             </View>
           </View>
         </View>
-      </View>
+        </View>
+      )}
 
       {/* Sort Popup Modal */}
-      <View
-        className={`fixed inset-0 z-[1000] ${showSortOptions ? 'visible' : 'hidden'}`}
-        catchMove
-      >
+      {showSortOptions && (
+        <View className="fixed inset-0 z-[1000]" catchMove>
         <View
           className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
           onClick={() => setShowSortOptions(false)}
@@ -992,7 +992,8 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
             </View>
           </ScrollView>
         </View>
-      </View>
+        </View>
+      )}
     </View>
   );
 };

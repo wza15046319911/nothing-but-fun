@@ -3,4 +3,5 @@ export default definePageConfig({
   enablePullDownRefresh: false,
   backgroundColor: '#f0fdf4',
   onReachBottomDistance: 50,
+  disableScroll: true,
 });

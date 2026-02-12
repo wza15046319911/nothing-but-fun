@@ -15,8 +15,7 @@
 
 @bg-base: #f8fafc;
 @card-bg: #ffffff;
-@card-shadow:
-  0 4px 6px -1px rgba(0, 0, 0, 0.05),
+@card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
   0 2px 4px -1px rgba(0, 0, 0, 0.03);
 @card-radius: 24rpx;
 
@@ -238,7 +237,8 @@
   background: @primary-50;
   color: @primary-700;
   border-radius: 12rpx;
-  padding: 12rpx 24rpx; /* Bigger touch target */
+  padding: 12rpx 24rpx;
+  /* Bigger touch target */
   font-size: 26rpx;
   font-weight: 600;
   border: 1px solid rgba(16, 185, 129, 0.1);
@@ -274,7 +274,8 @@
   align-items: center;
 
   &::before {
-    display: none; /* Reset distinct title style */
+    display: none;
+    /* Reset distinct title style */
   }
 }
 
@@ -296,6 +297,7 @@
   display: flex;
   justify-content: center;
   margin-bottom: 32rpx;
+  min-height: 400rpx;
 }
 
 .qr-image {
@@ -314,7 +316,8 @@
 .action-btn {
   flex: 1;
   min-width: 180rpx;
-  height: 96rpx; /* Taller button */
+  height: 96rpx;
+  /* Taller button */
   border-radius: 999rpx;
   font-size: 30rpx;
   display: flex;

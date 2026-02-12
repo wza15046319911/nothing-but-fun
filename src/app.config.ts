@@ -1,30 +1,65 @@
 export default defineAppConfig({
   pages: [
     'pages/loading/index',
-    'pages/second-hand/publish/index',
-    'pages/contact-info/index',
-    'pages/past-activities/index',
-    'pages/update-phone/index',
     'pages/index/index',
-    'pages/profile/index',
-    'pages/course/write-review/index',
-    'pages/second-hand/index',
-    'pages/restaurant/index',
-    'pages/restaurant/detail/index',
-    'pages/course/index',
-    'pages/recent-activities/index',
-    'pages/events/detail/index',
-    'pages/second-hand/detail/index',
     'pages/user-login/index',
-    'pages/user-posts/index',
-    'pages/gift/index',
-    'pages/gift/detail/index',
-    'pages/rental/index',
-    'pages/rental/detail/index',
-    'pages/course/reviews/index',
-    'pages/user-registrations/index',
-    'pages/contact-us/index',
+    'pages/profile/index',
   ],
+  subPackages: [
+    {
+      root: 'pages/second-hand',
+      pages: ['index', 'detail/index', 'publish/index'],
+    },
+    {
+      root: 'pages/course',
+      pages: ['index', 'reviews/index', 'write-review/index'],
+    },
+    {
+      root: 'pages/restaurant',
+      pages: ['index', 'detail/index'],
+    },
+    {
+      root: 'pages/gift',
+      pages: ['index', 'detail/index'],
+    },
+    {
+      root: 'pages/rental',
+      pages: ['index', 'detail/index'],
+    },
+    {
+      root: 'pages/events',
+      pages: ['detail/index'],
+    },
+    {
+      root: 'pages/user-posts',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/user-registrations',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/recent-activities',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/past-activities',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/contact-info',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/contact-us',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/update-phone',
+      pages: ['index'],
+    },
+  ],
+  lazyCodeLoading: 'requiredComponents',
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',

@@ -184,9 +184,10 @@ const GiftDetail: React.FC = () => {
   ];
 
   return (
-    <ScrollView className="peripheral-detail-page" scrollY>
-      {/* Immersive Image Carousel */}
-      <View className="media-section">
+    <View className="peripheral-detail-page">
+      <ScrollView className="peripheral-detail-scroll" scrollY style={{ height: '100vh' }}>
+        {/* Immersive Image Carousel */}
+        <View className="media-section">
         <Swiper
           className="media-section__swiper"
           circular
@@ -210,10 +211,10 @@ const GiftDetail: React.FC = () => {
             {activeImageIndex + 1} / {imageList.length}
           </Text>
         </View>
-      </View>
+        </View>
 
-      {/* Content Wrapper */}
-      <View className="detail-wrapper">
+        {/* Content Wrapper */}
+        <View className="detail-wrapper">
         {/* Main Info Card */}
         <View className="info-card">
           <View className="info-card__header">
@@ -263,7 +264,8 @@ const GiftDetail: React.FC = () => {
 
         {/* Spacer for dock */}
         <View style={{ height: '40rpx' }}></View>
-      </View>
+        </View>
+      </ScrollView>
 
       {/* Floating Action Dock */}
       <View className="floating-dock">
@@ -274,7 +276,7 @@ const GiftDetail: React.FC = () => {
           联系商家 / 复制微信
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

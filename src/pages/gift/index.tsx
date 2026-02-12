@@ -169,6 +169,7 @@ const Gift: React.FC = () => {
                 key={item.id}
                 className="enhanced-item-card"
                 onClick={() => handleItemClick(item)}
+                onTap={() => handleItemClick(item)}
               >
                 {/* Image */}
                 <View className="enhanced-item-image-container">

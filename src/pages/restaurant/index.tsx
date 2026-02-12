@@ -168,6 +168,7 @@ const RestaurantList: React.FC = () => {
                   key={restaurant.id}
                   className="enhanced-restaurant-card"
                   onClick={() => handleRestaurantClick(restaurant)}
+                  onTap={() => handleRestaurantClick(restaurant)}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Image Section */}

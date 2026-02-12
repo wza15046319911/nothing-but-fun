@@ -222,9 +222,6 @@ const UserLogin: React.FC = () => {
               />
               <View className="login-text">{userInfo.nickname || `用户`}</View>
               <View className="login-desc">欢迎回来，{userInfo.nickname || ''}</View>
-              <Button className="retry-avatar-button" openType="chooseAvatar" onChooseAvatar={onChooseAvatar}>
-                重新上传头像
-              </Button>
             </>
           ) : (
             <>

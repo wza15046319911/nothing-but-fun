@@ -30,6 +30,7 @@
     background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg 25s infinite alternate ease-in-out;
   }
 
@@ -44,6 +45,7 @@
     background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
     filter: blur(70px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
 
@@ -183,6 +185,7 @@
         width: 100%;
         height: 60%;
         background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.5));
+        pointer-events: none;
       }
 
       .type-badge-floating {
@@ -195,6 +198,7 @@
         border-radius: 12rpx;
         color: #fff;
         font-size: 20rpx;
+        pointer-events: none;
       }
 
       .image-badges {
@@ -203,6 +207,7 @@
         right: 24rpx;
         display: flex;
         gap: 8rpx;
+        pointer-events: none;
 
         .image-count-badge {
           background: rgba(0, 0, 0, 0.4);

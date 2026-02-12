@@ -29,6 +29,7 @@
     background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg 25s infinite alternate ease-in-out;
   }
 
@@ -44,6 +45,7 @@
     background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
     filter: blur(70px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
 
@@ -219,6 +221,7 @@
             font-size: 22rpx;
             font-weight: 700;
             box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+            pointer-events: none;
           }
 
           .status-badge {
@@ -230,6 +233,7 @@
             border-radius: 50%;
             border: 2rpx solid #fff;
             box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.3);
+            pointer-events: none;
 
             &.available {
               background-color: #10b981;

@@ -129,6 +129,7 @@ const PastActivities: React.FC = () => {
                 key={event.id}
                 className="enhanced-activity-card"
                 onClick={() => handleEventClick(event)}
+                onTap={() => handleEventClick(event)}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <View className="enhanced-activity-image-container">

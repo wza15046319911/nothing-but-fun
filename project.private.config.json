@@ -7,7 +7,7 @@
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,
-    "preloadBackgroundData": true,
+    "preloadBackgroundData": false,
     "autoAudits": false,
     "useApiHook": true,
     "useApiHostProcess": true,
@@ -18,6 +18,6 @@
     "compileHotReLoad": true,
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true,
-    "bigPackageSizeSupport": false
+    "bigPackageSizeSupport": true
   }
 }

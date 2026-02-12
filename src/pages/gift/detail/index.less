@@ -10,11 +10,11 @@
 @card-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.08);
 
 .peripheral-detail-page {
-  min-height: 100vh;
+  height: 100vh;
   background: @bg-base;
   color: @text-primary;
   overflow-x: hidden;
-  padding-bottom: 200rpx; // Space for floating dock
+  overflow-y: hidden;
   position: relative;
 
   // Background Mesh Gradients
@@ -29,6 +29,7 @@
     background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg 25s infinite alternate ease-in-out;
   }
 
@@ -43,8 +44,17 @@
     background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(255, 255, 255, 0.3) 100%);
     filter: blur(80px);
     z-index: 0;
+    pointer-events: none;
     animation: float-bg-reverse 30s infinite alternate ease-in-out;
   }
+}
+
+.peripheral-detail-scroll {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  // Keep final content clear of fixed dock + safe area.
+  padding-bottom: calc(env(safe-area-inset-bottom) + 220rpx);
 
   // Immersive Swiper
   .media-section {
@@ -233,53 +243,54 @@
     }
   }
 
-  // Floating Dock
-  .floating-dock {
-    position: fixed;
-    bottom: 40rpx;
-    left: 40rpx;
-    right: 40rpx;
-    height: 120rpx;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: 40rpx;
-    padding: 16rpx;
+}
+
+// Floating Dock
+.floating-dock {
+  position: fixed;
+  bottom: 40rpx;
+  left: 40rpx;
+  right: 40rpx;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 40rpx;
+  padding: 16rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  z-index: 100;
+  box-sizing: border-box;
+  animation: slideUp 0.8s ease-out 0.2s backwards;
+
+  .dock-btn {
+    height: 100%;
+    border-radius: 28rpx;
     display: flex;
     align-items: center;
-    box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    z-index: 100;
-    box-sizing: border-box;
-    animation: slideUp 0.8s ease-out 0.2s backwards;
+    justify-content: center;
+    font-size: 30rpx;
+    font-weight: 600;
+    transition: transform 0.2s;
 
-    .dock-btn {
-      height: 100%;
-      border-radius: 28rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30rpx;
-      font-weight: 600;
-      transition: transform 0.2s;
+    &:active {
+      transform: scale(0.96);
+    }
 
-      &:active {
-        transform: scale(0.96);
-      }
+    &.secondary {
+      width: 100rpx;
+      background: transparent;
+      color: @text-secondary;
+      margin-right: 16rpx;
+      font-size: 40rpx; // Icon specific
+    }
 
-      &.secondary {
-        width: 100rpx;
-        background: transparent;
-        color: @text-secondary;
-        margin-right: 16rpx;
-        font-size: 40rpx; // Icon specific
-      }
-
-      &.primary {
-        flex: 1;
-        background: @primary-gradient;
-        color: #ffffff;
-        box-shadow: 0 8rpx 20rpx rgba(16, 185, 129, 0.3);
-      }
+    &.primary {
+      flex: 1;
+      background: @primary-gradient;
+      color: #ffffff;
+      box-shadow: 0 8rpx 20rpx rgba(16, 185, 129, 0.3);
     }
   }
 }

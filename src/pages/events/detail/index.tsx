@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Image, Video } from '@tarojs/components';
+import { View, Text, Image, Video, ScrollView } from '@tarojs/components';
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro';
 import { Swiper, SwiperItem } from '@tarojs/components';
 import { eventsApi, Event } from '../../../services/events';
@@ -191,7 +191,7 @@ const EventDetail: React.FC = () => {
 
   return (
     <View className="event-detail-page">
-      <View className="event-detail-scroll">
+      <ScrollView className="event-detail-scroll" scrollY style={{ height: '100vh' }}>
         {/* Immersive Header */}
         <View className="media-section">
           <View className="carousel-wrapper">
@@ -297,7 +297,7 @@ const EventDetail: React.FC = () => {
             </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Floating Action Bar */}
       <View className="floating-action-bar">
