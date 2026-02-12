@@ -12,12 +12,9 @@
 
 .rental-container {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
   background: @bg-base;
   position: relative;
-  overflow-x: hidden;
-  overflow-y: hidden;
+
 
   // Background Mesh Gradients
   &::before {
@@ -164,14 +161,8 @@
   .rental-list {
     position: relative;
     z-index: 1;
-    flex: 1;
-    min-height: 0;
-
-    .rental-list-scroll {
-      height: 100%;
-      padding: 0 32rpx 40rpx;
-      box-sizing: border-box;
-    }
+    padding: 0 32rpx 40rpx;
+    box-sizing: border-box;
 
     .rental-grid {
       display: flex;

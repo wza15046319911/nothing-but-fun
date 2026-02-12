@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import Taro, { usePullDownRefresh } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
 import { restaurantApi, Restaurant, RestaurantFilters } from '../../services/restaurant';
 import { useRestaurantTypes } from '../../hooks/useTypes';
 import RestaurantFiltersComponent from '../../components/RestaurantFiltersNew';
@@ -74,14 +74,6 @@ const RestaurantList: React.FC = () => {
     loadRestaurants(true, newFilters);
   };
 
-  const handleRefresh = async () => {
-    await loadRestaurants(true);
-  };
-
-  usePullDownRefresh(() => {
-    handleRefresh();
-  });
-
   const handleRestaurantClick = (restaurant: Restaurant) => {
     Taro.navigateTo({
       url: `/pages/restaurant/detail/index?id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`,
@@ -98,7 +90,11 @@ const RestaurantList: React.FC = () => {
   }, []);
 
   return (
-    <View className="restaurant-container">
+    <ScrollView
+      className="restaurant-container"
+      scrollY
+      style={{ height: '100vh' }}
+    >
       {/* Immersive Header */}
       <View className="enhanced-header">
         <View className="header-content">
@@ -121,15 +117,13 @@ const RestaurantList: React.FC = () => {
       </View>
 
       {/* Floating Filters */}
-      <View className="filter-section">
-        <RestaurantFiltersComponent
-          onFiltersChange={handleFiltersChange}
-          initialFilters={currentFilters}
-        />
-      </View>
+      <RestaurantFiltersComponent
+        onFiltersChange={handleFiltersChange}
+        initialFilters={currentFilters}
+      />
 
       {/* List Content */}
-      <ScrollView className="enhanced-content" scrollY>
+      <View className="enhanced-content">
         {loading ? (
           <View className="enhanced-loading-container">
             <View className="loading-dots">
@@ -148,7 +142,6 @@ const RestaurantList: React.FC = () => {
         ) : (
           <View className="enhanced-restaurants-list">
             {restaurants.map((restaurant, index) => {
-              console.log(restaurant);
               const images = getAllImages(restaurant);
               // 完全按照 detail 页面的逻辑
               let priceDisplay = '';
@@ -247,8 +240,8 @@ const RestaurantList: React.FC = () => {
         )}
 
         <View style={{ height: '60rpx' }}></View>
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 

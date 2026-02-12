@@ -126,7 +126,7 @@ const Gift: React.FC = () => {
   }, []);
 
   return (
-    <View className="enhanced-peripheral-container">
+    <ScrollView className="enhanced-peripheral-container" scrollY style={{ height: '100vh' }}>
       {/* Immersive Header */}
       <View className="enhanced-header">
         <View className="header-content">
@@ -146,7 +146,7 @@ const Gift: React.FC = () => {
       </View>
 
       {/* Product List */}
-      <ScrollView className="enhanced-content" scrollY>
+      <View className="enhanced-content">
         {loading ? (
           <View className="enhanced-loading-container">
             <View className="loading-dots">
@@ -235,7 +235,7 @@ const Gift: React.FC = () => {
         )}
 
         <View style={{ height: '40rpx' }}></View>
-      </ScrollView>
+      </View>
 
       {/* Toast */}
       <Toast
@@ -244,7 +244,7 @@ const Gift: React.FC = () => {
         type="text"
         onClose={() => setShowToast(false)}
       />
-    </View>
+    </ScrollView>
   );
 };
 

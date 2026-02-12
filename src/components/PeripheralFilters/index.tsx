@@ -370,43 +370,6 @@ const PeripheralFiltersComponent: React.FC<PeripheralFiltersProps> = ({
           <Text className="text-sm font-medium">排序</Text>
           <Text className="text-xs opacity-70 ml-1">{getSortOption(selectedSortKey).label}</Text>
         </View>
-
-        {/* All Categories Chip */}
-        <View
-          className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-            selectedCategoryId === undefined
-              ? 'bg-slate-800 text-white border-slate-800'
-              : 'bg-white/60 text-slate-600 border-white/60'
-          }`}
-          onClick={() => {
-            setSelectedCategoryId(undefined);
-            applyFilters(keyword, priceFrom, priceTo, undefined, selectedSortKey);
-          }}
-        >
-          <Text className="text-sm font-medium">全部商品</Text>
-        </View>
-
-        {categories.slice(0, 6).map((category) => (
-          <View
-            key={category.id}
-            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-              selectedCategoryId === category.id
-                ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                : 'bg-white/60 text-slate-600 border-white/60'
-            }`}
-            onClick={() => {
-              if (selectedCategoryId === category.id) {
-                setSelectedCategoryId(undefined);
-                applyFilters(keyword, priceFrom, priceTo, undefined, selectedSortKey);
-              } else {
-                setSelectedCategoryId(category.id);
-                applyFilters(keyword, priceFrom, priceTo, category.id, selectedSortKey);
-              }
-            }}
-          >
-            <Text className="text-sm font-medium">{category.name}</Text>
-          </View>
-        ))}
       </View>
 
       {/* Filter Popup Modal */}

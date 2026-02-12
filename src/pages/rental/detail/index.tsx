@@ -44,6 +44,15 @@ const RentalDetail: React.FC = () => {
     Taro.navigateBack();
   };
 
+  const handleImagePreview = (index: number) => {
+    if (!images.length) return;
+    const safeIndex = Math.max(0, Math.min(index, images.length - 1));
+    Taro.previewImage({
+      current: images[safeIndex],
+      urls: images,
+    });
+  };
+
   if (loading)
     return (
       <View className="rental-detail-container loading-state">
@@ -80,7 +89,12 @@ const RentalDetail: React.FC = () => {
         >
           {images.map((img, idx) => (
             <SwiperItem key={idx}>
-              <Image src={img} className="swiper-item-img" mode="aspectFill" />
+              <Image
+                src={img}
+                className="swiper-item-img"
+                mode="aspectFit"
+                onClick={() => handleImagePreview(idx)}
+              />
             </SwiperItem>
           ))}
         </Swiper>

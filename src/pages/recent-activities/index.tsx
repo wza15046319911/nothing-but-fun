@@ -54,7 +54,7 @@ const generateDatesFromBase = (baseDate: Date) => {
 
 const RecentActivities: React.FC = () => {
   const { getEventTypeName } = useEventTypes();
-  
+
   // State
   const [baseDate, setBaseDate] = useState<Date>(new Date()); // 横向日期列表的起始日期
   const [selectedDate, setSelectedDate] = useState<string | null>(null); // 初始为 null，等数据加载后再设置
@@ -213,7 +213,7 @@ const RecentActivities: React.FC = () => {
   const onConfirmCalendar = (date: any) => {
     // NutUI Calendar returns date in format: YYYY-MM-DD string or Date object
     let selectedDateObj: Date;
-    
+
     if (typeof date === 'string') {
       selectedDateObj = new Date(date);
     } else if (date instanceof Date) {
@@ -226,16 +226,16 @@ const RecentActivities: React.FC = () => {
       selectedDateObj = new Date(String(date));
     }
     const dateString = formatDateString(selectedDateObj);
-    
+
     // 更新选中的日期并按周拉取活动
     applyWeekRange(selectedDateObj, dateString);
-    
+
     setCalendarVisible(false);
   };
 
   const getSelectedDateInfo = () => {
     if (!selectedDate) return dates[0];
-    
+
     // Check if in generated 7 days
     const found = dates.find((date) => date.dateString === selectedDate);
     if (found) return found;
@@ -258,7 +258,7 @@ const RecentActivities: React.FC = () => {
   const selectedDateInfo = getSelectedDateInfo();
 
   return (
-    <View className="enhanced-events-container">
+    <ScrollView className="enhanced-events-container" scrollY style={{ height: '100vh' }}>
       {/* Immersive Header */}
       <View className="enhanced-header">
         <View className="header-content">
@@ -287,9 +287,9 @@ const RecentActivities: React.FC = () => {
           </ScrollView>
         </View>
         {/* 如果当前周不包含今天，显示回到今天按钮 */}
-        {!dates.some(d => d.isToday) && (
-          <View 
-            className="back-to-today" 
+        {!dates.some((d) => d.isToday) && (
+          <View
+            className="back-to-today"
             onClick={() => {
               const today = new Date();
               applyWeekRange(today);
@@ -304,7 +304,7 @@ const RecentActivities: React.FC = () => {
       </View>
 
       {/* Main Content */}
-      <ScrollView className="enhanced-content" scrollY>
+      <View className="enhanced-content">
         <View className="activity-section">
           <View className="section-title">
             {selectedDate === getTodayString()
@@ -423,7 +423,7 @@ const RecentActivities: React.FC = () => {
         </View>
 
         <View style={{ height: '60rpx' }}></View>
-      </ScrollView>
+      </View>
 
       <Toast
         content={toastMessage}
@@ -441,7 +441,7 @@ const RecentActivities: React.FC = () => {
           onConfirm={onConfirmCalendar}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 

@@ -213,7 +213,6 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
   const { restaurantTypes: allRestaurantTypes } = useRestaurantTypes();
 
   // Add "全部" option to the beginning
-  const restaurantTypes = [{ id: 0, name: '全部类型' }, ...allRestaurantTypes];
 
   const [keyword, setKeyword] = useState(initialFilters.keyword ?? '');
   const [selectedMinRating, setSelectedMinRating] = useState<number | undefined>(
@@ -362,7 +361,7 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
   };
 
   return (
-    <View className="flex flex-col gap-4 px-4 mt-2 mb-2 sticky top-[100px] z-[99]">
+    <View className="flex flex-col gap-4 px-4 mt-2 mb-2">
       {/* 1. Floating Capsule Search Bar */}
       <View className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-[0_8px_20px_-6px_rgba(31,38,135,0.15)] rounded-full p-2 border border-white/60 transition-all hover:shadow-[0_8px_24px_-4px_rgba(99,102,241,0.2)]">
         <View className="flex-1 flex items-center pl-4 bg-transparent">
@@ -426,68 +425,10 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
           <Text className="text-sm font-medium">排序</Text>
           <Text className="text-xs opacity-70 ml-1">{getSortOption(selectedSortKey).label}</Text>
         </View>
-
-        {/* All Types Chip */}
-        <View
-          className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-            selectedRestaurantTypeRid === undefined
-              ? 'bg-slate-800 text-white border-slate-800'
-              : 'bg-white/60 text-slate-600 border-white/60'
-          }`}
-          onClick={() => {
-            setSelectedRestaurantTypeRid(undefined);
-            applyFilters(
-              keyword,
-              selectedMinRating,
-              priceFrom,
-              priceTo,
-              undefined,
-              selectedSortKey
-            );
-          }}
-        >
-          <Text className="text-sm font-medium">全部美食</Text>
-        </View>
-
-        {allRestaurantTypes.slice(0, 6).map((type) => (
-          <View
-            key={type.id}
-            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-              selectedRestaurantTypeRid === type.id.toString()
-                ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                : 'bg-white/60 text-slate-600 border-white/60'
-            }`}
-            onClick={() => {
-              if (selectedRestaurantTypeRid === type.id.toString()) {
-                setSelectedRestaurantTypeRid(undefined);
-                applyFilters(
-                  keyword,
-                  selectedMinRating,
-                  priceFrom,
-                  priceTo,
-                  undefined,
-                  selectedSortKey
-                );
-              } else {
-                setSelectedRestaurantTypeRid(type.id.toString());
-                applyFilters(
-                  keyword,
-                  selectedMinRating,
-                  priceFrom,
-                  priceTo,
-                  type.id.toString(),
-                  selectedSortKey
-                );
-              }
-            }}
-          >
-            <Text className="text-sm font-medium">{type.name}</Text>
-          </View>
-        ))}
       </View>
 
       {/* Filter Popup Modal */}
-      <View className={`fixed inset-0 z-[1000] ${showAdvanced ? 'visible' : 'hidden'}`} catchMove>
+      {showAdvanced && <View className="fixed inset-0 z-[1000]" catchMove>
         {/* Backdrop */}
         <View
           className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
@@ -668,13 +609,10 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
             </View>
           </View>
         </View>
-      </View>
+      </View>}
 
       {/* Sort Popup Modal */}
-      <View
-        className={`fixed inset-0 z-[1000] ${showSortOptions ? 'visible' : 'hidden'}`}
-        catchMove
-      >
+      {showSortOptions && <View className="fixed inset-0 z-[1000]" catchMove>
         <View
           className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity"
           onClick={() => setShowSortOptions(false)}
@@ -725,7 +663,7 @@ const RestaurantFiltersComponent: React.FC<RestaurantFiltersProps> = ({
             </View>
           </ScrollView>
         </View>
-      </View>
+      </View>}
     </View>
   );
 };

@@ -3,15 +3,17 @@ import { View, Text, Image, Button, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAuth } from '../../context/auth';
 import './index.less';
-import { API_BASE_URL } from 'src/services/api';
+import { uploadImageWithRetry } from 'src/services/upload';
 
 // 默认头像URL
 const defaultAvatarUrl =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
 
+const cloudinaryAvatarBaseUrl = 'https://res.cloudinary.com/ds9attzj6/image/upload/f_auto/v1751287215';
+
 const UserLogin: React.FC = () => {
   // 使用Auth Context
-  const { state, createUser, logout, clearError } = useAuth();
+  const { state, createUser, clearError, updateUserInfo } = useAuth();
   const { isLoggedIn, isLoading, userInfo } = state;
 
   // 新增状态用于头像和昵称
@@ -22,13 +24,25 @@ const UserLogin: React.FC = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [hasUploadedAvatar, setHasUploadedAvatar] = useState(false);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+  const [avatarUploadWarning, setAvatarUploadWarning] = useState('');
+
+  const getAvatarUrlFromUploadData = (data: any): string => {
+    if (data?.filename_disk) {
+      return `${cloudinaryAvatarBaseUrl}/${data.filename_disk}`;
+    }
+    if (data?.url && typeof data.url === 'string') {
+      return data.url;
+    }
+    throw new Error('头像上传响应异常，请稍后重试');
+  };
 
   // 处理头像选择
   const onChooseAvatar = async (e) => {
-    const { avatarUrl } = e.detail;
+    const { avatarUrl: localAvatarPath } = e.detail;
 
     // 设置上传状态
     setIsUploadingAvatar(true);
+    setAvatarUploadWarning('');
 
     // 显示加载状态
     Taro.showLoading({
@@ -36,53 +50,40 @@ const UserLogin: React.FC = () => {
     });
 
     try {
-      // 上传头像到服务器
-      const url = `${API_BASE_URL}/file`;
-      const uploadResult = await new Promise<string>((resolve, reject) => {
-        Taro.uploadFile({
-          url: url,
-          filePath: avatarUrl,
-          name: 'image',
-          formData: {
-            user: 'test',
-          },
-          success: (res) => {
-            console.log('头像上传结果:', res);
-            try {
-              const data = JSON.parse(res.data);
-              resolve(
-                `https://res.cloudinary.com/ds9attzj6/image/upload/f_auto/v1751287215/${data.data.filename_disk}`
-              );
-            } catch (error) {
-              reject(error);
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          },
-        });
-      });
+      const uploadResult = await uploadImageWithRetry(localAvatarPath, 'avatar');
+      const nextAvatarUrl = getAvatarUrlFromUploadData(uploadResult.data);
 
       // 上传成功，更新头像URL
-      setAvatarUrl(uploadResult);
+      setAvatarUrl(nextAvatarUrl);
       setHasUploadedAvatar(true);
+
+      if (isLoggedIn && userInfo) {
+        const success = await updateUserInfo({ avatarUrl: nextAvatarUrl });
+        if (!success) {
+          throw new Error('头像上传成功，但更新资料失败，请稍后重试');
+        }
+      }
 
       Taro.hideLoading();
       Taro.showToast({
-        title: '头像上传成功',
+        title: isLoggedIn ? '头像更新成功' : '头像上传成功',
         icon: 'success',
         duration: 1500,
       });
     } catch (error) {
       console.error('头像上传失败:', error);
       Taro.hideLoading();
+      const message = (error as any)?.message || '头像上传失败，请稍后重试';
       Taro.showToast({
-        title: '头像上传失败，请重试',
+        title: message,
         icon: 'none',
         duration: 2000,
       });
-      setAvatarUrl(defaultAvatarUrl);
-      setHasUploadedAvatar(false);
+      setAvatarUploadWarning('头像上传失败，您可先完成登录，登录后再重试上传头像');
+      if (!isLoggedIn) {
+        setAvatarUrl(defaultAvatarUrl);
+        setHasUploadedAvatar(false);
+      }
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -142,7 +143,7 @@ const UserLogin: React.FC = () => {
       setIsSubmittingProfile(true);
       const success = await createUser(wechatCode, {
         nickname: nickname,
-        avatarUrl: avatarUrl,
+        avatarUrl: hasUploadedAvatar ? avatarUrl : defaultAvatarUrl,
       });
 
       if (success) {
@@ -221,7 +222,9 @@ const UserLogin: React.FC = () => {
               />
               <View className="login-text">{userInfo.nickname || `用户`}</View>
               <View className="login-desc">欢迎回来，{userInfo.nickname || ''}</View>
-              {/* Optional: Add logout button here if needed */}
+              <Button className="retry-avatar-button" openType="chooseAvatar" onChooseAvatar={onChooseAvatar}>
+                重新上传头像
+              </Button>
             </>
           ) : (
             <>
@@ -288,6 +291,7 @@ const UserLogin: React.FC = () => {
               <Text className="avatar-tip">
                 {isUploadingAvatar ? '上传中...' : hasUploadedAvatar ? '✅ 已选择' : '点击上方图标'}
               </Text>
+              {!!avatarUploadWarning && <Text className="avatar-warning">{avatarUploadWarning}</Text>}
             </View>
 
             <View className="nickname-section">

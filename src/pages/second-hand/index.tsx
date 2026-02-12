@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { Toast } from '@nutui/nutui-react-taro';
 import Taro from '@tarojs/taro';
@@ -18,6 +18,7 @@ const SecondHand: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const requestIdRef = useRef(0);
 
   // State for pagination
   const [pagination, setPagination] = useState({
@@ -37,12 +38,18 @@ const SecondHand: React.FC = () => {
 
   // Load secondhand items
   const loadItems = async (showLoading = true, filters: SecondhandFilters = currentFilters) => {
+    const requestId = ++requestIdRef.current;
+
     try {
       if (showLoading) {
         setLoading(true);
       }
 
       const response = await secondhandApi.getAllItems(filters);
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
       setItems(response.data);
       setPagination({
         page: response.page,
@@ -51,10 +58,15 @@ const SecondHand: React.FC = () => {
         totalPages: response.totalPages,
       });
     } catch (error) {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
       console.error('Failed to load secondhand items:', error);
       showToastMessage('加载商品失败，请稍后重试');
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -148,8 +160,7 @@ const SecondHand: React.FC = () => {
   }, []);
 
   return (
-    <View className="premium-container">
-      {/* Header */}
+    <ScrollView scrollY className="premium-container" style={{ height: '100vh' }}>
       <View className="premium-header">
         <View className="header-top">
           <Text className="main-title">布村换换乐</Text>
@@ -181,7 +192,7 @@ const SecondHand: React.FC = () => {
         initialFilters={currentFilters}
       />
 
-      <ScrollView className="content-scroll" scrollY>
+      <View className="content-scroll">
         {loading ? (
           <View style={{ padding: '40rpx', textAlign: 'center', color: '#666' }}>
             <Text>正在加载好物...</Text>
@@ -260,7 +271,7 @@ const SecondHand: React.FC = () => {
             - 都在这里了 -
           </View>
         )}
-      </ScrollView>
+      </View>
 
       {/* FAB */}
       <View className="fab-publish" onClick={handlePostNew}>
@@ -273,7 +284,7 @@ const SecondHand: React.FC = () => {
         type="text"
         onClose={() => setShowToast(false)}
       />
-    </View>
+    </ScrollView>
   );
 };
 

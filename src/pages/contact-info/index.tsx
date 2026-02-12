@@ -190,6 +190,9 @@ const ContactInfo: React.FC = () => {
               disabled={loading}
               placeholderClass="input-placeholder"
             />
+            <Text className="helper-text">
+              提醒：请先在微信「我-设置-朋友权限」中开启「通过微信号添加我」，否则对方可能无法通过微信号找到您。
+            </Text>
             {errors.wechatId && <Text className="error-text">{errors.wechatId}</Text>}
           </View>
 

@@ -296,42 +296,6 @@ const EventFiltersComponent: React.FC<EventFiltersProps> = ({
           )}
         </View>
 
-        {/* Quick Event Types */}
-        <View
-          className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-            selectedEventTypeRid === undefined
-              ? 'bg-slate-800 text-white border-slate-800'
-              : 'bg-white/60 text-slate-600 border-white/60'
-          }`}
-          onClick={() => {
-            setSelectedEventTypeRid(undefined);
-            applyFilters(keyword, priceFrom, priceTo, isFree, undefined);
-          }}
-        >
-          <Text className="text-sm font-medium">全部</Text>
-        </View>
-
-        {eventTypes.slice(0, 5).map((eventType) => (
-          <View
-            key={eventType.id}
-            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-              selectedEventTypeRid === eventType.id
-                ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                : 'bg-white/60 text-slate-600 border-white/60'
-            }`}
-            onClick={() => {
-              if (selectedEventTypeRid === eventType.id) {
-                setSelectedEventTypeRid(undefined);
-                applyFilters(keyword, priceFrom, priceTo, isFree, undefined);
-              } else {
-                setSelectedEventTypeRid(eventType.id);
-                applyFilters(keyword, priceFrom, priceTo, isFree, eventType.id);
-              }
-            }}
-          >
-            <Text className="text-sm font-medium">{eventType.name}</Text>
-          </View>
-        ))}
 
         {/* Free Chip */}
         <View

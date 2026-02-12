@@ -94,7 +94,7 @@ const PastActivities: React.FC = () => {
   };
 
   return (
-    <View className="enhanced-past-activities-container">
+    <ScrollView className="enhanced-past-activities-container" scrollY style={{ height: '100vh' }}>
       {/* Immersive Header */}
       <View className="enhanced-header-section">
         <View className="header-content">
@@ -114,7 +114,7 @@ const PastActivities: React.FC = () => {
       </View>
 
       {/* List */}
-      <ScrollView className="enhanced-content" scrollY>
+      <View className="enhanced-content">
         {loading ? (
           <View className="enhanced-loading-container">
             <View className="loading-dots">
@@ -231,8 +231,8 @@ const PastActivities: React.FC = () => {
         )}
 
         <View style={{ height: '60rpx' }}></View>
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 

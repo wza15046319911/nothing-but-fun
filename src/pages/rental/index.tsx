@@ -78,7 +78,7 @@ const RentalPage: React.FC = () => {
   );
 
   return (
-    <View className="rental-container">
+    <ScrollView className="rental-container" scrollY style={{ height: '100vh' }}>
       {/* Immersive Header */}
       <View className="rental-header">
         <View className="header-content">
@@ -98,84 +98,59 @@ const RentalPage: React.FC = () => {
         </View>
       </View>
 
-      {/* Floating Filters */}
-      <View className="filter-section">
-        <ScrollView scrollX className="filter-scroll" showScrollbar={false}>
-          <View className="filter-options">
-            <View
-              className={`filter-chip ${activeCategory === 'all' ? 'active' : ''}`}
-              onClick={() => handleCategoryChange('all')}
-            >
-              全部
-            </View>
-            {categories.map((cat) => (
-              <View
-                key={cat.id}
-                className={`filter-chip ${activeCategory === cat.slug ? 'active' : ''}`}
-                onClick={() => handleCategoryChange(cat.slug)}
-              >
-                {cat.name}
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-
       {/* Rental List */}
       <View className="rental-list">
-        <ScrollView className="rental-list-scroll" scrollY showScrollbar={false}>
-          {loading ? (
-            renderLoading()
-          ) : items.length === 0 ? (
-            renderEmpty()
-          ) : (
-            <View className="rental-grid">
-              {items.map((item) => (
-                <View key={item.id} className="rental-card" onClick={() => handleItemClick(item.id)}>
-                  <View className="card-image-wrapper">
-                    <Image
-                      className="card-image"
-                      src={
-                        item.imageUrls && item.imageUrls.length > 0
-                          ? item.imageUrls[0]
-                          : item.images && item.images.length > 0
-                            ? item.images[0]
-                            : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'
-                      }
-                      mode="aspectFill"
-                      lazyLoad
-                    />
-                    <View className="category-tag">
-                      {categories.find((c) => c.slug === item.category)?.name || item.category}
-                    </View>
-                    <View className={`status-badge ${item.status}`} />
+        {loading ? (
+          renderLoading()
+        ) : items.length === 0 ? (
+          renderEmpty()
+        ) : (
+          <View className="rental-grid">
+            {items.map((item) => (
+              <View key={item.id} className="rental-card" onClick={() => handleItemClick(item.id)}>
+                <View className="card-image-wrapper">
+                  <Image
+                    className="card-image"
+                    src={
+                      item.imageUrls && item.imageUrls.length > 0
+                        ? item.imageUrls[0]
+                        : item.images && item.images.length > 0
+                          ? item.images[0]
+                          : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80'
+                    }
+                    mode="aspectFill"
+                    lazyLoad
+                  />
+                  <View className="category-tag">
+                    {categories.find((c) => c.slug === item.category)?.name || item.category}
+                  </View>
+                  <View className={`status-badge ${item.status}`} />
+                </View>
+
+                <View className="card-content">
+                  <Text className="card-title">{item.title}</Text>
+
+                  <View className="card-price-row">
+                    <Text className="currency">$</Text>
+                    <Text className="price">{item.price}</Text>
+                    <Text className="period">
+                      / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
+                    </Text>
                   </View>
 
-                  <View className="card-content">
-                    <Text className="card-title">{item.title}</Text>
-
-                    <View className="card-price-row">
-                      <Text className="currency">$</Text>
-                      <Text className="price">{item.price}</Text>
-                      <Text className="period">
-                        / {item.period === 'day' ? '天' : item.period === 'week' ? '周' : '月'}
-                      </Text>
-                    </View>
-
-                    <View className="card-footer">
-                      <View className="seller-info">
-                        <View className="seller-avatar" />
-                        <Text className="seller-name">{item.contact_info || '布好玩管家'}</Text>
-                      </View>
+                  <View className="card-footer">
+                    <View className="seller-info">
+                      <View className="seller-avatar" />
+                      <Text className="seller-name">{item.contact_info || '布好玩管家'}</Text>
                     </View>
                   </View>
                 </View>
-              ))}
-            </View>
-          )}
-        </ScrollView>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

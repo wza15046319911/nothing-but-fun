@@ -8,7 +8,7 @@ import {
   SecondhandSubCategory,
   SecondhandProductStatus,
 } from 'src/services/secondhand';
-import { API_BASE_URL } from 'src/services/api';
+import { uploadImageWithRetry } from 'src/services/upload';
 import { useAuth } from 'src/context/auth';
 
 import '@taroify/core/uploader/style';
@@ -250,20 +250,44 @@ const SecondHandPublish: React.FC = () => {
       });
 
       try {
-        const newLocalFiles = fileList.filter((f) => (f as any).path);
+        const uploadSingleFileWithPrompt = async (path: string): Promise<string> => {
+          // 单张上传失败时允许用户立即重试，避免整批失败无感知
+          for (;;) {
+            try {
+              const res = await uploadImageWithRetry<{ id: string }>(path, 'secondhand');
+              if (!res.data?.id) {
+                throw new Error('图片上传成功但未返回文件ID');
+              }
+              return res.data.id;
+            } catch (error) {
+              const retryModal = await Taro.showModal({
+                title: '图片上传失败',
+                content: `${(error as any)?.message || '网络异常'}\n是否重试当前图片？`,
+                confirmText: '重试',
+                cancelText: '取消',
+              });
+              if (!retryModal.confirm) {
+                throw error;
+              }
+            }
+          }
+        };
+
+        const newLocalFiles = fileList.filter((f) => {
+          const path = ((f as any).path || f.url || '').trim();
+          return !!path && !/^https?:\/\//i.test(path);
+        });
         let fileIds: string[] | undefined = undefined;
         if (newLocalFiles.length > 0) {
-          fileIds = await Promise.all(
-            newLocalFiles.map(async (file) => {
-              const res = await Taro.uploadFile({
-                url: `${API_BASE_URL}/file`,
-                filePath: (file as any).path || file.url || '',
-                name: 'image',
-              });
-              const data = JSON.parse(res.data);
-              return data.data.id;
-            })
-          );
+          fileIds = [];
+          for (const file of newLocalFiles) {
+            const filePath = (file as any).path || file.url || '';
+            if (!filePath) {
+              throw new Error('检测到无效图片路径，请重新选择图片');
+            }
+            const fileId = await uploadSingleFileWithPrompt(filePath);
+            fileIds.push(fileId);
+          }
         }
 
         const payload: any = {
@@ -300,68 +324,77 @@ const SecondHandPublish: React.FC = () => {
         });
       }
     } else {
-      // 新发布模式：立即显示成功弹窗，后台异步上传
-      // 保存当前表单数据用于异步上传
-      const formData = {
-        fileList: [...fileList],
-        title: title.trim(),
-        description: description.trim(),
-        price: price.trim(),
-        sellerId: parseInt(state.userInfo.id),
-        categoryRid: categories.length > 0 ? categories[selectedCategoryIndex].id : undefined,
-        productStatusRid:
-          productStatuses.length > 0 ? productStatuses[selectedProductStatusIndex].id : undefined,
-      };
-
-      // 立即显示成功弹窗
-      Taro.showModal({
-        title: '提交成功',
-        content: '您的商品已提交，请等待审核。审核通过后将自动上架。',
-        showCancel: false,
-        confirmText: '我知道了',
-      }).then(() => {
-        // 清空表单
-        setTitle('');
-        setDescription('');
-        setPrice('');
-        setFileList([]);
-        // 返回上一页
-        Taro.navigateBack();
+      Taro.showLoading({
+        title: '上传中...',
       });
 
-      // 异步上传图片和创建商品（不阻塞用户）
-      (async () => {
-        try {
-          const fileIds: string[] = await Promise.all(
-            formData.fileList.map(async (file) => {
-              const res = await Taro.uploadFile({
-                url: `${API_BASE_URL}/file`,
-                filePath: (file as any).path || file.url || '',
-                name: 'image',
+      try {
+        const uploadSingleFileWithPrompt = async (path: string): Promise<string> => {
+          for (;;) {
+            try {
+              const res = await uploadImageWithRetry<{ id: string }>(path, 'secondhand');
+              if (!res.data?.id) {
+                throw new Error('图片上传成功但未返回文件ID');
+              }
+              return res.data.id;
+            } catch (error) {
+              const retryModal = await Taro.showModal({
+                title: '图片上传失败',
+                content: `${(error as any)?.message || '网络异常'}\n是否重试当前图片？`,
+                confirmText: '重试',
+                cancelText: '取消发布',
               });
-              const data = JSON.parse(res.data);
-              return data.data.id;
-            })
-          );
+              if (!retryModal.confirm) {
+                throw error;
+              }
+            }
+          }
+        };
 
-          await secondhandApi.createItem({
-            sellerId: formData.sellerId,
-            title: formData.title,
-            description: formData.description,
-            price: formData.price,
-            status: 'available',
-            images: fileIds,
-            categoryRid: formData.categoryRid,
-            productStatusRid: formData.productStatusRid,
-          });
-
-          console.log('商品发布成功（后台）');
-        } catch (error) {
-          console.error('后台发布失败:', error);
-          // 后台失败时可以考虑本地存储，下次重试
-          // 这里静默处理，因为用户已经离开页面
+        const fileIds: string[] = [];
+        for (const file of fileList) {
+          const filePath = (file as any).path || file.url || '';
+          if (!filePath) {
+            throw new Error('检测到无效图片路径，请重新选择图片');
+          }
+          const fileId = await uploadSingleFileWithPrompt(filePath);
+          fileIds.push(fileId);
         }
-      })();
+
+        await secondhandApi.createItem({
+          sellerId: parseInt(state.userInfo.id),
+          title: title.trim(),
+          description: description.trim(),
+          price: price.trim(),
+          status: 'available',
+          images: fileIds,
+          categoryRid: categories.length > 0 ? categories[selectedCategoryIndex].id : undefined,
+          productStatusRid:
+            productStatuses.length > 0 ? productStatuses[selectedProductStatusIndex].id : undefined,
+        });
+
+        Taro.hideLoading();
+        Taro.showModal({
+          title: '提交成功',
+          content: '您的商品已提交，请等待审核。审核通过后将自动上架。',
+          showCancel: false,
+          confirmText: '我知道了',
+        }).then(() => {
+          setTitle('');
+          setDescription('');
+          setPrice('');
+          setFileList([]);
+          Taro.navigateBack();
+        });
+      } catch (error) {
+        console.error('发布失败:', error);
+        Taro.hideLoading();
+        Taro.showToast({
+          title: (error as any)?.message || '发布失败，请重试',
+          icon: 'none',
+          duration: 2000,
+        });
+      }
     }
   };
 

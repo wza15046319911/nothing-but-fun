@@ -337,6 +337,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     setSelectedCategoryId(undefined);
     setSelectedSubCategoryId(undefined);
     setSelectedProductStatusId(undefined);
+    setSelectedListingStatus(undefined);
     setSortBy('sort');
     setSortOrder('asc');
     setError('');
@@ -356,6 +357,51 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
     if (payload) {
       onFiltersChange(payload);
     }
+  };
+
+  const handleProductStatusReset = () => {
+    const resetPriceFrom = '';
+    const resetPriceTo = '';
+
+    setSelectedProductStatusId(undefined);
+    setPriceFrom(resetPriceFrom);
+    setPriceTo(resetPriceTo);
+
+    applyFilters(
+      keyword,
+      resetPriceFrom,
+      resetPriceTo,
+      selectedCategoryId,
+      selectedSubCategoryId,
+      undefined,
+      selectedListingStatus,
+      sortBy,
+      sortOrder
+    );
+  };
+
+  const handleQuickAllReset = () => {
+    const resetPriceFrom = '';
+    const resetPriceTo = '';
+
+    setSelectedSubCategoryId(undefined);
+    setSelectedCategoryId(undefined);
+    setSelectedProductStatusId(undefined);
+    setSelectedListingStatus(undefined);
+    setPriceFrom(resetPriceFrom);
+    setPriceTo(resetPriceTo);
+
+    applyFilters(
+      keyword,
+      resetPriceFrom,
+      resetPriceTo,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      sortBy,
+      sortOrder
+    );
   };
 
   const handleQuickRange = (from: number, to?: number) => {
@@ -551,69 +597,6 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
             {getSortOption(getCurrentSortKey()).label}
           </Text>
         </View>
-
-        {/* Quick Categories (Demo) */}
-        <View
-          className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-            selectedCategoryId === undefined && selectedSubCategoryId === undefined
-              ? 'bg-slate-800 text-white border-slate-800'
-              : 'bg-white/60 text-slate-600 border-white/60'
-          }`}
-          onClick={() => {
-            setSelectedSubCategoryId(undefined);
-            setSelectedCategoryId(undefined);
-            applyFilters(
-              keyword,
-              priceFrom,
-              priceTo,
-              undefined,
-              undefined,
-              selectedProductStatusId,
-              selectedListingStatus
-            );
-          }}
-        >
-          <Text className="text-sm font-medium">全部</Text>
-        </View>
-
-        {/* Render top 3 categories as quick chips if available */}
-        {categories.slice(0, 3).map((cat) => (
-          <View
-            key={cat.id}
-            className={`flex-shrink-0 px-4 py-2 rounded-full border backdrop-blur-sm ${
-              selectedCategoryId === cat.id
-                ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
-                : 'bg-white/60 text-slate-600 border-white/60'
-            }`}
-            onClick={() => {
-              if (selectedCategoryId === cat.id) {
-                setSelectedCategoryId(undefined);
-                applyFilters(
-                  keyword,
-                  priceFrom,
-                  priceTo,
-                  undefined,
-                  selectedSubCategoryId,
-                  selectedProductStatusId,
-                  selectedListingStatus
-                );
-              } else {
-                setSelectedCategoryId(cat.id);
-                applyFilters(
-                  keyword,
-                  priceFrom,
-                  priceTo,
-                  cat.id,
-                  selectedSubCategoryId,
-                  selectedProductStatusId,
-                  selectedListingStatus
-                );
-              }
-            }}
-          >
-            <Text className="text-sm font-medium">{cat.name}</Text>
-          </View>
-        ))}
       </View>
 
       {/* Filter Popup Modal */}
@@ -771,17 +754,7 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                           ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200'
                           : 'bg-slate-100 text-slate-600'
                       }`}
-                      onClick={() => {
-                        setSelectedProductStatusId(undefined);
-                        applyFilters(
-                          keyword,
-                          priceFrom,
-                          priceTo,
-                          selectedCategoryId,
-                          selectedSubCategoryId,
-                          undefined
-                        );
-                      }}
+                      onClick={handleProductStatusReset}
                     >
                       <Text>全部</Text>
                     </View>
@@ -801,7 +774,10 @@ const SecondhandFiltersComponent: React.FC<SecondhandFiltersProps> = ({
                             priceTo,
                             selectedCategoryId,
                             selectedSubCategoryId,
-                            status.id
+                            status.id,
+                            selectedListingStatus,
+                            sortBy,
+                            sortOrder
                           );
                         }}
                       >
